@@ -36,6 +36,7 @@ app.UseExceptionHandler();
 var api = app.MapGroup("/api/v1");
 api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 api.MapIdentityEndpoints();
+api.MapShopCoreEndpoints();
 
 app.Run();
 

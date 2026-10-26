@@ -234,7 +234,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         principalSchema: "shopcore",
                         principalTable: "credit_accounts",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -247,6 +247,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     quantity = table.Column<int>(type: "int", nullable: false),
+                    sale_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     unit_cost_cents = table.Column<long>(type: "bigint", nullable: true),
                     reason_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     supplier_name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
@@ -264,7 +265,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         principalSchema: "shopcore",
                         principalTable: "products",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -274,6 +275,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     sale_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     staff_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     reason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     cancelled_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -290,7 +292,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         principalSchema: "shopcore",
                         principalTable: "sales",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -340,7 +342,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         principalSchema: "shopcore",
                         principalTable: "sales",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -414,6 +416,13 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 table: "stock_movements",
                 column: "product_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_stock_movements_sale_id",
+                schema: "shopcore",
+                table: "stock_movements",
+                column: "sale_id",
+                filter: "sale_id IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "ix_stock_movements_shop_id_product_id",

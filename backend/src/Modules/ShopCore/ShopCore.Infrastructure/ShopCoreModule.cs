@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using ShopCore.Application.Sync;
+using TillKnowIT.Dispatching;
 using ShopCore.Infrastructure.Persistence;
 using TillKnowIT.Outbox;
 using TillKnowIT.SharedKernel;
@@ -16,6 +19,9 @@ public static class ShopCoreModule
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, ShopCoreMigrator>();
+        services.AddScoped<IUploadStore, UploadStore>();
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddDispatching(typeof(UploadBatch).Assembly);
         return services;
     }
 }

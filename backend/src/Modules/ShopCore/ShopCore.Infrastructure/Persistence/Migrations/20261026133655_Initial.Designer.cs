@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261026132926_Initial")]
+    [Migration("20261026133655_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -488,6 +488,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
 
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
                     b.Property<Guid>("StaffId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("staff_id");
@@ -676,6 +680,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("reason_code");
 
+                    b.Property<Guid?>("SaleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("sale_id");
+
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
@@ -700,6 +708,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId")
                         .HasDatabaseName("ix_stock_movements_product_id");
+
+                    b.HasIndex("SaleId")
+                        .HasDatabaseName("ix_stock_movements_sale_id")
+                        .HasFilter("sale_id IS NOT NULL");
 
                     b.HasIndex("ShopId", "ProductId")
                         .HasDatabaseName("ix_stock_movements_shop_id_product_id");
@@ -811,7 +823,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.HasOne("ShopCore.Domain.CreditAccount", null)
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_credit_entries_credit_accounts_account_id");
                 });
@@ -821,7 +833,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.HasOne("ShopCore.Domain.Sale", null)
                         .WithMany()
                         .HasForeignKey("SaleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_sale_cancellations_sales_sale_id");
                 });
@@ -841,7 +853,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.HasOne("ShopCore.Domain.Sale", null)
                         .WithMany()
                         .HasForeignKey("SaleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_slip_requests_sales_sale_id");
                 });
@@ -851,7 +863,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.HasOne("ShopCore.Domain.Product", null)
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_stock_movements_products_product_id");
                 });

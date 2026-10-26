@@ -16,6 +16,15 @@ public abstract class Entity : IHasDomainEvents
     public Guid? CreatedBy { get; protected set; }
     public Guid? DeviceId { get; protected set; }
 
+    /// <summary>For records created on a till: keep the id and time the device gave them, so retries never duplicate.</summary>
+    protected void StampFromDevice(Guid id, DateTimeOffset createdAt, Guid? createdBy, Guid? deviceId)
+    {
+        Id = id;
+        CreatedAt = createdAt;
+        CreatedBy = createdBy;
+        DeviceId = deviceId;
+    }
+
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _events;
     public void ClearDomainEvents() => _events.Clear();
     protected void Raise(IDomainEvent e) => _events.Add(e);

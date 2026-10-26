@@ -37,6 +37,7 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.Property(x => x.InvoiceRef).HasMaxLength(100);
             e.HasOne<Product>().WithMany().HasForeignKey(x => x.ProductId);
             e.HasIndex(x => new { x.ShopId, x.ProductId });
+            e.HasIndex(x => x.SaleId).HasFilter("sale_id IS NOT NULL");
         });
 
         b.Entity<Sale>(e =>
@@ -139,6 +140,12 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.Property(x => x.PartnerRef).HasMaxLength(100);
             e.Property(x => x.Status).HasMaxLength(20);
         });
+
+        // Movements, cancellations and credit entries are a ledger: deleting a product, sale or account must
+        // never erase them. Only a sale's own lines go with the sale.
+        foreach (var fk in b.Model.GetEntityTypes().SelectMany(t => t.GetForeignKeys())
+                     .Where(f => f.DeleteBehavior == DeleteBehavior.Cascade && f.DeclaringEntityType.ClrType != typeof(SaleLine)))
+            fk.DeleteBehavior = DeleteBehavior.Restrict;
 
         b.AddOutbox();
     }

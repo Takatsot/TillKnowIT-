@@ -1,3 +1,4 @@
+using Identity.Contracts;
 using Identity.Application.Devices;
 using Identity.Application.Shops;
 using Identity.Application.Staff;
@@ -22,6 +23,7 @@ public static class IdentityModule
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, IdentityMigrator>();
         services.AddScoped<IShopStore, ShopStore>();
+        services.AddScoped<ITillAccessChecker, TillAccessChecker>();
         services.AddScoped<IStaffStore, StaffStore>();
         services.AddScoped<IDeviceStore, DeviceStore>();
         services.AddSingleton<IPinHasher, Pbkdf2PinHasher>();
