@@ -12,7 +12,7 @@ public static class MessagingModule
     public static IServiceCollection AddMessagingModule(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<MessagingDbContext>(o => o
-            .UseNpgsql(connectionString, n => n.MigrationsHistoryTable("__ef_migrations", MessagingDbContext.Schema))
+            .UseSqlServer(connectionString, n => n.MigrationsHistoryTable("__ef_migrations", MessagingDbContext.Schema))
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, MessagingMigrator>();
@@ -32,9 +32,9 @@ internal sealed class MessagingDesignTimeFactory : IDesignTimeDbContextFactory<M
     public MessagingDbContext CreateDbContext(string[] args)
     {
         var cs = Environment.GetEnvironmentVariable("TILLKNOWIT_DB")
-                 ?? "Host=localhost;Port=5432;Database=tillknowit;Username=postgres;Password=postgres";
+                 ?? "Server=localhost,1433;Database=tillknowit;User Id=sa;Password=Tillknowit_Dev1!;TrustServerCertificate=True";
         var options = new DbContextOptionsBuilder<MessagingDbContext>()
-            .UseNpgsql(cs, n => n.MigrationsHistoryTable("__ef_migrations", MessagingDbContext.Schema))
+            .UseSqlServer(cs, n => n.MigrationsHistoryTable("__ef_migrations", MessagingDbContext.Schema))
             .UseSnakeCaseNamingConvention().Options;
         return new MessagingDbContext(options);
     }

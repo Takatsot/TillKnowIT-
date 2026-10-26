@@ -12,8 +12,8 @@ using TillKnowIT.Outbox;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-var db = builder.Configuration.GetConnectionString("Postgres")
-         ?? throw new InvalidOperationException("ConnectionStrings:Postgres is not set.");
+var db = builder.Configuration.GetConnectionString("Database")
+         ?? throw new InvalidOperationException("ConnectionStrings:Database is not set.");
 
 // Same modules as the API, so event handlers in any module can run in the worker.
 builder.Services

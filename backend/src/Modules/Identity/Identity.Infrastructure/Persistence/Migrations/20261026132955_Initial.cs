@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -22,15 +21,15 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,13 +41,13 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    payload = table.Column<string>(type: "jsonb", nullable: false),
-                    occurred_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    processed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    attempts = table.Column<int>(type: "integer", nullable: false),
-                    error = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    payload = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    occurred_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    processed_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    attempts = table.Column<int>(type: "int", nullable: false),
+                    error = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -60,16 +59,16 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    display_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: true),
-                    preferred_language = table.Column<string>(type: "character varying(5)", maxLength: 5, nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    display_name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    email = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: true),
+                    preferred_language = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,14 +80,14 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    names = table.Column<Dictionary<string, string>>(type: "jsonb", nullable: false),
-                    is_active = table.Column<bool>(type: "boolean", nullable: false),
-                    sort_order = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    names = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    is_active = table.Column<bool>(type: "bit", nullable: false),
+                    sort_order = table.Column<int>(type: "int", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -100,17 +99,17 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    last_seen_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    wipe_requested = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    last_seen_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    wipe_requested = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -129,19 +128,19 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    person_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    organisation_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    role_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    pin_hash = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    failed_pin_attempts = table.Column<int>(type: "integer", nullable: false),
-                    locked_until = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    person_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    organisation_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    role_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    pin_hash = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    failed_pin_attempts = table.Column<int>(type: "int", nullable: false),
+                    locked_until = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -174,8 +173,8 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity",
                 columns: table => new
                 {
-                    role_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    permission_code = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    role_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    permission_code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -195,11 +194,11 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 columns: new[] { "id", "code", "created_at", "created_by", "device_id", "is_active", "names", "sort_order" },
                 values: new object[,]
                 {
-                    { new Guid("348e6554-ea72-2399-652b-d01e00d0d3db"), "field_agent", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, new Dictionary<string, string> { ["en"] = "Field agent" }, 4 },
-                    { new Guid("63135645-6d68-f7b8-72e0-710926a3c998"), "owner", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, new Dictionary<string, string> { ["en"] = "Owner" }, 1 },
-                    { new Guid("bbdebcea-b24c-c7e1-9d0d-583dfcf15005"), "manager", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, new Dictionary<string, string> { ["en"] = "Manager" }, 2 },
-                    { new Guid("df96efb0-9ce8-44d4-6592-1fe7d95bb4ad"), "cashier", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, new Dictionary<string, string> { ["en"] = "Cashier" }, 3 },
-                    { new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"), "platform_admin", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, new Dictionary<string, string> { ["en"] = "Platform admin" }, 5 }
+                    { new Guid("348e6554-ea72-2399-652b-d01e00d0d3db"), "field_agent", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Field agent\"}", 4 },
+                    { new Guid("63135645-6d68-f7b8-72e0-710926a3c998"), "owner", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Owner\"}", 1 },
+                    { new Guid("bbdebcea-b24c-c7e1-9d0d-583dfcf15005"), "manager", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Manager\"}", 2 },
+                    { new Guid("df96efb0-9ce8-44d4-6592-1fe7d95bb4ad"), "cashier", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Cashier\"}", 3 },
+                    { new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"), "platform_admin", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Platform admin\"}", 5 }
                 });
 
             migrationBuilder.InsertData(

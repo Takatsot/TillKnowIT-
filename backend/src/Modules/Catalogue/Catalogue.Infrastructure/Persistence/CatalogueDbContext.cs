@@ -53,7 +53,7 @@ public sealed class CatalogueDbContext(DbContextOptions<CatalogueDbContext> opti
             e.HasKey(x => x.Id);
             e.Property(x => x.EntityType).HasMaxLength(100).IsRequired();
             e.Property(x => x.Action).HasMaxLength(50).IsRequired();
-            e.Property(x => x.DetailJson).HasColumnType("jsonb");
+            e.Property(x => x.DetailJson).HasColumnType("nvarchar(max)");
             e.HasIndex(x => new { x.EntityType, x.EntityId });
         });
 

@@ -1,14 +1,16 @@
-# Local PostgreSQL until the .NET Aspire AppHost is added.
+# Local SQL Server until the .NET Aspire AppHost is added.
+# SQL Server 2022 or later is required (PowerSync's SQL Server source needs it).
 services:
-  postgres:
-    image: postgres:18
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      POSTGRES_DB: tillknowit
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Tillknowit_Dev1!"
+      MSSQL_PID: "Developer"
+      MSSQL_AGENT_ENABLED: "true" # CDC, used by PowerSync, runs on SQL Server Agent
     ports:
-      - "5432:5432"
+      - "1433:1433"
     volumes:
-      - pgdata:/var/lib/postgresql
+      - sqldata:/var/opt/mssql
 volumes:
-  pgdata:
+  sqldata:

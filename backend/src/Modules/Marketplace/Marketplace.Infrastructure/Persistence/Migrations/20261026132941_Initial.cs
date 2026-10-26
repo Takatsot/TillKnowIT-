@@ -19,13 +19,13 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    payload = table.Column<string>(type: "jsonb", nullable: false),
-                    occurred_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    processed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    attempts = table.Column<int>(type: "integer", nullable: false),
-                    error = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    payload = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    occurred_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    processed_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    attempts = table.Column<int>(type: "int", nullable: false),
+                    error = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -37,17 +37,17 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    organisation_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    whatsapp = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: true),
-                    is_active = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    organisation_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    whatsapp = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    email = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: true),
+                    is_active = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,15 +59,15 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    supplier_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -86,18 +86,18 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    supplier_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    barcode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    units_per_case = table.Column<int>(type: "integer", nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    barcode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    units_per_case = table.Column<int>(type: "int", nullable: false),
                     case_price_cents = table.Column<long>(type: "bigint", nullable: false),
-                    is_available = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    is_available = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -116,9 +116,9 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace",
                 columns: table => new
                 {
-                    purchase_order_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    supplier_product_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    quantity_cases = table.Column<int>(type: "integer", nullable: false),
+                    purchase_order_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    quantity_cases = table.Column<int>(type: "int", nullable: false),
                     case_price_cents = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>

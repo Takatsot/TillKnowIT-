@@ -127,7 +127,7 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.HasKey(x => x.Id);
             e.Property(x => x.FileUrl).HasMaxLength(500).IsRequired();
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
-            e.Property(x => x.ResultJson).HasColumnType("jsonb");
+            e.Property(x => x.ResultJson).HasColumnType("nvarchar(max)");
             e.Property(x => x.Version).IsConcurrencyToken();
         });
 

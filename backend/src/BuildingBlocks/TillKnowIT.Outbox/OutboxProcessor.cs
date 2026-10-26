@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace TillKnowIT.Outbox;
 
 /// <summary>
-/// Publishes one module's outbox. Rows are claimed with FOR UPDATE SKIP LOCKED, so several workers can run
+/// Publishes one module's outbox. Rows are claimed with UPDLOCK and READPAST, so several workers can run
 /// at once without handling the same event twice at the same time.
 /// </summary>
 public sealed class OutboxProcessor<TContext>(IServiceScopeFactory scopes, ILogger<OutboxProcessor<TContext>> log)
@@ -41,13 +41,13 @@ public sealed class OutboxProcessor<TContext>(IServiceScopeFactory scopes, ILogg
         var db = scope.ServiceProvider.GetRequiredService<TContext>();
 
         var entity = db.Model.FindEntityType(typeof(OutboxMessage))!;
-        var table = $"\"{entity.GetSchema()}\".\"{entity.GetTableName()}\"";
+        var table = $"[{entity.GetSchema()}].[{entity.GetTableName()}]";
 
         await using var tx = await db.Database.BeginTransactionAsync(ct);
 #pragma warning disable EF1003 // Table name comes from EF's own model and the limits are constants; identifiers cannot be parameters.
         var batch = await db.Set<OutboxMessage>()
-            .FromSqlRaw($"SELECT * FROM {table} WHERE processed_at IS NULL AND attempts < {MaxAttempts} " +
-                        $"ORDER BY occurred_at LIMIT {BatchSize} FOR UPDATE SKIP LOCKED")
+            .FromSqlRaw($"SELECT TOP ({BatchSize}) * FROM {table} WITH (UPDLOCK, READPAST, ROWLOCK) " +
+                        $"WHERE processed_at IS NULL AND attempts < {MaxAttempts} ORDER BY occurred_at")
             .ToListAsync(ct);
 #pragma warning restore EF1003
 

@@ -3,8 +3,8 @@ using System;
 using Marketplace.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -19,50 +19,50 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
             modelBuilder
                 .HasDefaultSchema("marketplace")
                 .HasAnnotation("ProductVersion", "10.0.14")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Marketplace.Domain.PurchaseOrder", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("status");
 
                     b.Property<Guid>("SupplierId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("supplier_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("version");
 
                     b.HasKey("Id")
@@ -80,11 +80,11 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Marketplace.Domain.PurchaseOrderLine", b =>
                 {
                     b.Property<Guid>("PurchaseOrderId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("purchase_order_id");
 
                     b.Property<Guid>("SupplierProductId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("supplier_product_id");
 
                     b.Property<long>("CasePriceCents")
@@ -92,7 +92,7 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnName("case_price_cents");
 
                     b.Property<int>("QuantityCases")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("quantity_cases");
 
                     b.HasKey("PurchaseOrderId", "SupplierProductId")
@@ -105,52 +105,52 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<string>("Email")
                         .HasMaxLength(320)
-                        .HasColumnType("character varying(320)")
+                        .HasColumnType("nvarchar(320)")
                         .HasColumnName("email");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("bit")
                         .HasColumnName("is_active");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
                     b.Property<Guid>("OrganisationId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("organisation_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("version");
 
                     b.Property<string>("Whatsapp")
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("whatsapp");
 
                     b.HasKey("Id")
@@ -163,12 +163,12 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<string>("Barcode")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("barcode");
 
                     b.Property<long>("CasePriceCents")
@@ -176,42 +176,42 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnName("case_price_cents");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<bool>("IsAvailable")
-                        .HasColumnType("boolean")
+                        .HasColumnType("bit")
                         .HasColumnName("is_available");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
                     b.Property<Guid>("SupplierId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("supplier_id");
 
                     b.Property<int>("UnitsPerCase")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("units_per_case");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("version");
 
                     b.HasKey("Id")
@@ -227,35 +227,35 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<int>("Attempts")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("attempts");
 
                     b.Property<string>("Error")
                         .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
+                        .HasColumnType("nvarchar(1000)")
                         .HasColumnName("error");
 
                     b.Property<DateTimeOffset>("OccurredAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("occurred_at");
 
                     b.Property<string>("Payload")
                         .IsRequired()
-                        .HasColumnType("jsonb")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("payload");
 
                     b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("processed_at");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("type");
 
                     b.HasKey("Id")

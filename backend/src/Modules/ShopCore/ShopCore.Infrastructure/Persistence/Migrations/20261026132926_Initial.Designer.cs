@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ShopCore.Infrastructure.Persistence;
 
 #nullable disable
@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261026132127_Initial")]
+    [Migration("20261026132926_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -22,15 +22,15 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
             modelBuilder
                 .HasDefaultSchema("shopcore")
                 .HasAnnotation("ProductVersion", "10.0.14")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("ShopCore.Domain.CashUp", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<long>("CountedCents")
@@ -38,11 +38,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("counted_cents");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<DateOnly>("Day")
@@ -50,7 +50,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("day");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<long>("DifferenceCents")
@@ -67,15 +67,15 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Note")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("note");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<Guid>("TillDeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("till_device_id");
 
                     b.HasKey("Id")
@@ -92,19 +92,19 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<DateOnly?>("ExpiresOn")
@@ -114,26 +114,26 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.Property<string>("FileUrl")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("file_url");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<string>("TypeCode")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("type_code");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("version");
 
                     b.HasKey("Id")
@@ -149,15 +149,15 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<long?>("CreditLimitCents")
@@ -165,31 +165,31 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("credit_limit_cents");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("phone");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("version");
 
                     b.HasKey("Id")
@@ -205,11 +205,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<Guid>("AccountId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("account_id");
 
                     b.Property<long>("AmountCents")
@@ -217,25 +217,25 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("amount_cents");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<Guid?>("SaleId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("type");
 
                     b.HasKey("Id")
@@ -251,48 +251,48 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<string>("FileUrl")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("file_url");
 
                     b.Property<string>("ResultJson")
-                        .HasColumnType("jsonb")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("result_json");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("version");
 
                     b.HasKey("Id")
@@ -305,22 +305,22 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<string>("Barcode")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("barcode");
 
                     b.Property<Guid?>("CatalogueProductId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("catalogue_product_id");
 
                     b.Property<string>("CategoryCode")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("category_code");
 
                     b.Property<long>("CostCents")
@@ -328,15 +328,15 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("cost_cents");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<DateOnly?>("ExpiryDate")
@@ -344,17 +344,17 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("expiry_date");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("bit")
                         .HasColumnName("is_active");
 
                     b.Property<int>("LowStockLevel")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("low_stock_level");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
                     b.Property<long>("PriceCents")
@@ -362,16 +362,16 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("price_cents");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("version");
 
                     b.HasKey("Id")
@@ -389,11 +389,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<Guid?>("AccountId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("account_id");
 
                     b.Property<long?>("ChangeCents")
@@ -401,33 +401,33 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("change_cents");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<string>("PaymentMethodCode")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("payment_method_code");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<DateTimeOffset>("SoldAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("sold_at");
 
                     b.Property<Guid>("StaffId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("staff_id");
 
                     b.Property<long?>("TenderedCents")
@@ -435,7 +435,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("tendered_cents");
 
                     b.Property<Guid>("TillDeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("till_device_id");
 
                     b.Property<long>("TotalCents")
@@ -459,37 +459,37 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CancelledAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("cancelled_at");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("reason");
 
                     b.Property<Guid>("SaleId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
 
                     b.Property<Guid>("StaffId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("staff_id");
 
                     b.HasKey("Id")
@@ -505,11 +505,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("ShopCore.Domain.SaleLine", b =>
                 {
                     b.Property<Guid>("SaleId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("product_id");
 
                     b.Property<long>("CostCents")
@@ -519,7 +519,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
                     b.Property<long>("PriceCents")
@@ -527,7 +527,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("price_cents");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("quantity");
 
                     b.HasKey("SaleId", "ProductId")
@@ -540,44 +540,44 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("key");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
+                        .HasColumnType("nvarchar(1000)")
                         .HasColumnName("value");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("version");
 
                     b.HasKey("Id")
@@ -594,40 +594,40 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<string>("Channel")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("channel");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<string>("Destination")
                         .HasMaxLength(320)
-                        .HasColumnType("character varying(320)")
+                        .HasColumnType("nvarchar(320)")
                         .HasColumnName("destination");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<Guid>("SaleId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("status");
 
                     b.HasKey("Id")
@@ -643,52 +643,52 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<string>("InvoiceRef")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("invoice_ref");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("product_id");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("quantity");
 
                     b.Property<string>("ReasonCode")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("reason_code");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<string>("SupplierName")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("nvarchar(200)")
                         .HasColumnName("supplier_name");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("type");
 
                     b.Property<long?>("UnitCostCents")
@@ -711,7 +711,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<long>("AmountCents")
@@ -723,36 +723,36 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnName("commission_cents");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
                     b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
                     b.Property<string>("PartnerRef")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("partner_ref");
 
                     b.Property<string>("ProductType")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("product_type");
 
                     b.Property<Guid>("ShopId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("status");
 
                     b.HasKey("Id")
@@ -765,35 +765,35 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
                     b.Property<int>("Attempts")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("attempts");
 
                     b.Property<string>("Error")
                         .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
+                        .HasColumnType("nvarchar(1000)")
                         .HasColumnName("error");
 
                     b.Property<DateTimeOffset>("OccurredAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("occurred_at");
 
                     b.Property<string>("Payload")
                         .IsRequired()
-                        .HasColumnType("jsonb")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("payload");
 
                     b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetimeoffset")
                         .HasColumnName("processed_at");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("type");
 
                     b.HasKey("Id")

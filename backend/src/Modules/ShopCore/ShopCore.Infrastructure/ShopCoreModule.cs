@@ -12,7 +12,7 @@ public static class ShopCoreModule
     public static IServiceCollection AddShopCoreModule(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<ShopCoreDbContext>(o => o
-            .UseNpgsql(connectionString, n => n.MigrationsHistoryTable("__ef_migrations", ShopCoreDbContext.Schema))
+            .UseSqlServer(connectionString, n => n.MigrationsHistoryTable("__ef_migrations", ShopCoreDbContext.Schema))
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, ShopCoreMigrator>();
@@ -32,9 +32,9 @@ internal sealed class ShopCoreDesignTimeFactory : IDesignTimeDbContextFactory<Sh
     public ShopCoreDbContext CreateDbContext(string[] args)
     {
         var cs = Environment.GetEnvironmentVariable("TILLKNOWIT_DB")
-                 ?? "Host=localhost;Port=5432;Database=tillknowit;Username=postgres;Password=postgres";
+                 ?? "Server=localhost,1433;Database=tillknowit;User Id=sa;Password=Tillknowit_Dev1!;TrustServerCertificate=True";
         var options = new DbContextOptionsBuilder<ShopCoreDbContext>()
-            .UseNpgsql(cs, n => n.MigrationsHistoryTable("__ef_migrations", ShopCoreDbContext.Schema))
+            .UseSqlServer(cs, n => n.MigrationsHistoryTable("__ef_migrations", ShopCoreDbContext.Schema))
             .UseSnakeCaseNamingConvention().Options;
         return new ShopCoreDbContext(options);
     }

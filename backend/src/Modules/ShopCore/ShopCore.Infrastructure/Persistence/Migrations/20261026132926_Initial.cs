@@ -19,18 +19,18 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    till_device_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    till_device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     day = table.Column<DateOnly>(type: "date", nullable: false),
                     float_cents = table.Column<long>(type: "bigint", nullable: false),
                     expected_cents = table.Column<long>(type: "bigint", nullable: false),
                     counted_cents = table.Column<long>(type: "bigint", nullable: false),
                     difference_cents = table.Column<long>(type: "bigint", nullable: false),
-                    note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -42,16 +42,16 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type_code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    file_url = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    file_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     expires_on = table.Column<DateOnly>(type: "date", nullable: true),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,16 +63,16 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     credit_limit_cents = table.Column<long>(type: "bigint", nullable: true),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -84,16 +84,16 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    file_url = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    result_json = table.Column<string>(type: "jsonb", nullable: true),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    file_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    result_json = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -105,13 +105,13 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    payload = table.Column<string>(type: "jsonb", nullable: false),
-                    occurred_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    processed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    attempts = table.Column<int>(type: "integer", nullable: false),
-                    error = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    payload = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    occurred_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    processed_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    attempts = table.Column<int>(type: "int", nullable: false),
+                    error = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -123,22 +123,22 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    catalogue_product_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    barcode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    category_code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    catalogue_product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    barcode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    category_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     cost_cents = table.Column<long>(type: "bigint", nullable: false),
                     price_cents = table.Column<long>(type: "bigint", nullable: false),
-                    low_stock_level = table.Column<int>(type: "integer", nullable: false),
+                    low_stock_level = table.Column<int>(type: "int", nullable: false),
                     expiry_date = table.Column<DateOnly>(type: "date", nullable: true),
-                    is_active = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    is_active = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -150,20 +150,20 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    till_device_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    staff_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    till_device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    staff_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     total_cents = table.Column<long>(type: "bigint", nullable: false),
                     vat_cents = table.Column<long>(type: "bigint", nullable: false),
-                    payment_method_code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    payment_method_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     tendered_cents = table.Column<long>(type: "bigint", nullable: true),
                     change_cents = table.Column<long>(type: "bigint", nullable: true),
-                    account_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    sold_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    account_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    sold_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -175,15 +175,15 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    key = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    value = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    version = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    key = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    value = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -195,16 +195,16 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    product_type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    product_type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     amount_cents = table.Column<long>(type: "bigint", nullable: false),
                     commission_cents = table.Column<long>(type: "bigint", nullable: false),
-                    partner_ref = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    partner_ref = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -216,14 +216,14 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    account_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     amount_cents = table.Column<long>(type: "bigint", nullable: false),
-                    sale_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    sale_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -242,18 +242,18 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    shop_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    product_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    quantity = table.Column<int>(type: "integer", nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    quantity = table.Column<int>(type: "int", nullable: false),
                     unit_cost_cents = table.Column<long>(type: "bigint", nullable: true),
-                    reason_code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    supplier_name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    invoice_ref = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    reason_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    supplier_name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    invoice_ref = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -272,14 +272,14 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    sale_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    staff_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    cancelled_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    sale_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    staff_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    reason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    cancelled_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -298,10 +298,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    sale_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    product_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    quantity = table.Column<int>(type: "integer", nullable: false),
+                    sale_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    quantity = table.Column<int>(type: "int", nullable: false),
                     price_cents = table.Column<long>(type: "bigint", nullable: false),
                     cost_cents = table.Column<long>(type: "bigint", nullable: false)
                 },
@@ -322,14 +322,14 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    sale_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    channel = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    destination = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: true),
-                    status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    device_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    sale_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    channel = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    destination = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: true),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {

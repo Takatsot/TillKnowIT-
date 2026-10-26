@@ -12,7 +12,7 @@ public static class MarketplaceModule
     public static IServiceCollection AddMarketplaceModule(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<MarketplaceDbContext>(o => o
-            .UseNpgsql(connectionString, n => n.MigrationsHistoryTable("__ef_migrations", MarketplaceDbContext.Schema))
+            .UseSqlServer(connectionString, n => n.MigrationsHistoryTable("__ef_migrations", MarketplaceDbContext.Schema))
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, MarketplaceMigrator>();
@@ -32,9 +32,9 @@ internal sealed class MarketplaceDesignTimeFactory : IDesignTimeDbContextFactory
     public MarketplaceDbContext CreateDbContext(string[] args)
     {
         var cs = Environment.GetEnvironmentVariable("TILLKNOWIT_DB")
-                 ?? "Host=localhost;Port=5432;Database=tillknowit;Username=postgres;Password=postgres";
+                 ?? "Server=localhost,1433;Database=tillknowit;User Id=sa;Password=Tillknowit_Dev1!;TrustServerCertificate=True";
         var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
-            .UseNpgsql(cs, n => n.MigrationsHistoryTable("__ef_migrations", MarketplaceDbContext.Schema))
+            .UseSqlServer(cs, n => n.MigrationsHistoryTable("__ef_migrations", MarketplaceDbContext.Schema))
             .UseSnakeCaseNamingConvention().Options;
         return new MarketplaceDbContext(options);
     }

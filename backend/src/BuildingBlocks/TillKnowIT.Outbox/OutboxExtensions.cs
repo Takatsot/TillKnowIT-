@@ -16,7 +16,7 @@ public static class OutboxExtensions
             b.HasKey(x => x.Id);
             b.Property(x => x.Type).HasMaxLength(500);
             b.Property(x => x.Error).HasMaxLength(1000);
-            b.Property(x => x.Payload).HasColumnType("jsonb");
+            b.Property(x => x.Payload).HasColumnType("nvarchar(max)");
             b.HasIndex(x => x.OccurredAt).HasFilter("processed_at IS NULL");
         });
         return modelBuilder;

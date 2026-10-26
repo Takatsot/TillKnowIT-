@@ -17,7 +17,7 @@ public static class IdentityModule
     public static IServiceCollection AddIdentityModule(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<IdentityDbContext>(o => o
-            .UseNpgsql(connectionString, n => n.MigrationsHistoryTable("__ef_migrations", IdentityDbContext.Schema))
+            .UseSqlServer(connectionString, n => n.MigrationsHistoryTable("__ef_migrations", IdentityDbContext.Schema))
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, IdentityMigrator>();
@@ -43,9 +43,9 @@ internal sealed class IdentityDesignTimeFactory : IDesignTimeDbContextFactory<Id
     public IdentityDbContext CreateDbContext(string[] args)
     {
         var cs = Environment.GetEnvironmentVariable("TILLKNOWIT_DB")
-                 ?? "Host=localhost;Port=5432;Database=tillknowit;Username=postgres;Password=postgres";
+                 ?? "Server=localhost,1433;Database=tillknowit;User Id=sa;Password=Tillknowit_Dev1!;TrustServerCertificate=True";
         var options = new DbContextOptionsBuilder<IdentityDbContext>()
-            .UseNpgsql(cs, n => n.MigrationsHistoryTable("__ef_migrations", IdentityDbContext.Schema))
+            .UseSqlServer(cs, n => n.MigrationsHistoryTable("__ef_migrations", IdentityDbContext.Schema))
             .UseSnakeCaseNamingConvention().Options;
         return new IdentityDbContext(options);
     }

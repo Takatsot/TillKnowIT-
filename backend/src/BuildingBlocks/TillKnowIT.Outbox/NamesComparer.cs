@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,11 +12,16 @@ public static class NamesComparer
         d => d.Aggregate(0, (hash, kv) => HashCode.Combine(hash, kv.Key, kv.Value)),
         d => new Dictionary<string, string>(d));
 
-    /// <summary>Stores per-language names as jsonb and compares them by content, so seed data and change tracking behave.</summary>
+    private static string ToJson(Dictionary<string, string> names) => JsonSerializer.Serialize(names);
+
+    private static Dictionary<string, string> FromJson(string json) =>
+        JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? [];
+
+    /// <summary>Stores per-language names as JSON text and compares them by content, so seed data and change tracking behave.</summary>
     public static PropertyBuilder<Dictionary<string, string>> AsLanguageNames(this PropertyBuilder<Dictionary<string, string>> property)
     {
-        property.HasColumnType("jsonb");
-        property.Metadata.SetValueComparer(Comparer);
+        property.HasConversion(v => ToJson(v), s => FromJson(s), Comparer);
+        property.HasColumnType("nvarchar(max)");
         return property;
     }
 }

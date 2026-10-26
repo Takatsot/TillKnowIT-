@@ -7,8 +7,8 @@ using TillKnowIT.SharedKernel;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var db = builder.Configuration.GetConnectionString("Postgres")
-         ?? throw new InvalidOperationException("ConnectionStrings:Postgres is not set.");
+var db = builder.Configuration.GetConnectionString("Database")
+         ?? throw new InvalidOperationException("ConnectionStrings:Database is not set.");
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
