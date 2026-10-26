@@ -1,0 +1,6 @@
+@TillKnowIT.Api_HostAddress = http://localhost:5241
+
+GET {{TillKnowIT.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

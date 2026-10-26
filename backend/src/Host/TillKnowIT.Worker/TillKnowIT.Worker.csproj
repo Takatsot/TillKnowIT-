@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-TillKnowIT.Worker-e05afb75-bed7-4aac-a280-772c0cd85827</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modules\ShopCore\ShopCore.Infrastructure\ShopCore.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Catalogue\Catalogue.Infrastructure\Catalogue.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Marketplace\Marketplace.Infrastructure\Marketplace.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Messaging\Messaging.Infrastructure\Messaging.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
