@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20261026131110_Initial")]
+    [Migration("20261026132223_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -378,8 +378,13 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
                     b.Property<string>("Error")
-                        .HasColumnType("text")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
                         .HasColumnName("error");
 
                     b.Property<DateTimeOffset>("OccurredAt")
@@ -397,8 +402,8 @@ namespace Identity.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("type");
 
                     b.HasKey("Id")

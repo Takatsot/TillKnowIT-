@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261026121254_Initial")]
+    [Migration("20261026132127_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -768,8 +768,13 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
                     b.Property<string>("Error")
-                        .HasColumnType("text")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
                         .HasColumnName("error");
 
                     b.Property<DateTimeOffset>("OccurredAt")
@@ -787,8 +792,8 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("type");
 
                     b.HasKey("Id")

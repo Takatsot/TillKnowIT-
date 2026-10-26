@@ -61,11 +61,12 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    type = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     payload = table.Column<string>(type: "jsonb", nullable: false),
                     occurred_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     processed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    error = table.Column<string>(type: "text", nullable: true)
+                    attempts = table.Column<int>(type: "integer", nullable: false),
+                    error = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {

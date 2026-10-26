@@ -45,12 +45,12 @@ internal sealed class Dispatcher(IServiceProvider services) : IDispatcher
 
 public static class DispatchingExtensions
 {
-    /// <summary>Registers the dispatcher and every command/query handler found in the given assemblies.</summary>
+    /// <summary>Registers the dispatcher and every command, query and event handler found in the given assemblies.</summary>
     public static IServiceCollection AddDispatching(this IServiceCollection services, params Assembly[] handlerAssemblies)
     {
         services.TryAddScoped<IDispatcher, Dispatcher>();
 
-        var handlerTypes = new[] { typeof(ICommandHandler<,>), typeof(IQueryHandler<,>) };
+        var handlerTypes = new[] { typeof(ICommandHandler<,>), typeof(IQueryHandler<,>), typeof(IDomainEventHandler<>) };
         foreach (var type in handlerAssemblies.SelectMany(a => a.GetTypes()).Where(t => t is { IsClass: true, IsAbstract: false }))
             foreach (var face in type.GetInterfaces().Where(i => i.IsGenericType && handlerTypes.Contains(i.GetGenericTypeDefinition())))
                 services.AddScoped(face, type);

@@ -14,7 +14,8 @@ public static class OutboxExtensions
         {
             b.ToTable("outbox_messages");
             b.HasKey(x => x.Id);
-            b.Property(x => x.Type).HasMaxLength(300);
+            b.Property(x => x.Type).HasMaxLength(500);
+            b.Property(x => x.Error).HasMaxLength(1000);
             b.Property(x => x.Payload).HasColumnType("jsonb");
             b.HasIndex(x => x.OccurredAt).HasFilter("processed_at IS NULL");
         });

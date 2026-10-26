@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+      - run: dotnet tool restore
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - run: dotnet test --no-build -c Release
+      - name: Every model change has a migration
+        run: bash scripts/check-migrations.sh
