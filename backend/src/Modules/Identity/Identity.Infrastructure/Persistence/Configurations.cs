@@ -1,3 +1,4 @@
+using TillKnowIT.Outbox;
 using Identity.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -55,7 +56,7 @@ internal sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
         b.ToTable("roles");
         b.HasKey(x => x.Id);
         b.Property(x => x.Code).HasMaxLength(50).IsRequired();
-        b.Property(x => x.Names).HasColumnType("jsonb");
+        b.Property(x => x.Names).AsLanguageNames();
         b.HasIndex(x => x.Code).IsUnique();
         b.HasData(IdentitySeed.RoleRows());
         b.OwnsMany(x => x.Permissions, p =>

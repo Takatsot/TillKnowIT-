@@ -1,3 +1,4 @@
+using Identity.Application.Devices;
 using Identity.Application.Shops;
 using Identity.Application.Staff;
 using Identity.Infrastructure.Persistence;
@@ -22,6 +23,7 @@ public static class IdentityModule
         services.AddScoped<IModuleMigrator, IdentityMigrator>();
         services.AddScoped<IShopStore, ShopStore>();
         services.AddScoped<IStaffStore, StaffStore>();
+        services.AddScoped<IDeviceStore, DeviceStore>();
         services.AddSingleton<IPinHasher, Pbkdf2PinHasher>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddDispatching(typeof(CreateShop).Assembly);

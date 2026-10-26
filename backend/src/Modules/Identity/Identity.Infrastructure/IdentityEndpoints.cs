@@ -1,3 +1,4 @@
+using Identity.Application.Devices;
 using Identity.Application.Shops;
 using Identity.Application.Staff;
 using Identity.Contracts;
@@ -40,6 +41,38 @@ public static class IdentityEndpoints
         api.MapPost("/staff/{id:guid}/verify-pin", async (Guid id, VerifyPinRequest req, IDispatcher d, CancellationToken ct) =>
         {
             var result = await d.Send(new VerifyPin(id, req.Pin), ct);
+            return result.IsSuccess ? Results.NoContent() : Problem(result);
+        });
+
+        api.MapPost("/shops/{shopId:guid}/devices", async (Guid shopId, RegisterDeviceRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new RegisterDevice(shopId, req.Name), ct);
+            return result.IsSuccess
+                ? Results.Created($"/api/v1/devices/{result.Value}", new RegisterDeviceResponse(result.Value))
+                : Problem(result);
+        });
+
+        api.MapPost("/devices/{id:guid}/approve", async (Guid id, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new ApproveDevice(id), ct);
+            return result.IsSuccess ? Results.NoContent() : Problem(result);
+        });
+
+        api.MapPost("/devices/{id:guid}/wipe", async (Guid id, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new WipeDevice(id), ct);
+            return result.IsSuccess ? Results.NoContent() : Problem(result);
+        });
+
+        api.MapPost("/devices/{id:guid}/check-in", async (Guid id, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new CheckInDevice(id), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
+        });
+
+        api.MapPost("/devices/{id:guid}/wipe-confirmed", async (Guid id, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new ConfirmDeviceWiped(id), ct);
             return result.IsSuccess ? Results.NoContent() : Problem(result);
         });
 
