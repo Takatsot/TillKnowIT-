@@ -179,6 +179,17 @@ public class StaffTests
         Assert.False(hasher.Verify("1234", "garbage"));
     }
 
+    /// <summary>The same hash is checked by the till in frontend/packages/domain (pin.test.ts). If either side changes the format, both tests fail.</summary>
+    [Fact]
+    public void Pbkdf2_verifies_the_hash_the_till_side_also_checks()
+    {
+        const string sharedVector = "pbkdf2-sha256$100000$AAECAwQFBgcICQoLDA0ODw==$wmpH7CpIGbsLmht6VKVaCLZoFloVcHYAdmA4DgEdAUg=";
+        var hasher = new Pbkdf2PinHasher();
+
+        Assert.True(hasher.Verify("4821", sharedVector));
+        Assert.False(hasher.Verify("4822", sharedVector));
+    }
+
     [Theory]
     [InlineData("0821234567", "+27821234567")]
     [InlineData("+27 82 123 4567", "+27821234567")]

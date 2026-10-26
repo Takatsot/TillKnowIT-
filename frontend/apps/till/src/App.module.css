@@ -1,0 +1,68 @@
+.shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100dvh;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brand {
+  margin-right: auto;
+  font-size: var(--font-size-large);
+}
+
+.online,
+.offline {
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  font-size: var(--font-size-small);
+}
+
+.online {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.offline {
+  background: var(--color-warning-bg);
+}
+
+.language select {
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.main {
+  display: grid;
+  align-items: start;
+  padding: var(--space-6) var(--space-4);
+}
+
+.welcome {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  text-align: center;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

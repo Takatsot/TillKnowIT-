@@ -1,0 +1,76 @@
+.panel {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  width: 100%;
+  max-width: 24rem;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-large);
+  text-align: center;
+}
+
+.people {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.person {
+  width: 100%;
+  min-height: 4rem;
+  font-size: var(--font-size-large);
+}
+
+.dots {
+  display: flex;
+  gap: var(--space-3);
+  min-height: var(--touch-target);
+  align-items: center;
+}
+
+.dot,
+.dotFilled {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--color-text);
+  border-radius: 50%;
+}
+
+.dotFilled {
+  background: var(--color-text);
+}
+
+.message {
+  min-height: 3rem;
+  margin: 0;
+  color: var(--color-danger);
+  text-align: center;
+}
+
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.key {
+  min-height: 4rem;
+  font-size: var(--font-size-large);
+}
+
+.notice {
+  max-width: 24rem;
+  margin: var(--space-8) auto;
+  padding: var(--space-4);
+  background: var(--color-warning-bg);
+  border-radius: var(--radius);
+  text-align: center;
+}

@@ -1,0 +1,67 @@
+/* Design tokens. Components only use these, never raw colours or sizes. */
+:root {
+  /* Colour */
+  --color-bg: #f7f7f4;
+  --color-surface: #ffffff;
+  --color-text: #1b1f1d;
+  --color-text-muted: #55605b;
+  --color-border: #c9d0cb;
+  --color-primary: #0b6b4a;
+  --color-primary-hover: #095a3e;
+  --color-on-primary: #ffffff;
+  --color-danger: #b3261e;
+  --color-warning-bg: #fff4d6;
+  --color-focus: #1a5fd0;
+
+  /* Size. Touch targets are at least 48px (WCAG 2.2 AA, spec). */
+  --touch-target: 48px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius: 12px;
+
+  /* Type uses rem so it follows the user's text size up to 200%. */
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size-base: 1.125rem;
+  --font-size-small: 0.9375rem;
+  --font-size-large: 1.5rem;
+  --font-size-xlarge: 2rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121614;
+    --color-surface: #1c221f;
+    --color-text: #eef1ef;
+    --color-text-muted: #aab4ae;
+    --color-border: #3a443f;
+    --color-primary: #4fc79a;
+    --color-primary-hover: #6fd6af;
+    --color-on-primary: #08130e;
+    --color-danger: #ff8a80;
+    --color-warning-bg: #3d3414;
+    --color-focus: #8ab4ff;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
