@@ -31,3 +31,15 @@ internal sealed class ShopDirectory(IdentityDbContext db) : IShopDirectory
             .Where(o => o.Type == OrganisationType.Shop && o.Status == OrganisationStatus.Verified)
             .Select(o => o.Id).ToListAsync(ct);
 }
+
+internal sealed class DeviceDirectory(IdentityDbContext db) : IDeviceDirectory
+{
+    public async Task<List<StaleDevice>> NotSeenSince(DateTimeOffset cutoff, CancellationToken ct)
+    {
+        var rows = await db.Devices.AsNoTracking()
+            .Where(d => d.Status == DeviceStatus.Approved && d.LastSeenAt != null && d.LastSeenAt < cutoff)
+            .Select(d => new { d.ShopId, d.Id, d.Name, d.LastSeenAt })
+            .ToListAsync(ct);
+        return rows.Select(r => new StaleDevice(r.ShopId, r.Id, r.Name, r.LastSeenAt!.Value)).ToList();
+    }
+}

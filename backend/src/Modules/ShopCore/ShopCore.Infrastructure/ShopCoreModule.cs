@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ShopCore.Application.Compliance;
 using ShopCore.Application.Credit;
+using ShopCore.Application.Notifications;
 using ShopCore.Application.Slips;
 using ShopCore.Application.Insights;
 using ShopCore.Application.Reports;
@@ -47,6 +48,8 @@ public static class ShopCoreModule
         services.AddScoped<IStockReadStore, StockReadStore>();
         services.AddScoped<IComplianceStore, ComplianceStore>();
         services.AddScoped<ISlipStore, SlipStore>();
+        services.AddScoped<INotificationReadStore, NotificationReadStore>();
+        services.AddScoped<OwnerMessenger>();
         services.AddScoped<IInsightsReadStore, InsightsReadStore>();
         services.AddScoped<IReportReadStore, InsightsReadStore>();
         services.TryAddSingleton(TimeProvider.System);

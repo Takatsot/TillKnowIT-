@@ -75,7 +75,8 @@ public static class SlipToken
         byte[] bytes;
         try { bytes = FromBase64Url(token); }
         catch (FormatException) { return false; }
-        if (bytes.Length != 16 + SignatureBytes) return false;
+        // Reject any spelling other than the one we produce: the last character has spare bits that decode to the same bytes.
+        if (bytes.Length != 16 + SignatureBytes || Base64Url(bytes) != token) return false;
 
         var expected = HMACSHA256.HashData(key, bytes[..16])[..SignatureBytes];
         if (!CryptographicOperations.FixedTimeEquals(expected, bytes[16..])) return false;

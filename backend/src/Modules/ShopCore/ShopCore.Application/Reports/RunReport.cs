@@ -8,7 +8,7 @@ using TillKnowIT.SharedKernel;
 
 namespace ShopCore.Application.Reports;
 
-public sealed record CashUpRow(DateOnly Day, Guid TillDeviceId, long FloatCents, long ExpectedCents, long CountedCents, long DifferenceCents);
+public sealed record CashUpRow(DateOnly Day, Guid TillDeviceId, long FloatCents, long ExpectedCents, long CountedCents, long DifferenceCents, Guid CashUpId = default);
 
 public interface IReportReadStore
 {

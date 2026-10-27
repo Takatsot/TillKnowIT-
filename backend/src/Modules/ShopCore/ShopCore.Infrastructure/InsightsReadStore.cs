@@ -25,8 +25,8 @@ internal sealed class InsightsReadStore(ShopCoreDbContext db) : IInsightsReadSto
     {
         var rows = await db.Set<CashUp>().AsNoTracking()
             .Where(c => c.ShopId == shopId && c.Day >= from && c.Day <= to)
-            .Select(c => new { c.Day, c.TillDeviceId, c.FloatCents, c.ExpectedCents, c.CountedCents, c.DifferenceCents })
+            .Select(c => new { c.Id, c.Day, c.TillDeviceId, c.FloatCents, c.ExpectedCents, c.CountedCents, c.DifferenceCents })
             .ToListAsync(ct);
-        return rows.Select(r => new CashUpRow(r.Day, r.TillDeviceId, r.FloatCents, r.ExpectedCents, r.CountedCents, r.DifferenceCents)).ToList();
+        return rows.Select(r => new CashUpRow(r.Day, r.TillDeviceId, r.FloatCents, r.ExpectedCents, r.CountedCents, r.DifferenceCents, r.Id)).ToList();
     }
 }

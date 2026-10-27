@@ -31,6 +31,17 @@ public class SlipTests
     }
 
     [Fact]
+    public void Only_the_exact_token_we_made_is_accepted_whatever_character_is_changed()
+    {
+        // Every other spelling of every position must fail, including the last character whose spare bits decode to the same bytes.
+        var token = SlipToken.Create(Guid.NewGuid(), Key);
+        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+        for (var i = 0; i < token.Length; i++)
+            foreach (var c in alphabet.Where(c => c != token[i]))
+                Assert.False(SlipToken.TryRead(token[..i] + c + token[(i + 1)..], Key, out _), $"position {i} -> {c}");
+    }
+
+    [Fact]
     public void Altered_foreign_or_malformed_tokens_are_rejected()
     {
         var token = SlipToken.Create(Guid.NewGuid(), Key);

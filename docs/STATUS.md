@@ -34,9 +34,10 @@ on the build machine. The first real run is the first item on the hand-over list
 | E7-1 Cash-up | Done | |
 | E8-1, E8-2 Insights | Done | Server endpoint and the same rules in TypeScript for offline use. Screens not built. |
 | E8-3 Reports and export | Partly | Five reports as CSV, Excel and PDF (own PDF writer, no library licence). Reports are LINQ queries, not T-SQL functions, and run immediately; background jobs for very large reports are not built. |
-| E9-1 Compliance documents | Partly | Upload (JPEG/PNG/PDF, 10 MB, content checked), AES-256-GCM encrypted storage, list with status, download, delete, and the 30-day / 7-day / expired reminder rules. Sending the reminders waits for the Messaging module (next). Local encrypted disk store; Azure Blob adapter not written. |
+| E9-1 Compliance documents | Done | Upload (JPEG/PNG/PDF, 10 MB, content checked), AES-256-GCM encrypted storage, list with status, download, delete, and WhatsApp/email reminders at 30 days, 7 days and expiry, sent once. Local encrypted disk store; the Azure Blob adapter is not written. |
 | E10-1 Airtime and electricity | Todo | Needs a licensed partner. |
-| E11-1, E11-2 Summary and alerts | Todo | |
+| E11-1 Daily summary | Done | Sent once a day after 19:00 shop time to every verified shop, by WhatsApp or email. |
+| E11-2 Loss alerts | Done | Cancellations per hour and short cash-ups, levels from shop settings with defaults; plus a 48-hour offline-till alert. All sent once (dedupe keys). Push needs the owner app; WhatsApp/SMS/email providers are not connected. |
 | E12-1 Six languages | Partly | Structure and English done; translations need translators. |
 | E13-1 Field agent app | Todo | |
 | E14-1, E14-2 Founding suppliers | Todo | |
