@@ -1,3 +1,4 @@
+using TillKnowIT.SharedKernel;
 using ShopCore.Contracts;
 using ShopCore.Domain;
 

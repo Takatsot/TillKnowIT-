@@ -1,3 +1,5 @@
+using Wallet.Infrastructure;
+using Wallet.Infrastructure.Persistence;
 using Payments.Infrastructure;
 using Payments.Infrastructure.Persistence;
 using Catalogue.Infrastructure;
@@ -27,8 +29,8 @@ builder.Services
     .AddShopCoreModule(db)
     .AddMarketplaceModule(db)
     .AddMessagingModule(db)
-    .AddPaymentsModule(db);
-
+    .AddPaymentsModule(db)
+    .AddWalletModule(builder.Configuration.GetConnectionString("Wallet") ?? db);
 // One publisher per module outbox.
 builder.Services
     .AddOutboxProcessor<IdentityDbContext>()
@@ -36,7 +38,8 @@ builder.Services
     .AddOutboxProcessor<ShopCoreDbContext>()
     .AddOutboxProcessor<MarketplaceDbContext>()
     .AddOutboxProcessor<MessagingDbContext>()
-    .AddOutboxProcessor<PaymentsDbContext>();
+    .AddOutboxProcessor<PaymentsDbContext>()
+    .AddOutboxProcessor<WalletDbContext>();
 
 // Delivers queued messages. Pretend providers (log only) exist in Development; elsewhere a channel with no
 // real provider fails visibly rather than pretending to send.
@@ -45,11 +48,13 @@ builder.Services.AddOwnerNotifications();
 builder.Services.AddInvoiceReading();
 builder.Services.AddPaymentRelease();
 builder.Services.AddGroupDealClosing();
+builder.Services.AddWalletJobs();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddMessagingDevProviders();
     builder.Services.AddDevInvoiceReader();
     builder.Services.AddDevPaymentPartner();
+    builder.Services.AddDevStoredValuePartner();
 }
 
 builder.Build().Run();

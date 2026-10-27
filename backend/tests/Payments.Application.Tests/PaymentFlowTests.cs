@@ -1,3 +1,4 @@
+using TillKnowIT.Security;
 using Identity.Contracts;
 using Marketplace.Contracts;
 using Microsoft.Extensions.Time.Testing;

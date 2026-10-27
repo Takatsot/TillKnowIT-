@@ -64,7 +64,35 @@ on the build machine. The first real run is the first item on the hand-over list
 | Marketplace as its own service, Service Bus | Decided not yet | See ADR 0002: same hosts, same boundaries; split when there is a reason. |
 | Supplier portal app | Todo | Front-end only; the API for it is all there. |
 
-## Phases 3 to 5
+## Phase 3: school wallet
+
+Backend only: the screens (parent app, till wallet payment, photo check) and the NFC/Capacitor work are not built. Everything below is tested without a database or a partner.
+
+| Story | State | Notes |
+| --- | --- | --- |
+| Double-entry ledger | Done | Accounts, append-only transactions, balanced legs (the domain refuses anything that does not add to zero; a 2,000-case property test covers every posting kind). Balances are calculated, never stored. A unique reference per transaction makes every request safe to repeat. A wallet's version moves on every debit so two simultaneous spends cannot both win. `backend/scripts/sql/wallet-ledger-checks.sql` adds views for spot checks; there is no trigger (the file says why). |
+| W1-1 Schools | Done | The platform registers and verifies a school against a verified tuckshop; school admins; settings (payout schedule, daily ceiling, staff accounts, offline split minutes). Only the platform can change the fee. |
+| W1-2 Import learners and teachers | Done | CSV or Excel with header aliases; duplicates flagged within the file and against the list; bad rows reported; safe to send again. Each new person gets a wallet and a one-time link code to print. Photos (JPEG or PNG) are stored encrypted and served only to a till of that school. |
+| W1-3 Cards and wristbands | Done | The NFC UID is stored as a hash; one card, one person; a blocked card stays blocked. Port: the NFC reading itself (Capacitor plugin, USB readers) is front-end work. |
+| W2-1 Parent links a child | Done | Link code plus consent (version recorded) before anything about the child is shown; up to 4 parents per child. |
+| W2-2 Top-ups | Done (code) | Card or instant EFT through the partner's checkout, credited only on a signed, replay-protected, once-only partner callback. Cash at the school office is recorded by the admin (the school owes that cash until it is paid in). Port: the licensed stored-value partner (only a Development fake exists). |
+| W2-3 Limits and blocked items | Done | A daily limit and blocked products or categories. The school's ceiling and the parent's limit both apply; the lower wins. |
+| W2-4 Alerts and statement | Done | Optional push on every purchase; one low-balance alert per crossing (push, and WhatsApp if opted in); statement with a running balance as JSON, CSV, Excel or PDF. Messaging never blocks or fails a sale. |
+| W2-5 Automatic weekly top-up | Todo | Could. Needs a saved card at the partner. |
+| W2-6 Transfers between children | Done | Only between a parent's own children; once per reference. |
+| W3-1 Pay at the till | Done | NFC card or rotating QR (60 seconds, signed). The cashier gets name, grade, class and a photo marker. Limits, blocked items and balance are checked; idempotent by sale id; the platform fee is split out in the ledger. |
+| W3-2 Offline wallet | Done | Each till gets a signed allowance per wallet (lower of the balance and what is left of today's limit) and never the real balance. Settlement verifies the signature, wallet, school and day, and caps the day's offline sales across all tills at the allowance; sales over it are rejected and the shop owner and parent are told. A sale inside the allowance is honoured even if the wallet has since been emptied elsewhere: the shop is paid and the wallet shows overdrawn (the parent is told). Whole-day outage test: 40 learners, up to 600 sales over two tills, nobody over their allowance, ledger balanced. |
+| W3-3 Block a lost card | Done | A parent or the school blocks it; the block reaches tills in the next snapshot; a replacement links to the same wallet. |
+| W4-1 Teachers | Done | A teacher wallet, or a monthly staff account if the school turns it on; monthly statement per teacher; settlement posted once per teacher and month. |
+| W4-2 and W4-3 Pre-orders | Done | Breaks with cut-off times (South African time); a menu set by the school; prices come from the menu; paid from the wallet when placed; cancellable until the cut-off with the exact amount and fee returned; the cashier lists by break and class and marks collected; today's paid orders are in the till snapshot. |
+| W5-1 Payouts | Done (code) | Schedule-driven (daily, weekly on Friday, monthly on the last day), once per shop per day, the partner reference is the idempotency key; a failed payout is recorded and retried; the owner sees sales, fees, payouts and what is owed. Port: the partner payout call. |
+| W5-2 Refund on leaving | Done (code) | The parent asks once the child is marked as left; the school confirms; the partner is asked first, so a failure changes nothing. |
+| W5-3 Reconciliation | Done | A daily job compares the ledger with the partner's own total to the cent and checks that every transaction balances; any difference blocks all payouts until a platform admin writes a resolution. |
+| W5-4 Erasure | Done | Names, grade, class, photo, link code and guardian links are removed and cards blocked; the ledger is kept (it holds no names). A wallet with money waits for the refund, then completes; due within 30 days. |
+| Separate wallet database and service | Prepared | `ConnectionStrings:Wallet` puts the module in a database of its own today. The separate Container App, Key Vault and network rules are infrastructure work: see ADR 0003. |
+| Parent app, till screens, native NFC, penetration test | Todo | Front-end and infrastructure work; the penetration test and four-eyes reviews are process items. |
+
+## Phases 4 and 5
 
 Not started. These tables are filled in as each phase is built.
 

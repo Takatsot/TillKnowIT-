@@ -1,3 +1,4 @@
+using Wallet.Infrastructure;
 using Payments.Infrastructure;
 using Catalogue.Infrastructure;
 using Identity.Infrastructure;
@@ -22,11 +23,12 @@ builder.Services
     .AddShopCoreModule(db)
     .AddMarketplaceModule(db)
     .AddMessagingModule(db)
+    .AddWalletModule(builder.Configuration.GetConnectionString("Wallet") ?? db)
     .AddPaymentsModule(db);
 
 // A fake VAS partner exists in Development only. Elsewhere airtime and electricity report "not available"
 // until the real partner adapter is registered.
-if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner().AddDevPaymentPartner();
+if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner().AddDevPaymentPartner().AddDevStoredValuePartner();
 
 var app = builder.Build();
 
@@ -47,6 +49,7 @@ api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 api.MapIdentityEndpoints();
 api.MapShopCoreEndpoints();
 api.MapCatalogueEndpoints();
+api.MapWalletEndpoints();
 api.MapPaymentsEndpoints();
 api.MapMarketplaceEndpoints();
 

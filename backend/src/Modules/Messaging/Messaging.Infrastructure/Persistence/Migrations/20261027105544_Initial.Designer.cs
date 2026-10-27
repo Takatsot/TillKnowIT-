@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messaging.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MessagingDbContext))]
-    [Migration("20261027102258_Initial")]
+    [Migration("20261027105544_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -181,6 +181,96 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                             Body = "{shop}: group deal for {product} from {supplier}. {summary}",
                             Channel = "Email",
                             Code = "group.update",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("743083d3-4b10-9372-b4c6-9df6894441b6"),
+                            Body = "{child} spent {amount} at the tuckshop. Balance: {balance}.",
+                            Channel = "Push",
+                            Code = "wallet.purchase",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("6c7a9b11-b91b-04a2-5906-a262aca989c5"),
+                            Body = "{amount} was added to {child}'s wallet. Balance: {balance}.",
+                            Channel = "Push",
+                            Code = "wallet.topup",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("e9b8fa6c-47d8-5815-7c1e-23b6d5137a4b"),
+                            Body = "{child}'s wallet is running low: {balance} left. Top up so they can buy at break.",
+                            Channel = "Push",
+                            Code = "wallet.low_balance",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("55505a20-9e06-e40a-f65d-885db42183dc"),
+                            Body = "{child}'s wallet is running low: {balance} left. Top up so they can buy at break.",
+                            Channel = "Whatsapp",
+                            Code = "wallet.low_balance",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("329a87f9-0e8b-fbe9-346a-aaafd7976556"),
+                            Body = "{child} bought {amount} while the tuckshop was offline and the wallet did not have enough. Please top it up.",
+                            Channel = "Push",
+                            Code = "wallet.overdrawn",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("51c23d1d-66d4-2856-e02a-a12c50bd4b19"),
+                            Body = "{child} bought {amount} while the tuckshop was offline and the wallet did not have enough. Please top it up.",
+                            Channel = "Whatsapp",
+                            Code = "wallet.overdrawn",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("eb05e1a5-62e5-1505-5609-da693bb3e8d9"),
+                            Body = "A tuckshop sale of {amount} could not be settled ({reason}).",
+                            Channel = "Push",
+                            Code = "wallet.sale_rejected",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("6a6f3a6a-ae0c-a1d0-d1aa-b678b53ea6ed"),
+                            Body = "A tuckshop sale of {amount} could not be settled ({reason}).",
+                            Channel = "Whatsapp",
+                            Code = "wallet.sale_rejected",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("5c48c668-cc7f-f123-1b33-4380e833a0cc"),
+                            Body = "A tuckshop sale of {amount} could not be settled ({reason}).",
+                            Channel = "Email",
+                            Code = "wallet.sale_rejected",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Language = "en",
                             Version = 1

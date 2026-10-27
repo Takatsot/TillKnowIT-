@@ -1,3 +1,4 @@
+using TillKnowIT.SharedKernel;
 namespace ShopCore.Domain;
 
 public sealed record SaleLineRow(

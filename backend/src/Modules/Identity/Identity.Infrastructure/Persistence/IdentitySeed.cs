@@ -22,7 +22,7 @@ internal static class IdentitySeed
         ("manager", "Manager", 2, ShopPermissions),
         ("cashier", "Cashier", 3, ["sale.create", "slip.send", "cashup.do", "vas.sell", "credit.payment"]),
         ("field_agent", "Field agent", 4, ["shop.setup", "shop.verify", "staff.manage", "device.manage"]),
-        ("platform_admin", "Platform admin", 5, ["catalogue.approve", "lookup.manage", "shop.verify", "user.manage", "supplier.verify", "dispute.resolve", "marketplace.settings"]),
+        ("platform_admin", "Platform admin", 5, ["catalogue.approve", "lookup.manage", "shop.verify", "user.manage", "supplier.verify", "dispute.resolve", "marketplace.settings", "school.manage", "wallet.admin"]),
         ("supplier_admin", "Supplier admin", 6, ["supplier.manage", "supplier.catalogue", "supplier.orders", "supplier.reps", "supplier.statements", "deals.manage", "supplier.demand"]),
         ("supplier_rep", "Supplier sales rep", 7, ["supplier.catalogue", "supplier.orders", "deals.manage"]),
     ];

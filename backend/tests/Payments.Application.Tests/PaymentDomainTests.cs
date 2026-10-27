@@ -1,4 +1,5 @@
 using Payments.Application;
+using TillKnowIT.Security;
 using Payments.Domain;
 
 namespace Payments.Application.Tests;

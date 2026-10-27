@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wallet.Domain\Wallet.Domain.csproj" />
+    <ProjectReference Include="..\Wallet.Contracts\Wallet.Contracts.csproj" />
+    <ProjectReference Include="..\..\Identity\Identity.Contracts\Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\Messaging\Messaging.Contracts\Messaging.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Storage\TillKnowIT.Storage.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Importing\TillKnowIT.Importing.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Reporting\TillKnowIT.Reporting.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Security\TillKnowIT.Security.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Dispatching\TillKnowIT.Dispatching.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Wallet.Application.Tests" />
+  </ItemGroup>
+
+</Project>

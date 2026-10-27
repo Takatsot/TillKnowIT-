@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Payments.Application;
+using TillKnowIT.Security;
 using Payments.Domain;
 using Payments.Infrastructure.Persistence;
 using TillKnowIT.Dispatching;

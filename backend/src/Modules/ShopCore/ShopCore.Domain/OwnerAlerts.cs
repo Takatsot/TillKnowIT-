@@ -1,3 +1,4 @@
+using TillKnowIT.SharedKernel;
 using System.Globalization;
 
 namespace ShopCore.Domain;

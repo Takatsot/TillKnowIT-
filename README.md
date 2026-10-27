@@ -30,7 +30,7 @@ dotnet ef migrations add <Name> \
 ```
 
 Contexts: `IdentityDbContext` (identity), `CatalogueDbContext` (catalogue, plus the `platform` lookup tables),
-`ShopCoreDbContext` (shopcore), `MarketplaceDbContext` (marketplace), `MessagingDbContext` (messaging).
+`ShopCoreDbContext` (shopcore), `MarketplaceDbContext` (marketplace), `MessagingDbContext` (messaging), `PaymentsDbContext` (payments), `WalletDbContext` (wallet).
 
 `bash backend/scripts/check-migrations.sh` fails if a model change has no migration. CI runs it on every pull request.
 
