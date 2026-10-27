@@ -51,6 +51,7 @@ builder.Services.AddOwnerNotifications();
 builder.Services.AddInvoiceReading();
 builder.Services.AddPaymentRelease();
 builder.Services.AddGroupDealClosing();
+builder.Services.AddLaybyExpiry();
 builder.Services.AddWalletJobs();
 if (builder.Environment.IsDevelopment())
 {

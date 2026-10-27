@@ -60,7 +60,7 @@ public sealed class CreditAccount : VersionedEntity
     public long? CreditLimitCents { get; private set; }
 }
 
-public enum CreditEntryType { Sale, Payment, Cancel }
+public enum CreditEntryType { Sale, Payment, Cancel, Refund }
 
 public sealed record CreditEntryInput(
     Guid Id, Guid AccountId, CreditEntryType Type, long AmountCents, Guid? SaleId, string? PaymentMethodCode,

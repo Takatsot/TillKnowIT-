@@ -436,8 +436,8 @@ public class TipTests
 
 public class RefundRuleTests
 {
-    private static readonly SoldLine Shirt = new(Guid.NewGuid(), Guid.NewGuid(), "Shirt", 3, 20_000);
-    private static readonly SoldLine Socks = new(Guid.NewGuid(), Guid.NewGuid(), "Socks", 2, 5_000);
+    private static readonly SoldLine Shirt = new(Guid.NewGuid(), Guid.NewGuid(), "Shirt", 3, 60_000);
+    private static readonly SoldLine Socks = new(Guid.NewGuid(), Guid.NewGuid(), "Socks", 2, 10_000);
 
     [Fact]
     public void A_refund_gives_back_the_price_paid_for_the_quantity_returned()
@@ -486,5 +486,55 @@ public class RefundRuleTests
         Assert.Equal("voucher", RefundRules.RefundMethodFor("wallet"));
         Assert.Equal("voucher", RefundRules.RefundMethodFor("layby"));
         Assert.Equal("voucher", RefundRules.RefundMethodFor("split"));
+    }
+}
+
+public class WeighedSaleTests
+{
+    private static readonly DateTimeOffset Now = new(2026, 10, 26, 10, 0, 0, TimeSpan.Zero);
+    private static readonly Guid Mince = Guid.NewGuid();
+    private static readonly Guid Bread = Guid.NewGuid();
+
+    private static SaleInput Sale(long total, params SaleLineInput[] lines) => new(
+        Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Now, PaymentMethods.Card, total, 0, null, null, null, lines);
+
+    [Fact]
+    public void A_weighed_line_costs_the_grams_at_the_price_per_kilogram()
+    {
+        var line = new SaleLineInput(Mince, "Beef mince", 700, 12_500, 9_000, UnitDivisor: 1000);   // 700 g at R125/kg
+
+        var sale = Domain.Sale.Record(Sale(10_550, line, new SaleLineInput(Bread, "Bread", 1, 1_800, 1_400)), Now);
+
+        Assert.True(sale.IsSuccess);
+        Assert.Equal(10_550, sale.Value!.TotalCents);
+        Assert.Equal(8_750, sale.Value.Lines.Single(l => l.ProductId == Mince).TotalCents);
+        Assert.Equal(1000, sale.Value.Lines.Single(l => l.ProductId == Mince).UnitDivisor);
+    }
+
+    [Fact]
+    public void The_till_cannot_get_the_weighed_total_wrong_or_use_an_unknown_unit()
+    {
+        var line = new SaleLineInput(Mince, "Beef mince", 700, 12_500, 9_000, UnitDivisor: 1000);
+
+        Assert.Equal("sale.total_mismatch", Domain.Sale.Record(Sale(8_749, line), Now).Error!.Code);
+        Assert.Equal("sale.line_unit", Domain.Sale.Record(Sale(8_750, line with { UnitDivisor = 100 }), Now).Error!.Code);
+    }
+
+    [Fact]
+    public void Sales_insights_and_reports_use_the_weighed_line_total_not_price_times_grams()
+    {
+        var row = new SaleLineRow(Guid.NewGuid(), Now, Mince, "Beef mince", 700, 12_500, 9_000, false, 1000);
+
+        Assert.Equal((8_750L, 6_300L, 2_450L), (row.Revenue, row.Cost, row.Profit));
+        Assert.Equal((1_800L, 1_400L, 400L), (new SaleLineRow(Guid.NewGuid(), Now, Bread, "Bread", 1, 1_800, 1_400, false).Revenue, new SaleLineRow(Guid.NewGuid(), Now, Bread, "Bread", 1, 1_800, 1_400, false).Cost, new SaleLineRow(Guid.NewGuid(), Now, Bread, "Bread", 1, 1_800, 1_400, false).Profit));
+    }
+
+    [Fact]
+    public void A_slip_shows_weight_in_kilograms()
+    {
+        var text = SlipFormatter.Lines([new SlipLine("Beef mince", 700, 12_500, 1000), new SlipLine("Bread", 2, 1_800)]);
+
+        Assert.Contains("0.700 kg x Beef mince  R87.50", text);
+        Assert.Contains("2 x Bread  R36.00", text);
     }
 }

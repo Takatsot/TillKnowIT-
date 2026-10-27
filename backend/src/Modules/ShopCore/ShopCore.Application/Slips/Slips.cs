@@ -77,6 +77,6 @@ internal sealed class GetSlipHandler(ISlipStore store, IShopDirectory shops, Sli
 
         var shop = await shops.Get(sale.ShopId, ct);
         return Result<SlipView>.Ok(new SlipView(shop?.Name ?? "", SlipFormatter.Date(sale.SoldAt),
-            sale.Lines.Select(l => new SlipLineView(l.Name, l.Quantity, l.PriceCents)).ToList(), sale.TotalCents, sale.VatCents, sale.PaymentMethod, sale.Cancelled));
+            sale.Lines.Select(l => new SlipLineView(l.Name, l.Quantity, l.PriceCents, l.UnitDivisor, l.DiscountCents)).ToList(), sale.TotalCents, sale.VatCents, sale.PaymentMethod, sale.Cancelled));
     }
 }

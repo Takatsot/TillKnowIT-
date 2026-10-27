@@ -74,6 +74,7 @@ public static class ShopCoreEndpoints
         SlipEndpoints.Map(api);
         ImportEndpoints.Map(api);
         VasEndpoints.Map(api);
+        api.MapSellingEndpoints();
         return api;
     }
 

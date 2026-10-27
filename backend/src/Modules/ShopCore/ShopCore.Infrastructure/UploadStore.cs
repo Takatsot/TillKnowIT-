@@ -110,9 +110,12 @@ internal sealed class UploadStore(ShopCoreDbContext db) : IUploadStore
         db.Set<CashUp>().AsNoTracking().AnyAsync(c => c.ShopId == shopId && c.TillDeviceId == deviceId && c.Day == day, ct);
 
     public Task<List<CashSaleRow>> CashSales(Guid deviceId, DateTimeOffset from, DateTimeOffset to, CancellationToken ct) =>
+        // Cash sales put their whole bill and any tip in the drawer; a split sale puts in only its cash part.
         db.Sales.AsNoTracking()
-            .Where(s => s.TillDeviceId == deviceId && s.PaymentMethodCode == PaymentMethods.Cash && s.SoldAt >= from && s.SoldAt <= to)
-            .Select(s => new CashSaleRow(s.Id, s.TotalCents, db.Set<SaleCancellation>().Any(c => c.SaleId == s.Id)))
+            .Where(s => s.TillDeviceId == deviceId && (s.PaymentMethodCode == PaymentMethods.Cash || s.PaymentMethodCode == PaymentMethods.Split) && s.SoldAt >= from && s.SoldAt <= to)
+            .Select(s => new CashSaleRow(s.Id,
+                s.PaymentMethodCode == PaymentMethods.Cash ? s.TotalCents + s.TipCents : s.Payments.Where(p => p.MethodCode == PaymentMethods.Cash).Sum(p => p.AmountCents),
+                db.Set<SaleCancellation>().Any(c => c.SaleId == s.Id)))
             .ToListAsync(ct);
 
     public async Task<long> CreditCashPayments(Guid deviceId, DateTimeOffset from, DateTimeOffset to, CancellationToken ct) =>

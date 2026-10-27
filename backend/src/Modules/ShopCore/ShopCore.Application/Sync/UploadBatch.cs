@@ -2,6 +2,7 @@ using Catalogue.Contracts;
 using Identity.Contracts;
 using ShopCore.Contracts;
 using ShopCore.Domain;
+using ShopCore.Domain.Selling;
 using TillKnowIT.Dispatching;
 using TillKnowIT.SharedKernel;
 
@@ -9,7 +10,7 @@ namespace ShopCore.Application.Sync;
 
 public sealed record UploadBatch(SyncUploadRequest Request) : ICommand<SyncUploadResponse>;
 
-public interface IUploadStore
+public interface IUploadStore : IRefundEffects
 {
     Task<HashSet<Guid>> ExistingSaleIds(IEnumerable<Guid> ids, CancellationToken ct);
     Task<HashSet<Guid>> ExistingMovementIds(IEnumerable<Guid> ids, CancellationToken ct);
@@ -45,11 +46,9 @@ public interface IUploadStore
     Task<long> CreditCashPayments(Guid deviceId, DateTimeOffset from, DateTimeOffset to, CancellationToken ct);
 
     void Add(CreditAccount account);
-    void Add(CreditEntry entry);
     void Add(CashUp cashUp);
     void Add(Product product);
     void Add(Sale sale);
-    void Add(StockMovement movement);
     void Add(SaleCancellation cancellation);
     Task Save(CancellationToken ct);
 }
@@ -58,7 +57,7 @@ public sealed record SaleSummary(string PaymentMethodCode, Guid? AccountId, long
 
 public sealed record CashSaleRow(Guid SaleId, long TotalCents, bool Cancelled);
 
-internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker access, ILookupChecker lookups, TimeProvider clock)
+internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker access, ILookupChecker lookups, TimeProvider clock, IRefundStore? refunds = null, IFeatureGate? gate = null)
     : ICommandHandler<UploadBatch, SyncUploadResponse>
 {
     public async Task<Result<SyncUploadResponse>> Handle(UploadBatch command, CancellationToken ct)
@@ -71,6 +70,7 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
         var sales = req.Sales ?? [];
         var movements = req.StockMovements ?? [];
         var cancellations = req.Cancellations ?? [];
+        var refundUploads = req.Refunds ?? [];
         var results = new List<UploadRecordResult>(req.Count);
         if (req.Count == 0) return Result<SyncUploadResponse>.Ok(new SyncUploadResponse(results));
 
@@ -108,6 +108,15 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
         var referencedSales = movements.Where(m => m.SaleId is not null).Select(m => m.SaleId!.Value)
             .Concat(cancellations.Select(c => c.SaleId)).Distinct().ToList();
         var soldQuantities = await store.SaleQuantities(req.ShopId, referencedSales, ct);
+        var batchSales = new Dictionary<Guid, Sale>();
+        var batchCashRefunds = new List<(DateTimeOffset At, long Cents)>();
+        var refundSaleIds = refundUploads.Select(r => r.SaleId).Distinct().ToList();
+        var existingRefunds = refunds is null ? [] : await refunds.ExistingIds(refundUploads.Select(r => r.Id), ct);
+        var refundSoldLines = refunds is null ? [] : await refunds.SoldLines(req.ShopId, refundSaleIds, ct);
+        var refundedSoFar = refunds is null ? [] : (await refunds.RefundedSoFar(refundSaleIds, ct)).GroupBy(x => x.SaleId)
+            .ToDictionary(g => g.Key, g => g.Select(x => new RefundedSoFar(x.ProductId, x.Quantity)).ToList());
+        foreach (var cancelledId in await store.CancelledSaleIds(refundSaleIds, ct)) alreadyCancelled.Add(cancelledId);
+        var refundSummaries = await store.SaleSummaries(req.ShopId, refundSaleIds, ct);
 
         var accessCache = new Dictionary<(Guid Staff, string Permission), Result>();
         async Task<Result> Allowed(Guid staffId, string permission)
@@ -115,6 +124,20 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
             if (!accessCache.TryGetValue((staffId, permission), out var r))
                 accessCache[(staffId, permission)] = r = await access.Check(req.ShopId, req.DeviceId, staffId, permission, ct);
             return r;
+        }
+
+        async Task<Error?> FeatureError(SaleUpload sale)
+        {
+            if (gate is null) return null;
+            var needed = new List<string>();
+            if (sale.PaymentMethodCode == PaymentMethods.Split || sale.Payments is { Count: > 0 }) needed.Add("split_payments");
+            if (sale.TipCents > 0) needed.Add("tips");
+            if (sale.CustomerId is not null) needed.Add("customers");
+            if (sale.Lines?.Any(l => l.PromotionId is not null) == true) needed.Add("promotions");
+            if (sale.Lines?.Any(l => l.UnitDivisor != 1) == true) needed.Add("weight");
+            foreach (var feature in needed)
+                if (!await gate.IsOn(req.ShopId, feature, ct)) return new Error("feature.not_enabled", $"'{feature}' is not switched on for this shop.");
+            return null;
         }
 
         void Add(string kind, Guid id, string status, string? code = null, string? message = null) =>
@@ -236,6 +259,21 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
                 continue;
             }
 
+            // Phase 4 selling features only work for a shop whose business pack switches them on.
+            var featureError = await FeatureError(s);
+            if (featureError is not null) { Reject(kind, s.Id, featureError); continue; }
+
+            // A discount that is a manager's price override needs that manager's role to allow it.
+            var priceDenied = false;
+            foreach (var approver in lines.Where(l => l.PriceOverrideBy is not null).Select(l => l.PriceOverrideBy!.Value).Distinct())
+            {
+                if ((await Allowed(approver, "sale.price_override")).IsSuccess) continue;
+                Reject(kind, s.Id, new Error("sale.override_not_allowed", "The person who approved the price may not do that."));
+                priceDenied = true;
+                break;
+            }
+            if (priceDenied) continue;
+
             // A sale of an expired item needs a manager's override, and the manager's role must allow it.
             var overrideDenied = false;
             foreach (var overrider in lines.Where(l => l.ExpiryOverrideBy is not null).Select(l => l.ExpiryOverrideBy!.Value).Distinct())
@@ -250,13 +288,16 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
 
             var recorded = Sale.Record(new SaleInput(s.Id, req.ShopId, req.DeviceId, s.StaffId, s.SoldAt, s.PaymentMethodCode,
                 s.TotalCents, s.VatCents, s.TenderedCents, s.ChangeCents, s.AccountId,
-                lines.Select(l => new SaleLineInput(l.ProductId, l.Name, l.Quantity, l.PriceCents, l.CostCents, l.ExpiryOverrideBy)).ToList()), now);
+                lines.Select(l => new SaleLineInput(l.ProductId, l.Name, l.Quantity, l.PriceCents, l.CostCents, l.ExpiryOverrideBy, l.UnitDivisor,
+                    l.DiscountCents, l.PromotionId, l.PriceOverrideBy)).ToList(),
+                s.Payments?.Select(p => new PaymentPart(p.MethodCode, p.AmountCents, p.Reference, null, p.TenderedCents)).ToList(), s.TipCents, s.CustomerId), now);
             if (!recorded.IsSuccess) { Reject(kind, s.Id, recorded.Error!); continue; }
 
             store.Add(recorded.Value!);
             soldQuantities[s.Id] = recorded.Value!.Lines.ToDictionary(l => l.ProductId, l => l.Quantity);
             saleSummaries[s.Id] = new SaleSummary(recorded.Value.PaymentMethodCode, recorded.Value.AccountId, recorded.Value.TotalCents);
-            if (recorded.Value.PaymentMethodCode == PaymentMethods.Cash) batchCashSales.Add(recorded.Value);
+            batchSales[s.Id] = recorded.Value;
+            if (recorded.Value.CashCents > 0) batchCashSales.Add(recorded.Value);
             Add(kind, s.Id, UploadStatus.Accepted);
         }
 
@@ -347,6 +388,38 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
             alreadyCancelled.Add(c.SaleId);
             store.Add(recorded.Value!);
             Add(kind, c.Id, UploadStatus.Accepted);
+        }
+
+        // ---- refunds ----
+        RefundProcessor? processor = refunds is null ? null : new RefundProcessor(store, refunds);
+        foreach (var r in refundUploads)
+        {
+            const string kind = "refund";
+            if (existingRefunds.Contains(r.Id) || !seen.Add(r.Id)) { Add(kind, r.Id, UploadStatus.Duplicate); continue; }
+            if (processor is null || refunds is null) { Reject(kind, r.Id, new Error("refund.not_supported", "Refunds are not available here.")); continue; }
+            if (gate is not null && !await gate.IsOn(req.ShopId, "refunds", ct)) { Reject(kind, r.Id, new Error("feature.not_enabled", "'refunds' is not switched on for this shop.")); continue; }
+
+            if (!saleSummaries.TryGetValue(r.SaleId, out var summary) && !refundSummaries.TryGetValue(r.SaleId, out summary))
+            {
+                Reject(kind, r.Id, new Error("refund.sale_unknown", "The sale is not on the server yet."));
+                continue;
+            }
+            if (alreadyCancelled.Contains(r.SaleId)) { Reject(kind, r.Id, new Error("refund.sale_cancelled", "A cancelled sale cannot be refunded.")); continue; }
+
+            var sold = batchSales.TryGetValue(r.SaleId, out var inBatch)
+                ? inBatch.Lines.Select(l => new SoldLine(l.ProductId, l.ProductId, l.Name, l.Quantity, l.TotalCents)).ToList()
+                : refundSoldLines.GetValueOrDefault(r.SaleId) ?? [];
+            var already = refundedSoFar.GetValueOrDefault(r.SaleId) ?? [];
+            var threshold = RefundThreshold(gate is null ? null : await gate.Settings(req.ShopId, "refunds", ct));
+
+            var outcome = await processor.Process(r, new RefundProcessor.Context(req.ShopId, req.DeviceId, r.StaffId, summary, sold, already, threshold, OnlineAllowed: false),
+                Allowed, now, ct);
+            if (!outcome.IsSuccess) { Reject(kind, r.Id, outcome.Error!); continue; }
+
+            // Later refunds in this batch must see this one, so a sale is never refunded for more than it was.
+            refundedSoFar[r.SaleId] = [.. already, .. r.Lines.Select(l => new RefundedSoFar(l.ProductId, l.Quantity))];
+            if (outcome.Value!.MethodCode == PaymentMethods.Cash) batchCashRefunds.Add((r.RefundedAt, outcome.Value.Refund.AmountCents));
+            Add(kind, r.Id, UploadStatus.Accepted);
         }
 
         // ---- credit entries ----
@@ -440,10 +513,12 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
             var to = c.CashedUpAt;
             var storedSales = await store.CashSales(req.DeviceId, from, to, ct);
             var cashSales = storedSales.Where(s => !s.Cancelled && !alreadyCancelled.Contains(s.SaleId)).Sum(s => s.TotalCents)
-                + batchCashSales.Where(s => s.SoldAt >= from && s.SoldAt <= to && !alreadyCancelled.Contains(s.Id)).Sum(s => s.TotalCents);
+                + batchCashSales.Where(s => s.SoldAt >= from && s.SoldAt <= to && !alreadyCancelled.Contains(s.Id)).Sum(s => s.CashCents);
             var creditCash = await store.CreditCashPayments(req.DeviceId, from, to, ct)
                 + batchCashPayments.Where(p => p.CreatedAt >= from && p.CreatedAt <= to).Sum(p => -p.AmountCents);
-            var expected = CashUpCalculator.Expected(c.FloatCents, cashSales, creditCash);
+            var cashRefunds = (refunds is null ? 0 : await refunds.CashRefunds(req.DeviceId, from, to, ct)) + batchCashRefunds.Where(x => x.At >= from && x.At <= to).Sum(x => x.Cents);
+            var cashIn = refunds is null ? 0 : await refunds.CashIn(req.DeviceId, from, to, ct);
+            var expected = CashUpCalculator.Expected(c.FloatCents, cashSales + cashIn, creditCash, cashRefunds);
 
             store.Add(CashUp.Record(input, expected));
             if (expected == c.ExpectedCents) Add(kind, c.Id, UploadStatus.Accepted);
@@ -455,6 +530,17 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
         // Everything accepted is saved in one transaction.
         await store.Save(ct);
         return Result<SyncUploadResponse>.Ok(new SyncUploadResponse(results));
+    }
+
+    private static long RefundThreshold(string? settingsJson)
+    {
+        if (string.IsNullOrWhiteSpace(settingsJson)) return RefundRules.DefaultApprovalThresholdCents;
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(settingsJson);
+            return doc.RootElement.TryGetProperty("approvalThresholdCents", out var v) && v.TryGetInt64(out var cents) && cents >= 0 ? cents : RefundRules.DefaultApprovalThresholdCents;
+        }
+        catch (System.Text.Json.JsonException) { return RefundRules.DefaultApprovalThresholdCents; }
     }
 
     private static bool TryParseCreditType(string value, out CreditEntryType type)

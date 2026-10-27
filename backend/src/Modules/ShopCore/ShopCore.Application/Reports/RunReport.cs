@@ -97,7 +97,7 @@ public static class ReportBuilders
         var list = rows.Where(r => !r.Cancelled && r.SoldAt >= from && r.SoldAt <= to)
             .GroupBy(r => r.ProductId)
             .Select(g => (Name: g.OrderByDescending(r => r.SoldAt).First().Name, Units: g.Sum(r => r.Quantity),
-                Revenue: g.Sum(r => r.PriceCents * r.Quantity), Profit: g.Sum(r => (r.PriceCents - r.CostCents) * r.Quantity)))
+                Revenue: g.Sum(r => r.Revenue), Profit: g.Sum(r => r.Profit)))
             .OrderByDescending(x => x.Units).ThenBy(x => x.Name, StringComparer.Ordinal)
             .ToList();
         return new ReportTable("Sales by product",

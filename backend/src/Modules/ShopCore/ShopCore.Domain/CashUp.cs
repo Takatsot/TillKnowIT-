@@ -4,9 +4,9 @@ namespace ShopCore.Domain;
 
 public static class CashUpCalculator
 {
-    /// <summary>Float + cash sales + cash paid on credit accounts. Cancelled sales are not in the cash sales.</summary>
-    public static long Expected(long floatCents, long cashSalesCents, long creditCashPaymentsCents) =>
-        floatCents + cashSalesCents + creditCashPaymentsCents;
+    /// <summary>Float + cash sales + cash paid on credit accounts - cash given back in refunds. Cancelled sales are not in the cash sales.</summary>
+    public static long Expected(long floatCents, long cashSalesCents, long creditCashPaymentsCents, long cashRefundsCents = 0) =>
+        floatCents + cashSalesCents + creditCashPaymentsCents - cashRefundsCents;
 }
 
 public sealed record CashUpInput(

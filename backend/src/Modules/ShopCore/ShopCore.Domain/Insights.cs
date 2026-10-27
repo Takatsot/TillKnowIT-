@@ -1,8 +1,15 @@
 using TillKnowIT.SharedKernel;
+
 namespace ShopCore.Domain;
 
 public sealed record SaleLineRow(
-    Guid SaleId, DateTimeOffset SoldAt, Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents, bool Cancelled);
+    Guid SaleId, DateTimeOffset SoldAt, Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents, bool Cancelled, int UnitDivisor = 1,
+    long DiscountCents = 0)
+{
+    public long Revenue => SaleMath.LineTotal(PriceCents, Quantity, UnitDivisor, DiscountCents);
+    public long Cost => SaleMath.LineGross(CostCents, Quantity, UnitDivisor);
+    public long Profit => Revenue - Cost;
+}
 
 public sealed record PeriodSummary(int Days, long SalesCents, long ProfitCents, int Customers, long AverageSaleCents);
 
@@ -24,8 +31,8 @@ public static class InsightsCalculator
         var from = PeriodStart(now, days);
         var live = rows.Where(r => !r.Cancelled && r.SoldAt >= from && r.SoldAt <= now).ToList();
 
-        var sales = live.Sum(r => r.PriceCents * r.Quantity);
-        var profit = live.Sum(r => (r.PriceCents - r.CostCents) * r.Quantity);
+        var sales = live.Sum(r => r.Revenue);
+        var profit = live.Sum(r => r.Profit);
         var customers = live.Select(r => r.SaleId).Distinct().Count();
         // Average sale is rounded to the nearest cent, halves up.
         var average = customers == 0 ? 0 : (sales * 2 + customers) / (customers * 2);
@@ -39,7 +46,7 @@ public static class InsightsCalculator
         return rows.Where(r => !r.Cancelled && r.SoldAt >= from && r.SoldAt <= now)
             .GroupBy(r => r.ProductId)
             .Select(g => new BestSeller(g.Key, g.OrderByDescending(r => r.SoldAt).First().Name, g.Sum(r => r.Quantity),
-                g.Sum(r => r.PriceCents * r.Quantity), g.Sum(r => (r.PriceCents - r.CostCents) * r.Quantity)))
+                g.Sum(r => r.Revenue), g.Sum(r => r.Profit)))
             .OrderByDescending(b => b.Units).ThenByDescending(b => b.RevenueCents).ThenBy(b => b.Name, StringComparer.Ordinal)
             .Take(top)
             .ToList();
@@ -52,7 +59,7 @@ public static class InsightsCalculator
             .Where(x => x.Day >= from && x.Day <= to)
             .GroupBy(x => x.Day)
             .Select(g => new DaySummary(g.Key, g.Select(x => x.Row.SaleId).Distinct().Count(),
-                g.Sum(x => x.Row.PriceCents * x.Row.Quantity), g.Sum(x => (x.Row.PriceCents - x.Row.CostCents) * x.Row.Quantity)))
+                g.Sum(x => x.Row.Revenue), g.Sum(x => x.Row.Profit)))
             .OrderBy(d => d.Day)
             .ToList();
 }

@@ -13,6 +13,7 @@ using ShopCore.Application.Insights;
 using ShopCore.Application.Reports;
 using ShopCore.Application.Stock;
 using ShopCore.Contracts;
+using ShopCore.Application.Selling;
 using ShopCore.Application.Sync;
 using TillKnowIT.Dispatching;
 using ShopCore.Infrastructure.Persistence;
@@ -48,6 +49,10 @@ public static class ShopCoreModule
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, ShopCoreMigrator>();
         services.AddScoped<IUploadStore, UploadStore>();
+        services.AddScoped<IRefundStore, RefundStore>();
+        services.AddScoped<IRefundEffects>(sp => sp.GetRequiredService<IUploadStore>());
+        services.AddScoped<ISellingStore, SellingStore>();
+        services.AddScoped<IFeatureGate, FeatureGate>();
         services.AddScoped<ICreditReadStore, CreditReadStore>();
         services.AddScoped<IStockReadStore, StockReadStore>();
         services.AddScoped<IShopStockInfo, ShopStockInfo>();

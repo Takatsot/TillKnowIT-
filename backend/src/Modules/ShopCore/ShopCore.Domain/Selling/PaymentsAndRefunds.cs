@@ -10,7 +10,8 @@ public static class ExtraPaymentMethods
     public const string Layby = "layby";
     public const string Split = "split";
 
-    public static bool IsPart(string? code) => PaymentMethods.IsValid(code) || code is Wallet or Voucher;
+    /// <summary>What one part of a split payment can be: not "split" or "layby", which describe a whole sale.</summary>
+    public static bool IsPart(string? code) => code is PaymentMethods.Cash or PaymentMethods.Card or PaymentMethods.Qr or PaymentMethods.Credit or Wallet or Voucher;
 }
 
 /// <summary>
@@ -66,7 +67,8 @@ public static class Tips
         percent is < 0 or > MaxPercent ? Result<long>.Fail("tip.invalid", "A tip percentage is from 0 to 100.") : Result<long>.Ok((subtotalCents * percent + 50) / 100);
 }
 
-public sealed record SoldLine(Guid SaleLineId, Guid ProductId, string Name, int Quantity, long UnitPriceCents);
+/// <summary>What was sold on a line: its quantity and what it cost the customer in total (after any discount), so a refund is pro rata.</summary>
+public sealed record SoldLine(Guid SaleLineId, Guid ProductId, string Name, int Quantity, long LineTotalCents);
 
 public sealed record RefundLineInput(Guid SaleLineId, int Quantity);
 
@@ -82,7 +84,8 @@ public static class RefundRules
 
     /// <summary>
     /// B2-4: works out what to give back. Each line may be refunded up to what was sold less what has already been refunded, so a sale can never
-    /// be refunded for more than it was. The amount is the price the customer actually paid per unit (after any promotion), times the quantity.
+    /// be refunded for more than it was. The amount is the share of what the customer actually paid for the line (after any promotion) that the quantity is,
+    /// rounded half up, so refunding the whole line gives back exactly what it cost.
     /// </summary>
     public static Result<RefundPlan> Plan(IReadOnlyList<SoldLine> sold, IReadOnlyList<RefundedSoFar> already, IReadOnlyList<RefundLineInput> asked, long approvalThresholdCents)
     {
@@ -97,7 +100,7 @@ public static class RefundRules
             if (a.Quantity < 1) return Result<RefundPlan>.Fail("refund.quantity_invalid", "The quantity must be more than zero.");
             var left = line.Quantity - already.Where(r => r.SaleLineId == line.SaleLineId).Sum(r => r.Quantity);
             if (a.Quantity > left) return Result<RefundPlan>.Fail("refund.too_many", $"{line.Name}: only {Math.Max(0, left)} left to refund.");
-            lines.Add((line.SaleLineId, line.ProductId, a.Quantity, line.UnitPriceCents * a.Quantity));
+            lines.Add((line.SaleLineId, line.ProductId, a.Quantity, (line.LineTotalCents * a.Quantity + line.Quantity / 2) / line.Quantity));
         }
         var total = lines.Sum(l => l.Item4);
         return Result<RefundPlan>.Ok(new RefundPlan(total, lines, total > approvalThresholdCents));

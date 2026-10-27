@@ -211,6 +211,19 @@ public class PackFlowTests
     }
 
     [Fact]
+    public async Task A_brand_new_business_type_is_just_data_and_works_with_no_code_change()
+    {
+        // A pack nobody has written code for: a bakery that weighs bread and takes tips.
+        await Admin.Handle(new SavePack(null, new(_admin, "bakery", "Bakery", null, "slip.sale", [new(FeatureFlags.Weight, null), new(FeatureFlags.Tips, null)])), default);
+
+        await Shops.Handle(new ChooseShopPack(_shop, new(_owner, "bakery")), default);
+
+        Assert.True(await Features.IsOn(_shop, FeatureFlags.Weight, default));
+        Assert.True(await Features.IsOn(_shop, FeatureFlags.Tips, default));
+        Assert.False(await Features.IsOn(_shop, FeatureFlags.Tables, default));
+    }
+
+    [Fact]
     public async Task The_default_pack_can_never_be_retired()
     {
         Assert.Equal("pack.default_required", (await Admin.Handle(new SetPackActive("spaza", _admin, false), default)).Error!.Code);

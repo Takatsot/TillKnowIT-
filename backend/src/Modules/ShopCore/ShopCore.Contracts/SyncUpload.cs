@@ -29,11 +29,31 @@ public sealed record CashUpUpload(
     DateTimeOffset CashedUpAt);
 
 /// <summary>ExpiryOverrideBy is the manager who approved selling an expired item. Their role must allow sale.override_expiry.</summary>
-public sealed record SaleLineUpload(Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents, Guid? ExpiryOverrideBy = null);
+/// <summary>UnitDivisor is 1 for items sold each, or 1000 for items sold by weight (quantity in grams, price per kilogram).</summary>
+public sealed record SaleLineUpload(
+    Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents, Guid? ExpiryOverrideBy = null, int UnitDivisor = 1,
+    long DiscountCents = 0, Guid? PromotionId = null, Guid? PriceOverrideBy = null);
 
+/// <summary>One part of a split sale: cash, card, qr, wallet or voucher. Reference is the wallet purchase or the voucher redemption.</summary>
+public sealed record PaymentPartUpload(string MethodCode, long AmountCents, string? Reference = null, long? TenderedCents = null);
+
+/// <summary>
+/// A sale paid in one way has PaymentMethodCode and, for cash, TenderedCents and ChangeCents. A sale paid in several has PaymentMethodCode "split" and Payments.
+/// TipCents is on top of TotalCents. CustomerId attaches the sale to a customer for loyalty.
+/// </summary>
 public sealed record SaleUpload(
     Guid Id, Guid StaffId, DateTimeOffset SoldAt, string PaymentMethodCode, long TotalCents, long VatCents,
-    long? TenderedCents, long? ChangeCents, Guid? AccountId, List<SaleLineUpload> Lines);
+    long? TenderedCents, long? ChangeCents, Guid? AccountId, List<SaleLineUpload> Lines,
+    List<PaymentPartUpload>? Payments = null, long TipCents = 0, Guid? CustomerId = null);
+
+public sealed record RefundLineUpload(Guid ProductId, int Quantity);
+
+/// <summary>
+/// Goods taken back from a past sale. MethodCode is how the customer was paid back (cash, card, qr or credit); leave it out to go back the way the sale was paid.
+/// ApprovedBy is the manager who approved a refund above the shop's threshold. Refunds to a wallet, voucher or lay-by sale are made online, not synced.
+/// </summary>
+public sealed record RefundUpload(
+    Guid Id, Guid StaffId, Guid SaleId, string Reason, string? MethodCode, Guid? ApprovedBy, List<RefundLineUpload> Lines, DateTimeOffset RefundedAt);
 
 /// <summary>Type is receive, sale, cancel, count or write_off. Quantity is signed.</summary>
 public sealed record StockMovementUpload(
@@ -52,11 +72,12 @@ public sealed record SyncUploadRequest(
     List<ProductUpload>? Products = null,
     List<CreditAccountUpload>? CreditAccounts = null,
     List<CreditEntryUpload>? CreditEntries = null,
-    List<CashUpUpload>? CashUps = null)
+    List<CashUpUpload>? CashUps = null,
+    List<RefundUpload>? Refunds = null)
 {
     public const int MaxRecords = 500;
     public int Count => (Sales?.Count ?? 0) + (StockMovements?.Count ?? 0) + (Cancellations?.Count ?? 0) + (Products?.Count ?? 0)
-        + (CreditAccounts?.Count ?? 0) + (CreditEntries?.Count ?? 0) + (CashUps?.Count ?? 0);
+        + (CreditAccounts?.Count ?? 0) + (CreditEntries?.Count ?? 0) + (CashUps?.Count ?? 0) + (Refunds?.Count ?? 0);
 }
 
 public static class UploadStatus
@@ -66,7 +87,7 @@ public static class UploadStatus
     public const string Rejected = "rejected";
 }
 
-/// <summary>Kind is product, credit_account, sale, stock_movement, cancellation, credit_entry or cash_up. Duplicates were already stored and are safe to drop from the queue.</summary>
+/// <summary>Kind is product, credit_account, sale, stock_movement, cancellation, refund, credit_entry or cash_up. Duplicates were already stored and are safe to drop from the queue.</summary>
 public sealed record UploadRecordResult(string Kind, Guid Id, string Status, string? Code, string? Message);
 
 public sealed record SyncUploadResponse(List<UploadRecordResult> Results);
@@ -107,7 +128,7 @@ public sealed record RequestSlipRequest(Guid ShopId, Guid DeviceId, Guid StaffId
 /// <summary>Status is "shown" (QR) or "queued". Url is the slip link: draw it as the QR code, or it is what the message contains.</summary>
 public sealed record SlipResponse(string Status, string Url);
 
-public sealed record SlipLineView(string Name, int Quantity, long PriceCents);
+public sealed record SlipLineView(string Name, int Quantity, long PriceCents, int UnitDivisor = 1, long DiscountCents = 0);
 
 /// <summary>What the slip link shows. No staff, customer or device details, by design.</summary>
 public sealed record SlipView(string ShopName, string Date, List<SlipLineView> Lines, long TotalCents, long VatCents, string PaymentMethod, bool Cancelled);

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ShopCore.Domain;
+using ShopCore.Domain.Selling;
 using TillKnowIT.Outbox;
 
 namespace ShopCore.Infrastructure.Persistence;
@@ -46,7 +47,37 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.HasKey(x => x.Id);
             e.Property(x => x.PaymentMethodCode).HasMaxLength(50).IsRequired();
             e.HasMany(x => x.Lines).WithOne().HasForeignKey(l => l.SaleId);
+            e.HasMany(x => x.Payments).WithOne().HasForeignKey(p => p.SaleId);
+            e.Property(x => x.TipCents).HasDefaultValue(0L);
+            e.Ignore(x => x.CashCents);
             e.HasIndex(x => new { x.ShopId, x.SoldAt });
+            e.HasIndex(x => x.CustomerId).HasFilter("customer_id IS NOT NULL");
+        });
+
+        b.Entity<SalePayment>(e =>
+        {
+            e.ToTable("sale_payments");
+            e.HasKey(x => new { x.SaleId, x.MethodCode });
+            e.Property(x => x.MethodCode).HasMaxLength(50);
+            e.Property(x => x.Reference).HasMaxLength(100);
+        });
+
+        b.Entity<SaleRefund>(e =>
+        {
+            e.ToTable("sale_refunds");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Reason).HasMaxLength(200).IsRequired();
+            e.Property(x => x.MethodCode).HasMaxLength(20).IsRequired();
+            e.HasMany(x => x.Lines).WithOne().HasForeignKey(l => l.RefundId);
+            e.HasOne<Sale>().WithMany().HasForeignKey(x => x.SaleId);
+            e.HasIndex(x => x.SaleId);
+            e.HasIndex(x => new { x.DeviceId, x.RefundedAt });
+        });
+
+        b.Entity<SaleRefundLine>(e =>
+        {
+            e.ToTable("sale_refund_lines");
+            e.HasKey(x => new { x.RefundId, x.ProductId });
         });
 
         b.Entity<SaleLine>(e =>
@@ -54,6 +85,9 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.ToTable("sale_lines");
             e.HasKey(x => new { x.SaleId, x.ProductId });
             e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.UnitDivisor).HasDefaultValue(1);
+            e.Property(x => x.DiscountCents).HasDefaultValue(0L);
+            e.Ignore(x => x.TotalCents);
         });
 
         b.Entity<SaleCancellation>(e =>
@@ -169,8 +203,11 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
 
         // Movements, cancellations and credit entries are a ledger: deleting a product, sale or account must
         // never erase them. Only a sale's own lines go with the sale.
+        b.ApplyConfigurationsFromAssembly(typeof(ShopCoreDbContext).Assembly);
+
+        var ownedByParent = new[] { typeof(SaleLine), typeof(SalePayment), typeof(SaleRefundLine), typeof(ModifierOptionRow), typeof(LaybyPayment), typeof(VoucherEntry) };
         foreach (var fk in b.Model.GetEntityTypes().SelectMany(t => t.GetForeignKeys())
-                     .Where(f => f.DeleteBehavior == DeleteBehavior.Cascade && f.DeclaringEntityType.ClrType != typeof(SaleLine)))
+                     .Where(f => f.DeleteBehavior == DeleteBehavior.Cascade && !ownedByParent.Contains(f.DeclaringEntityType.ClrType)))
             fk.DeleteBehavior = DeleteBehavior.Restrict;
 
         b.AddOutbox();

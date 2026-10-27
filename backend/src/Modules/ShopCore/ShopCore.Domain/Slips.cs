@@ -93,7 +93,7 @@ public static class SlipToken
     }
 }
 
-public sealed record SlipLine(string Name, int Quantity, long PriceCents);
+public sealed record SlipLine(string Name, int Quantity, long PriceCents, int UnitDivisor = 1, long DiscountCents = 0);
 
 public static class SlipFormatter
 {
@@ -101,7 +101,7 @@ public static class SlipFormatter
 
     /// <summary>"2 x Bread  R36.00", one line per item.</summary>
     public static string Lines(IEnumerable<SlipLine> lines) =>
-        string.Join("\n", lines.Select(l => $"{l.Quantity} x {l.Name}  {Rand(l.PriceCents * l.Quantity)}"));
+        string.Join("\n", lines.Select(l => $"{(l.UnitDivisor == 1000 ? $"{l.Quantity / 1000m:0.000} kg" : l.Quantity.ToString())} x {l.Name}  {Rand(SaleMath.LineTotal(l.PriceCents, l.Quantity, l.UnitDivisor, l.DiscountCents))}"));
 
     public static string Total(long cents) => Rand(cents);
 

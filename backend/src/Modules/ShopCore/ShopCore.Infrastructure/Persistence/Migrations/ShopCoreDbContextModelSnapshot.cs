@@ -448,6 +448,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsAddOn")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_add_on");
+
                     b.Property<int>("LowStockLevel")
                         .HasColumnType("int")
                         .HasColumnName("low_stock_level");
@@ -458,17 +462,33 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
+                    b.Property<Guid?>("ParentProductId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("parent_product_id");
+
                     b.Property<long>("PriceCents")
                         .HasColumnType("bigint")
                         .HasColumnName("price_cents");
+
+                    b.Property<bool>("RequiresSerial")
+                        .HasColumnType("bit")
+                        .HasColumnName("requires_serial");
 
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");
 
+                    b.Property<bool>("SoldByWeight")
+                        .HasColumnType("bit")
+                        .HasColumnName("sold_by_weight");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("VariantLabel")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("variant_label");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
@@ -509,6 +529,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("customer_id");
+
                     b.Property<Guid?>("DeviceId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
@@ -539,6 +563,12 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("till_device_id");
 
+                    b.Property<long>("TipCents")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("tip_cents");
+
                     b.Property<long>("TotalCents")
                         .HasColumnType("bigint")
                         .HasColumnName("total_cents");
@@ -549,6 +579,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_sales");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_sales_customer_id")
+                        .HasFilter("customer_id IS NOT NULL");
 
                     b.HasIndex("ShopId", "SoldAt")
                         .HasDatabaseName("ix_sales_shop_id_sold_at");
@@ -621,6 +655,12 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("cost_cents");
 
+                    b.Property<long>("DiscountCents")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("discount_cents");
+
                     b.Property<Guid?>("ExpiryOverrideBy")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("expiry_override_by");
@@ -635,14 +675,1001 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("price_cents");
 
+                    b.Property<Guid?>("PriceOverrideBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("price_override_by");
+
+                    b.Property<Guid?>("PromotionId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("promotion_id");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("quantity");
+
+                    b.Property<int>("UnitDivisor")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1)
+                        .HasColumnName("unit_divisor");
 
                     b.HasKey("SaleId", "ProductId")
                         .HasName("pk_sale_lines");
 
                     b.ToTable("sale_lines", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.SalePayment", b =>
+                {
+                    b.Property<Guid>("SaleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("sale_id");
+
+                    b.Property<string>("MethodCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("method_code");
+
+                    b.Property<long>("AmountCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_cents");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("reference");
+
+                    b.Property<long?>("TenderedCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("tendered_cents");
+
+                    b.HasKey("SaleId", "MethodCode")
+                        .HasName("pk_sale_payments");
+
+                    b.ToTable("sale_payments", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.FloorTable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Area")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("area");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Seats")
+                        .HasColumnType("int")
+                        .HasColumnName("seats");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id")
+                        .HasName("pk_floor_tables");
+
+                    b.HasIndex("ShopId", "Area", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_floor_tables_shop_id_area_name");
+
+                    b.ToTable("floor_tables", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.GiftVoucher", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("code_hash");
+
+                    b.Property<string>("CodeLast4")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)")
+                        .HasColumnName("code_last4");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<DateOnly?>("ExpiresOn")
+                        .HasColumnType("date")
+                        .HasColumnName("expires_on");
+
+                    b.Property<long>("InitialCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("initial_cents");
+
+                    b.Property<bool>("IsVoid")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_void");
+
+                    b.Property<string>("PaidWithMethod")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("paid_with_method");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_gift_vouchers");
+
+                    b.HasIndex("ShopId", "CodeHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_gift_vouchers_shop_id_code_hash");
+
+                    b.ToTable("gift_vouchers", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.KitchenOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("ItemsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("items_json");
+
+                    b.Property<string>("OrderNo")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)")
+                        .HasColumnName("order_no");
+
+                    b.Property<DateTimeOffset?>("ReadyAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("ready_at");
+
+                    b.Property<Guid?>("SaleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("sale_id");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TableLabel")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("table_label");
+
+                    b.Property<Guid?>("TicketId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ticket_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_kitchen_orders");
+
+                    b.HasIndex("ShopId", "OrderNo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_kitchen_orders_shop_id_order_no");
+
+                    b.HasIndex("ShopId", "Status", "CreatedAt")
+                        .HasDatabaseName("ix_kitchen_orders_shop_id_status_created_at");
+
+                    b.ToTable("kitchen_orders", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.LaybyPayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<long>("AmountCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_cents");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("MethodCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("method_code");
+
+                    b.Property<DateTimeOffset>("PaidAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("paid_at");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("plan_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_layby_payments");
+
+                    b.HasIndex("PlanId")
+                        .HasDatabaseName("ix_layby_payments_plan_id");
+
+                    b.HasIndex("DeviceId", "PaidAt")
+                        .HasDatabaseName("ix_layby_payments_device_id_paid_at");
+
+                    b.ToTable("layby_payments", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.LaybyPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<long>("CancellationFeeCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("cancellation_fee_cents");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("customer_name");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("customer_phone");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<DateOnly>("DueOn")
+                        .HasColumnType("date")
+                        .HasColumnName("due_on");
+
+                    b.Property<string>("LinesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("lines_json");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("reference");
+
+                    b.Property<long>("RefundDueCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("refund_due_cents");
+
+                    b.Property<Guid?>("SaleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("sale_id");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<long>("TotalCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_cents");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_layby_plans");
+
+                    b.HasIndex("ShopId", "Reference")
+                        .IsUnique()
+                        .HasDatabaseName("ix_layby_plans_shop_id_reference");
+
+                    b.HasIndex("Status", "DueOn")
+                        .HasDatabaseName("ix_layby_plans_status_due_on");
+
+                    b.ToTable("layby_plans", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.ModifierGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<int>("Max")
+                        .HasColumnType("int")
+                        .HasColumnName("max");
+
+                    b.Property<int>("Min")
+                        .HasColumnType("int")
+                        .HasColumnName("min");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)")
+                        .HasColumnName("name");
+
+                    b.Property<bool>("Required")
+                        .HasColumnType("bit")
+                        .HasColumnName("required");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_modifier_groups");
+
+                    b.HasIndex("ShopId")
+                        .HasDatabaseName("ix_modifier_groups_shop_id");
+
+                    b.ToTable("modifier_groups", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.ModifierOptionRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("group_id");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id")
+                        .HasName("pk_modifier_options");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_modifier_options_product_id");
+
+                    b.HasIndex("GroupId", "ProductId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_modifier_options_group_id_product_id");
+
+                    b.ToTable("modifier_options", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.OpenTicket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("ClosedSaleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("closed_sale_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<Guid?>("HeldByDeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("held_by_device_id");
+
+                    b.Property<DateTimeOffset?>("HeldUntil")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("held_until");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("label");
+
+                    b.Property<string>("LinesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("lines_json");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("TableId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("table_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_open_tickets");
+
+                    b.HasIndex("ShopId", "Status")
+                        .HasDatabaseName("ix_open_tickets_shop_id_status");
+
+                    b.ToTable("open_tickets", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.ProductModifierGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("group_id");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id")
+                        .HasName("pk_product_modifier_groups");
+
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_product_modifier_groups_group_id");
+
+                    b.HasIndex("ProductId", "GroupId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_product_modifier_groups_product_id_group_id");
+
+                    b.ToTable("product_modifier_groups", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.Promotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<long>("AmountCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_cents");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("Days")
+                        .HasColumnType("int")
+                        .HasColumnName("days");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<DateTimeOffset>("EndsAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("ends_at");
+
+                    b.Property<TimeOnly?>("FromTime")
+                        .HasColumnType("time")
+                        .HasColumnName("from_time");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("ItemsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("items_json");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Percent")
+                        .HasColumnType("int")
+                        .HasColumnName("percent");
+
+                    b.Property<string>("ProductIdsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("product_ids_json");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<DateTimeOffset>("StartsAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("starts_at");
+
+                    b.Property<TimeOnly?>("ToTime")
+                        .HasColumnType("time")
+                        .HasColumnName("to_time");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotions");
+
+                    b.HasIndex("ShopId", "IsActive")
+                        .HasDatabaseName("ix_promotions_shop_id_is_active");
+
+                    b.ToTable("promotions", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.Quote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("CustomerName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("customer_name");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("customer_phone");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<DateOnly>("ExpiresOn")
+                        .HasColumnType("date")
+                        .HasColumnName("expires_on");
+
+                    b.Property<string>("LinesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("lines_json");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("number");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("TicketId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ticket_id");
+
+                    b.Property<long>("TotalCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("total_cents");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_quotes");
+
+                    b.HasIndex("ShopId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_quotes_shop_id_number");
+
+                    b.ToTable("quotes", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.SaleRefund", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<long>("AmountCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_cents");
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("MethodCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("method_code");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTimeOffset>("RefundedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("refunded_at");
+
+                    b.Property<Guid>("SaleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("sale_id");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sale_refunds");
+
+                    b.HasIndex("SaleId")
+                        .HasDatabaseName("ix_sale_refunds_sale_id");
+
+                    b.HasIndex("DeviceId", "RefundedAt")
+                        .HasDatabaseName("ix_sale_refunds_device_id_refunded_at");
+
+                    b.ToTable("sale_refunds", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.SaleRefundLine", b =>
+                {
+                    b.Property<Guid>("RefundId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("refund_id");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("product_id");
+
+                    b.Property<long>("AmountCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_cents");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int")
+                        .HasColumnName("quantity");
+
+                    b.HasKey("RefundId", "ProductId")
+                        .HasName("pk_sale_refund_lines");
+
+                    b.ToTable("sale_refund_lines", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.SerialNumberRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("product_id");
+
+                    b.Property<Guid>("SaleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("sale_id");
+
+                    b.Property<string>("Serial")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("serial");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<DateTimeOffset>("SoldAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("sold_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_serial_numbers");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_serial_numbers_product_id");
+
+                    b.HasIndex("SaleId")
+                        .HasDatabaseName("ix_serial_numbers_sale_id");
+
+                    b.HasIndex("ShopId", "ProductId", "Serial")
+                        .IsUnique()
+                        .HasDatabaseName("ix_serial_numbers_shop_id_product_id_serial");
+
+                    b.ToTable("serial_numbers", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.VoucherEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<long>("AmountCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount_cents");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("reference");
+
+                    b.Property<Guid?>("SaleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("sale_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("type");
+
+                    b.Property<Guid>("VoucherId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("voucher_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_voucher_entries");
+
+                    b.HasIndex("VoucherId", "Reference", "Type")
+                        .HasDatabaseName("ix_voucher_entries_voucher_id_reference_type");
+
+                    b.ToTable("voucher_entries", "shopcore");
                 });
 
             modelBuilder.Entity("ShopCore.Domain.ShopSetting", b =>
@@ -990,6 +2017,100 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_sale_lines_sales_sale_id");
                 });
 
+            modelBuilder.Entity("ShopCore.Domain.SalePayment", b =>
+                {
+                    b.HasOne("ShopCore.Domain.Sale", null)
+                        .WithMany("Payments")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sale_payments_sales_sale_id");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.LaybyPayment", b =>
+                {
+                    b.HasOne("ShopCore.Domain.Selling.LaybyPlan", null)
+                        .WithMany("Payments")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_layby_payments_layby_plans_plan_id");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.ModifierOptionRow", b =>
+                {
+                    b.HasOne("ShopCore.Domain.Selling.ModifierGroup", null)
+                        .WithMany("Options")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_modifier_options_modifier_groups_group_id");
+
+                    b.HasOne("ShopCore.Domain.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_modifier_options_products_product_id");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.ProductModifierGroup", b =>
+                {
+                    b.HasOne("ShopCore.Domain.Selling.ModifierGroup", null)
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_modifier_groups_modifier_groups_group_id");
+
+                    b.HasOne("ShopCore.Domain.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_modifier_groups_products_product_id");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.SaleRefund", b =>
+                {
+                    b.HasOne("ShopCore.Domain.Sale", null)
+                        .WithMany()
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_sale_refunds_sales_sale_id");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.SaleRefundLine", b =>
+                {
+                    b.HasOne("ShopCore.Domain.Selling.SaleRefund", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("RefundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sale_refund_lines_sale_refunds_refund_id");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.SerialNumberRecord", b =>
+                {
+                    b.HasOne("ShopCore.Domain.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_serial_numbers_products_product_id");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.VoucherEntry", b =>
+                {
+                    b.HasOne("ShopCore.Domain.Selling.GiftVoucher", null)
+                        .WithMany("Entries")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_voucher_entries_gift_vouchers_voucher_id");
+                });
+
             modelBuilder.Entity("ShopCore.Domain.SlipRequest", b =>
                 {
                     b.HasOne("ShopCore.Domain.Sale", null)
@@ -1011,6 +2132,28 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("ShopCore.Domain.Sale", b =>
+                {
+                    b.Navigation("Lines");
+
+                    b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.GiftVoucher", b =>
+                {
+                    b.Navigation("Entries");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.LaybyPlan", b =>
+                {
+                    b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.ModifierGroup", b =>
+                {
+                    b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.Selling.SaleRefund", b =>
                 {
                     b.Navigation("Lines");
                 });

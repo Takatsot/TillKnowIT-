@@ -14,13 +14,14 @@ internal static class IdentitySeed
         "sale.create", "sale.cancel", "sale.override_expiry", "slip.send",
         "product.edit", "stock.receive", "stock.count", "credit.manage", "cashup.do",
         "report.view", "compliance.manage", "vas.sell", "credit.payment",
+        "sale.refund", "sale.refund_approve", "sale.price_override",
     ];
 
     public static readonly (string Code, string En, int Sort, string[] Permissions)[] Roles =
     [
         ("owner", "Owner", 1, [.. ShopPermissions, "staff.manage", "device.manage", "shop.settings"]),
         ("manager", "Manager", 2, ShopPermissions),
-        ("cashier", "Cashier", 3, ["sale.create", "slip.send", "cashup.do", "vas.sell", "credit.payment"]),
+        ("cashier", "Cashier", 3, ["sale.create", "slip.send", "cashup.do", "vas.sell", "credit.payment", "sale.refund"]),
         ("field_agent", "Field agent", 4, ["shop.setup", "shop.verify", "staff.manage", "device.manage"]),
         ("platform_admin", "Platform admin", 5, ["catalogue.approve", "lookup.manage", "shop.verify", "user.manage", "supplier.verify", "dispute.resolve", "marketplace.settings", "school.manage", "wallet.admin", "pack.manage"]),
         ("supplier_admin", "Supplier admin", 6, ["supplier.manage", "supplier.catalogue", "supplier.orders", "supplier.reps", "supplier.statements", "deals.manage", "supplier.demand"]),

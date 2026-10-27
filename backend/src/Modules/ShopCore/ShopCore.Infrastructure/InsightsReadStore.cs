@@ -14,11 +14,11 @@ internal sealed class InsightsReadStore(ShopCoreDbContext db) : IInsightsReadSto
             .Where(s => s.ShopId == shopId && s.SoldAt >= from && s.SoldAt <= to)
             .SelectMany(s => s.Lines.Select(l => new
             {
-                SaleId = s.Id, s.SoldAt, l.ProductId, l.Name, l.Quantity, l.PriceCents, l.CostCents,
+                SaleId = s.Id, s.SoldAt, l.ProductId, l.Name, l.Quantity, l.PriceCents, l.CostCents, l.UnitDivisor, l.DiscountCents,
                 Cancelled = db.Set<SaleCancellation>().Any(c => c.SaleId == s.Id),
             }))
             .ToListAsync(ct);
-        return rows.Select(r => new SaleLineRow(r.SaleId, r.SoldAt, r.ProductId, r.Name, r.Quantity, r.PriceCents, r.CostCents, r.Cancelled)).ToList();
+        return rows.Select(r => new SaleLineRow(r.SaleId, r.SoldAt, r.ProductId, r.Name, r.Quantity, r.PriceCents, r.CostCents, r.Cancelled, r.UnitDivisor, r.DiscountCents)).ToList();
     }
 
     public async Task<List<CashUpRow>> CashUps(Guid shopId, DateOnly from, DateOnly to, CancellationToken ct)

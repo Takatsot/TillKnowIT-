@@ -40,6 +40,33 @@ public sealed partial class Product : VersionedEntity
         return product;
     }
 
+    /// <summary>A variant of this product: the same category, with its own label, barcode, price and cost. The parent is not changed.</summary>
+    public static Result<Product> RecordVariant(Product parent, Guid id, Guid staffId, Guid deviceId, string? label, string? barcode, long costCents, long priceCents, DateTimeOffset now)
+    {
+        if (parent.ParentProductId is not null) return Result<Product>.Fail("variant.nested", "A variant cannot have variants of its own.");
+        var cleanLabel = label?.Trim() ?? "";
+        if (cleanLabel.Length is 0 or > 60) return Result<Product>.Fail("variant.label_invalid", "Describe the variant, for example 'M / Blue' (up to 60 characters).");
+
+        var input = Check(new ProductInput(id, parent.ShopId, staffId, deviceId, null, $"{parent.Name} - {cleanLabel}", barcode, parent.CategoryCode, costCents, priceCents,
+            parent.LowStockLevel, null, true, now), now);
+        if (!input.IsSuccess) return Result<Product>.Fail(input.Error!.Code, input.Error.Message);
+
+        var variant = Record(input.Value!);
+        variant.ParentProductId = parent.Id;
+        variant.VariantLabel = cleanLabel;
+        variant.SoldByWeight = parent.SoldByWeight;
+        return Result<Product>.Ok(variant);
+    }
+
+    /// <summary>Flags set by the shop owner in setup. A product that is an add-on or sold by weight stays so until the owner changes it.</summary>
+    public void SetSellingFlags(bool soldByWeight, bool isAddOn, bool requiresSerial = false)
+    {
+        SoldByWeight = soldByWeight;
+        IsAddOn = isAddOn;
+        RequiresSerial = requiresSerial;
+        Touch();
+    }
+
     /// <summary>When this product last changed, by the clock of the device that changed it.</summary>
     public DateTimeOffset LastChangedAt => UpdatedAt ?? CreatedAt;
 
@@ -67,6 +94,24 @@ public sealed partial class Product : VersionedEntity
         ExpiryDate = i.ExpiryDate;
         IsActive = i.IsActive;
     }
+
+    /// <summary>
+    /// B2-1: a variant is a product of its own (own barcode, price, cost and stock) that belongs to a parent product, so the sale flow and stock
+    /// need nothing new to sell one. Null for ordinary products and for the parent itself.
+    /// </summary>
+    public Guid? ParentProductId { get; private set; }
+
+    /// <summary>How a variant differs from its parent, such as "M / Blue".</summary>
+    public string? VariantLabel { get; private set; }
+
+    /// <summary>B2-2: an add-on (cheese, extra shot) that is only sold with another item, so the till keeps it off the main grid.</summary>
+    public bool IsAddOn { get; private set; }
+
+    /// <summary>B6-3: each unit sold has a serial number recorded (a phone, a power tool).</summary>
+    public bool RequiresSerial { get; private set; }
+
+    /// <summary>B4-1: sold by weight. Stock is in grams and the price is per kilogram.</summary>
+    public bool SoldByWeight { get; private set; }
 
     public Guid ShopId { get; private set; }
     public Guid? CatalogueProductId { get; private set; }

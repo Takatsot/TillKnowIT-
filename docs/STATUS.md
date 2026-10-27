@@ -94,21 +94,35 @@ Backend only: the screens (parent app, till wallet payment, photo check) and the
 
 ## Phase 4: every business
 
-Backend and engines only; the screens, hardware adapters and kitchen view are front-end work. Rows are updated as each part lands.
+Backend and engines. The screens, hardware adapters and kitchen view are front-end work; rows are updated as each part lands. Every feature below is switched on by the shop's business pack: a shop on the spaza pack gets "feature.not_enabled" from all of them.
 
 | Story | State | Notes |
 | --- | --- | --- |
-| B1-1 Business packs as data | Done | New Platform module: packs with versioned features and settings, 23 known feature flags, five seeded packs (spaza, cafe, butchery, salon, clothing and hardware). A platform admin creates and edits packs (each edit is a new version) and retires them (the default pack never). |
-| B1-2 Owner chooses a business type | Done | Only the owner; every change recorded; no data is touched, so switching back restores everything. `IShopFeatures` answers "is this feature on?" for the rest of the system; a shop that never chose is on the spaza pack with nothing extra. |
-| B2-3 Promotions and combos (engine) | Engine done | Percent, amount off, fixed price and combos; days, hours (South African time, including windows past midnight) and dates; no stacking, combos fitted first, per-line discounts add up exactly; property-tested over 500 random baskets. Storage and till evaluation come with the selling handlers. |
-| B2-5 Split payments (rules) | Rules done | Parts add up to the total plus tip, each method once, change worked out by the server, credit needs an account, wallet and voucher parts need a reference. |
-| B3-3 Tips (rules) | Rules done | By amount or percentage, half-up, never more than the bill. |
-| B2-2 Modifiers (rules) | Rules done | Required and optional groups, minimum and maximum, prices added; unknown or repeated options refused. |
-| B4-1 Weight pricing | Engine done | Price per kg, tare, half-up rounding. |
-| B4-2 Price-embedded barcodes | Engine done | Rules from the pack settings, EAN-13 check digit, weight or price; ordinary barcodes are left to the normal lookup. |
-| B2-4 Refunds (rules) | Rules done | Never more than was sold less earlier refunds, manager above a threshold, money goes back the way it came (voucher where it cannot). |
+| B1-1 Business packs as data | Done | New Platform module: packs with versioned features and settings, 23 known feature flags, five seeded packs (spaza, cafe, butchery, salon, clothing and hardware). A platform admin creates, edits (each edit is a new version) and retires packs; the default pack is never retired. A brand-new pack works with no code change (tested). |
+| B1-2 Owner chooses a business type | Done | Only the owner; every switch recorded; no product, sale or customer is touched, so switching back restores everything. `IShopFeatures` answers "is this on?" for other modules. |
+| Core stays clean | Done | Architecture tests: the selling core cannot depend on the Platform module (features come through ShopCore's own `IFeatureGate` port) and no pack code may appear as a string anywhere in ShopCore's domain or application code. |
+| B2-1 Variants | Done | A variant is a product of its own under a parent (own barcode, price, cost and stock), so the sale flow and stock needed nothing new; labels and barcodes cannot repeat; a variant follows its parent's way of being sold. |
+| B2-2 Modifiers | Done | Required and optional groups with minimum and maximum; each option is a product (the add-on), so its price and stock are managed like any product; the server prices a choice against the product's groups. |
+| B2-3 Promotions and combos | Done | Percent, amount off, fixed price and combos with days, hours (South African time, past midnight too) and dates; no stacking; the engine runs on the server for previews and a till downloads the promotions to run it locally; per-line discounts add up exactly (property-tested over 500 random baskets). A sale line's discount must be a promotion or a manager's price override, and an override must come from a role that allows it. |
+| B2-4 Refunds | Done | Never more than was sold less earlier refunds, pro rata on what was actually paid; a manager above a threshold (default R500, the shop can set it); the goods go back to stock (Return movement); money goes back the way it came (credit sales reduce the debt); wallet, voucher and lay-by sales are refunded online, where a voucher can be given. Synced from a till or made online; both paths share one set of rules. Cash refunds come out of the expected cash at cash-up. |
+| B2-5 Split payments | Done | Parts add up to the bill plus tip, each method once, change worked out by the server, wallet and voucher parts carry their reference; credit cannot be one of several parts. The cash part counts at cash-up. |
+| B2-6 Open tickets | Done | A till holds a ticket while editing; others see it locked; the hold lapses after 10 minutes; merge, move table, close into a sale, void. |
+| B3-1 Tables | Done | Floor plan replaced by area and name so tables keep their ids; removed tables are retired, never deleted. |
+| B3-2 Kitchen | Done (server) | Orders with per-till order numbers, new, preparing, ready, collected; a list the kitchen screen polls. The kitchen view itself and the 3-second target are front-end and network work. |
+| B3-3 Tips | Done | On top of the bill, by amount or percentage, never more than the bill; in the cash drawer, not in sales figures. Tips report per staff: Todo. |
+| B4-1 Weight | Done | Price per kg, quantity in grams, tare, half-up rounding; a generic unit divisor in the sale arithmetic, used by insights, reports and slips (0.700 kg). Needs a scale adapter in the front end. |
+| B4-2 Price-embedded barcodes | Done | Rules from the pack settings, EAN-13 check digit, weight or price; ordinary barcodes are left to the normal lookup. |
+| B6-1 Quotes | Done | Total worked out on the server, valid up to 90 days, PDF, one tap to an open ticket, expiry. |
+| B6-2 Lay-by | Done | Deposit minimum, maximum term, cancellation fee and minimum fee from the pack settings; payments appended; stock reserved while active or waiting; cancel or expire gives back what was paid less the fee; collected goods are an ordinary sale paid by lay-by; an hourly job expires overdue plans. Lay-by cash counts at cash-up. |
+| B6-3 Serial numbers | Done | Flag on the product; recorded against the sale, never more than were sold, a serial is sold once; searchable. The till enforces entering them. |
+| B7-3 Gift vouchers | Done | Code shown once and only its hash kept; balance from entries; partial redemption; expiry from the pack settings; a repeated redemption takes nothing twice; cash vouchers count at cash-up. Redemption needs a connection. |
+| B7-1 Customer on a sale | Rules in the sale | A sale can carry a customer id (needs the customers feature); the Customers module is next. |
+| B5 Appointments and commission | Todo | Bookings module. |
+| B7-1, B7-2 Customers and loyalty | Todo | Customers module. |
+| B8-1, B8-2 Printer and cash drawer | Todo | Hardware package (front end). |
+| B8-3 Message bundles | Todo | Messaging. |
 
-## Phases 4 (rest) and 5
+## Phase 5
 
 Not started. These tables are filled in as each phase is built.
 

@@ -2,7 +2,7 @@ using TillKnowIT.SharedKernel;
 
 namespace ShopCore.Domain;
 
-public enum StockMovementType { Receive, Sale, Cancel, Count, WriteOff }
+public enum StockMovementType { Receive, Sale, Cancel, Count, WriteOff, Return }
 
 public sealed record StockMovementInput(
     Guid Id, Guid ShopId, Guid ProductId, StockMovementType Type, int Quantity, Guid StaffId, Guid DeviceId,
@@ -24,7 +24,7 @@ public sealed class StockMovement : Entity
 
         var signOk = i.Type switch
         {
-            StockMovementType.Receive or StockMovementType.Cancel => i.Quantity > 0,
+            StockMovementType.Receive or StockMovementType.Cancel or StockMovementType.Return => i.Quantity > 0,
             StockMovementType.Sale or StockMovementType.WriteOff => i.Quantity < 0,
             _ => true,
         };
@@ -33,7 +33,7 @@ public sealed class StockMovement : Entity
 
         if (i.Type is StockMovementType.Count or StockMovementType.WriteOff && string.IsNullOrWhiteSpace(i.ReasonCode))
             return Result<StockMovement>.Fail("stock.reason_required", "Counts and write-offs need a reason.");
-        if (i.Type is StockMovementType.Sale or StockMovementType.Cancel && i.SaleId is null)
+        if (i.Type is StockMovementType.Sale or StockMovementType.Cancel or StockMovementType.Return && i.SaleId is null)
             return Result<StockMovement>.Fail("stock.sale_required", "Sale and cancel movements must point at their sale.");
         if (i.UnitCostCents < 0)
             return Result<StockMovement>.Fail("stock.cost_invalid", "Cost cannot be negative.");

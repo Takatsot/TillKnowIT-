@@ -19,10 +19,10 @@ internal sealed class SlipStore(ShopCoreDbContext db) : ISlipStore
             {
                 s.Id, s.ShopId, s.SoldAt, s.TotalCents, s.VatCents, s.PaymentMethodCode,
                 Cancelled = db.Set<SaleCancellation>().Any(c => c.SaleId == s.Id),
-                Lines = s.Lines.Select(l => new { l.Name, l.Quantity, l.PriceCents }).ToList(),
+                Lines = s.Lines.Select(l => new { l.Name, l.Quantity, l.PriceCents, l.UnitDivisor, l.DiscountCents }).ToList(),
             }).FirstOrDefaultAsync(ct);
         return sale is null ? null : new SlipSale(sale.Id, sale.ShopId, sale.SoldAt, sale.TotalCents, sale.VatCents, sale.PaymentMethodCode, sale.Cancelled,
-            sale.Lines.Select(l => new SlipLine(l.Name, l.Quantity, l.PriceCents)).ToList());
+            sale.Lines.Select(l => new SlipLine(l.Name, l.Quantity, l.PriceCents, l.UnitDivisor, l.DiscountCents)).ToList());
     }
 
     public Task<int> CountRequests(Guid saleId, CancellationToken ct) =>
