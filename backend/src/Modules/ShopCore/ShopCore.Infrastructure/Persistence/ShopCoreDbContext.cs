@@ -130,9 +130,25 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.ToTable("invoice_imports");
             e.HasKey(x => x.Id);
             e.Property(x => x.FileUrl).HasMaxLength(500).IsRequired();
+            e.Property(x => x.FileName).HasMaxLength(200).IsRequired();
+            e.Property(x => x.SupplierName).HasMaxLength(200);
+            e.Property(x => x.Error).HasMaxLength(500);
+            e.Property(x => x.Kind).HasConversion<string>().HasMaxLength(20);
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            e.HasIndex(x => new { x.Status, x.CreatedAt });
             e.Property(x => x.ResultJson).HasColumnType("nvarchar(max)");
             e.Property(x => x.Version).IsConcurrencyToken();
+        });
+
+        b.Entity<ImportMapping>(e =>
+        {
+            e.ToTable("import_mappings");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.SupplierKey).HasMaxLength(200).IsRequired();
+            e.Property(x => x.SupplierName).HasMaxLength(200).IsRequired();
+            e.Property(x => x.MappingJson).HasColumnType("nvarchar(max)").IsRequired();
+            e.Property(x => x.Version).IsConcurrencyToken();
+            e.HasIndex(x => new { x.ShopId, x.SupplierKey }).IsUnique();
         });
 
         b.Entity<VasSale>(e =>

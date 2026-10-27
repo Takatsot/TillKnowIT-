@@ -27,8 +27,8 @@ on the build machine. The first real run is the first item on the hand-over list
 | E3-5 Expired items blocked | Done | Rule on the till; a manager override is kept on the sale line and the server checks the manager's role allows it. |
 | E3-6 Slips on request | Done | QR (signed link, free), WhatsApp, SMS and email through the Messaging module; at most 3 per sale; public slip page shows no staff or customer details. QR image drawing is a till screen. WhatsApp, SMS and email providers are not connected (Port, see Messaging below). |
 | E4-1 Receive stock | Rules | |
-| E4-2 Excel/CSV import | Todo | |
-| E4-3 Invoice reading | Todo | Needs a reading service. |
+| E4-2 Excel/CSV import | Done | Reads .xlsx and .csv (semicolons, comma decimals, Latin-1 handled), guesses columns, remembers the choice per supplier, works cases into units and case price into cost per unit, matches by barcode then name with suggestions, review table, nothing saved until confirmed. |
+| E4-3 Invoice reading | Port | Photo/PDF upload, queueing, the review and confirm flow and the worker are done. The reader itself (OCR or a language model) is not connected: queued invoices fail with a clear message, and a development stand-in exists for trying the flow. Spec asks for a test on 20 real invoices. |
 | E5-1, E5-2 Stock list, counts | Done | |
 | E6-1 Credit book | Done | |
 | E7-1 Cash-up | Done | |

@@ -38,6 +38,11 @@ builder.Services
 // real provider fails visibly rather than pretending to send.
 builder.Services.AddMessageSender();
 builder.Services.AddOwnerNotifications();
-if (builder.Environment.IsDevelopment()) builder.Services.AddMessagingDevProviders();
+builder.Services.AddInvoiceReading();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddMessagingDevProviders();
+    builder.Services.AddDevInvoiceReader();
+}
 
 builder.Build().Run();

@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261027090729_Initial")]
+    [Migration("20261027091550_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -267,6 +267,65 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.ToTable("credit_entries", "shopcore");
                 });
 
+            modelBuilder.Entity("ShopCore.Domain.ImportMapping", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("MappingJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("mapping_json");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<string>("SupplierKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("supplier_key");
+
+                    b.Property<string>("SupplierName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("supplier_name");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_import_mappings");
+
+                    b.HasIndex("ShopId", "SupplierKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_import_mappings_shop_id_supplier_key");
+
+                    b.ToTable("import_mappings", "shopcore");
+                });
+
             modelBuilder.Entity("ShopCore.Domain.InvoiceImport", b =>
                 {
                     b.Property<Guid>("Id")
@@ -286,11 +345,28 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
+                    b.Property<string>("Error")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("error");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("file_name");
+
                     b.Property<string>("FileUrl")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("file_url");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("kind");
 
                     b.Property<string>("ResultJson")
                         .HasColumnType("nvarchar(max)")
@@ -306,6 +382,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("status");
 
+                    b.Property<string>("SupplierName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("supplier_name");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
@@ -317,6 +398,9 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_invoice_imports");
+
+                    b.HasIndex("Status", "CreatedAt")
+                        .HasDatabaseName("ix_invoice_imports_status_created_at");
 
                     b.ToTable("invoice_imports", "shopcore");
                 });

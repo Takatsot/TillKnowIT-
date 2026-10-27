@@ -111,3 +111,25 @@ public sealed record SlipLineView(string Name, int Quantity, long PriceCents);
 
 /// <summary>What the slip link shows. No staff, customer or device details, by design.</summary>
 public sealed record SlipView(string ShopName, string Date, List<SlipLineView> Lines, long TotalCents, long VatCents, string PaymentMethod, bool Cancelled);
+
+/// <summary>
+/// One line of the review table. Quantity is in units and the cost is per unit, so cases are already worked out.
+/// MatchedBy is barcode, name or none; Candidates are suggested products when nothing matched. Issues can be
+/// no_match, ambiguous_name, name_or_barcode_missing, quantity_invalid and cost_missing.
+/// </summary>
+public sealed record StockImportLineResponse(
+    int Row, string Text, string? Barcode, Guid? ProductId, string MatchedBy, List<Guid> Candidates,
+    int Quantity, int? UnitsPerCase, long? UnitCostCents, List<string> Issues);
+
+/// <summary>Status is queued, reading, ready, confirmed or failed. Headers and Mapping are for sheets: the owner can correct the column choices.</summary>
+public sealed record StockImportResponse(
+    Guid Id, string Status, string Kind, string FileName, string? SupplierName, List<string>? Headers, Dictionary<string, string>? Mapping,
+    List<StockImportLineResponse> Lines, string? Error);
+
+public sealed record StartStockImportResponse(Guid ImportId, string Status);
+
+public sealed record ConfirmedLineRequest(Guid ProductId, int Quantity, long? UnitCostCents);
+
+public sealed record ConfirmStockImportRequest(Guid ShopId, Guid DeviceId, Guid StaffId, string? SupplierName, string? InvoiceRef, List<ConfirmedLineRequest> Lines);
+
+public sealed record RemapStockImportRequest(Guid ShopId, Guid DeviceId, Guid StaffId, Dictionary<string, string> Mapping);

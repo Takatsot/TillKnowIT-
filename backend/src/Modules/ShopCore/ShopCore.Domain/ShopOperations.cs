@@ -39,31 +39,6 @@ public sealed class ShopSetting : VersionedEntity
     public string Value { get; private set; } = default!;
 }
 
-public enum ImportStatus { Queued, Reading, Ready, Confirmed, Failed }
-
-public sealed class InvoiceImport : VersionedEntity
-{
-    private InvoiceImport() { }
-
-    public InvoiceImport(Guid shopId, string fileUrl)
-    {
-        ShopId = shopId;
-        FileUrl = fileUrl;
-    }
-
-    public Guid ShopId { get; private set; }
-    public string FileUrl { get; private set; } = default!;
-    public ImportStatus Status { get; private set; } = ImportStatus.Queued;
-    public string? ResultJson { get; private set; }
-
-    public void Complete(string json)
-    {
-        ResultJson = json;
-        Status = ImportStatus.Ready;
-        Touch();
-    }
-}
-
 public enum VasProductType { Airtime, Data, Electricity }
 
 /// <summary>Online only.</summary>

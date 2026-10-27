@@ -72,6 +72,7 @@ public static class ShopCoreEndpoints
 
         ComplianceEndpoints.Map(api);
         SlipEndpoints.Map(api);
+        ImportEndpoints.Map(api);
         return api;
     }
 

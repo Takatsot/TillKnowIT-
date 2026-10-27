@@ -82,15 +82,40 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "import_mappings",
+                schema: "shopcore",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_key = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    supplier_name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    mapping_json = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_import_mappings", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "invoice_imports",
                 schema: "shopcore",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    kind = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     file_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    file_name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    supplier_name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     result_json = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    error = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -384,6 +409,19 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 filter: "sale_id IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "ix_import_mappings_shop_id_supplier_key",
+                schema: "shopcore",
+                table: "import_mappings",
+                columns: new[] { "shop_id", "supplier_key" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_invoice_imports_status_created_at",
+                schema: "shopcore",
+                table: "invoice_imports",
+                columns: new[] { "status", "created_at" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_outbox_messages_occurred_at",
                 schema: "shopcore",
                 table: "outbox_messages",
@@ -457,6 +495,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "credit_entries",
+                schema: "shopcore");
+
+            migrationBuilder.DropTable(
+                name: "import_mappings",
                 schema: "shopcore");
 
             migrationBuilder.DropTable(

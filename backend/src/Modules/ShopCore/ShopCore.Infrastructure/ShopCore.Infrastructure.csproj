@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ShopCore.Application\ShopCore.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Outbox\TillKnowIT.Outbox.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Importing\TillKnowIT.Importing.csproj" />
   </ItemGroup>
 
   <ItemGroup>
