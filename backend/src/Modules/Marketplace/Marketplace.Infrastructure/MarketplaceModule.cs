@@ -1,3 +1,4 @@
+using Marketplace.Application.Offers;
 using Marketplace.Application.Suppliers;
 using Marketplace.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,9 @@ public static class MarketplaceModule
         services.AddScoped<IModuleMigrator, MarketplaceMigrator>();
         services.AddScoped<ISupplierStore, SupplierStore>();
         services.AddScoped<ISupplierProductStore, SupplierProductStore>();
+        services.AddScoped<IDealStore, DealStore>();
+        services.AddScoped<IOfferStore, OfferStore>();
+        services.AddScoped<IShopMarketplaceStore, ShopMarketplaceStore>();
         services.AddDispatching(typeof(ApplyAsSupplier).Assembly);
         return services;
     }

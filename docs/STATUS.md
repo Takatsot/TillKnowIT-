@@ -51,9 +51,9 @@ on the build machine. The first real run is the first item on the hand-over list
 | M1-3 Invite reps | Done | Reps get the supplier-rep role; only someone allowed in that supplier can invite. |
 | M2-1 Supplier catalogue upload | Done | Excel/CSV with column matching, preview then apply, matched to the shared catalogue by barcode, case size, case price, unit price, VAT flag. |
 | M2-2 Areas, days, minimum order, fee | Done | Areas from the municipalities lookup (the eight metros are seeded; admins add more). |
-| M2-3 Deals | Todo | |
-| M3-1 Reorder options | Todo | |
-| M3-2 Sharing settings | Todo | |
+| M2-3 Deals | Done | Discount, free goods and combo deals with dates and areas the supplier serves; sponsored deals are labelled; browse by area. |
+| M3-1 Reorder options | Done | Ranked options per product and an order list: true cost per unit (VAT, deal, delivery), usual supplier first with last price, cheapest marked, margin at the shop's price, ranking weights in settings. Fairness test: with default settings a sponsored offer never outranks a cheaper non-sponsored one (500 random cases). Ratings are not in the ranking yet (M7). |
+| M3-2 Sharing settings | Done | Off, usual or all; off until the owner chooses. Nothing reads it yet: it gates the demand totals (M7-2). |
 | M3-3 Suggested replacement | Todo | Could. |
 | M4-1 to M4-4 Ordering | Todo | |
 | M5-1 to M5-4 Paying suppliers | Todo | Needs a payment partner that can hold money. |

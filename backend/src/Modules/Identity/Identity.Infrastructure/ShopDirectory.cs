@@ -11,7 +11,7 @@ internal sealed class ShopDirectory(IdentityDbContext db) : IShopDirectory
     {
         var shop = await db.Organisations.AsNoTracking()
             .Where(o => o.Id == shopId && o.Type == OrganisationType.Shop)
-            .Select(o => new { o.Id, o.Name, o.Status })
+            .Select(o => new { o.Id, o.Name, o.Status, o.MunicipalityCode })
             .FirstOrDefaultAsync(ct);
         if (shop is null) return null;
 
@@ -23,7 +23,7 @@ internal sealed class ShopDirectory(IdentityDbContext db) : IShopDirectory
                            orderby m.CreatedAt
                            select new { p.Id, p.Phone, p.Email, p.PreferredLanguage }).FirstOrDefaultAsync(ct);
 
-        return new ShopInfo(shop.Id, shop.Name, shop.Status.ToString().ToLowerInvariant(), owner?.Id, owner?.Phone, owner?.Email, owner?.PreferredLanguage ?? "en");
+        return new ShopInfo(shop.Id, shop.Name, shop.Status.ToString().ToLowerInvariant(), owner?.Id, owner?.Phone, owner?.Email, owner?.PreferredLanguage ?? "en", shop.MunicipalityCode);
     }
 
     public Task<List<Guid>> VerifiedShopIds(CancellationToken ct) =>

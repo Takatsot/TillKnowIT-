@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Marketplace.Application.Offers;
 using Marketplace.Application.Suppliers;
 using Marketplace.Contracts;
 using Microsoft.AspNetCore.Builder;
@@ -61,6 +62,34 @@ public static class MarketplaceEndpoints
         }).DisableAntiforgery().WithMetadata(new RequestSizeLimitAttribute(6 * 1024 * 1024));
 
         api.MapGet("/suppliers/{id:guid}/products", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListSupplierProducts(id, callerPersonId), ct)));
+
+        api.MapPost("/suppliers/{id:guid}/deals", async (Guid id, CreateDealRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new CreateDeal(id, req), ct);
+            return result.IsSuccess ? Results.Created($"/api/v1/deals/{result.Value!.Id}", result.Value) : Problem(result.Error!);
+        });
+
+        api.MapPatch("/deals/{id:guid}/cancel", async (Guid id, CancelDealRequest req, IDispatcher d, CancellationToken ct) => Done(await d.Send(new CancelDeal(id, req), ct)));
+
+        api.MapGet("/suppliers/{id:guid}/deals", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListSupplierDeals(id, callerPersonId), ct)));
+
+        api.MapGet("/deals", async (string area, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new BrowseDeals(area), ct)));
+
+        api.MapGet("/shops/{shopId:guid}/offers", async (Guid shopId, Guid product, Guid callerPersonId, IDispatcher d, CancellationToken ct) =>
+            Reply(await d.Ask(new GetOffers(shopId, callerPersonId, product), ct)));
+
+        api.MapGet("/shops/{shopId:guid}/order-list", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) =>
+            Reply(await d.Ask(new GetOrderList(shopId, callerPersonId), ct)));
+
+        api.MapPut("/shops/{shopId:guid}/sharing", async (Guid shopId, SetSharingRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new SetSharing(shopId, req), ct)));
+
+        api.MapGet("/shops/{shopId:guid}/sharing", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetSharing(shopId, callerPersonId), ct)));
+
+        api.MapPut("/shops/{shopId:guid}/usual-suppliers", async (Guid shopId, SetUsualSupplierRequest req, IDispatcher d, CancellationToken ct) => Done(await d.Send(new SetUsualSupplier(shopId, req), ct)));
+
+        api.MapGet("/admin/marketplace/settings", async (Guid adminPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetMarketplaceSettings(adminPersonId), ct)));
+
+        api.MapPut("/admin/marketplace/settings/{key}", async (string key, SaveMarketplaceSettingRequest req, IDispatcher d, CancellationToken ct) => Done(await d.Send(new SaveMarketplaceSetting(key, req), ct)));
 
         api.MapPatch("/supplier-products/{id:guid}", async (Guid id, UpdateSupplierProductRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new UpdateSupplierProduct(id, req), ct)));
 

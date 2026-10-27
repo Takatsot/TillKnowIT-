@@ -198,6 +198,25 @@ public sealed class SupplierArea : Entity
         return true;
     }
 
+    /// <summary>
+    /// How many days until the next delivery day, counting from tomorrow (an order placed today cannot arrive today).
+    /// With no delivery days at all it says 7, the longest wait there can be.
+    /// </summary>
+    public static int DaysUntilNext(DeliveryDays days, DateOnly today)
+    {
+        for (var i = 1; i <= 7; i++)
+        {
+            var day = today.AddDays(i).DayOfWeek switch
+            {
+                DayOfWeek.Monday => DeliveryDays.Mon, DayOfWeek.Tuesday => DeliveryDays.Tue, DayOfWeek.Wednesday => DeliveryDays.Wed,
+                DayOfWeek.Thursday => DeliveryDays.Thu, DayOfWeek.Friday => DeliveryDays.Fri, DayOfWeek.Saturday => DeliveryDays.Sat,
+                _ => DeliveryDays.Sun,
+            };
+            if (days.HasFlag(day)) return i;
+        }
+        return 7;
+    }
+
     public static IReadOnlyList<string> DayNames(DeliveryDays days) =>
         Enum.GetValues<DeliveryDays>().Where(d => d != DeliveryDays.None && days.HasFlag(d)).Select(d => d.ToString()).ToList();
 }

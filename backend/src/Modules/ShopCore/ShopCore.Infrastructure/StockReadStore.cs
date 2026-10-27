@@ -17,7 +17,7 @@ internal sealed class StockReadStore(ShopCoreDbContext db) : IStockReadStore
             .Where(p => p.ShopId == shopId && p.IsActive)
             .Select(p => new
             {
-                p.Id, p.Name, p.Barcode, p.IsActive, p.CreatedAt, p.LowStockLevel, p.ExpiryDate,
+                p.Id, p.Name, p.Barcode, p.IsActive, p.CreatedAt, p.LowStockLevel, p.ExpiryDate, p.PriceCents,
                 OnHand = db.StockMovements.Where(m => m.ProductId == p.Id).Sum(m => (int?)m.Quantity) ?? 0,
                 Sold = db.StockMovements
                     .Where(m => m.ProductId == p.Id && m.CreatedAt >= since && (m.Type == StockMovementType.Sale || m.Type == StockMovementType.Cancel))
@@ -30,7 +30,7 @@ internal sealed class StockReadStore(ShopCoreDbContext db) : IStockReadStore
 
         return rows
             .Select(r => new StockItem(r.Id, r.Name, r.Barcode, r.IsActive, r.CreatedAt, r.OnHand, r.LowStockLevel, r.ExpiryDate,
-                Math.Max(r.Sold, 0), r.LastSoldAt))
+                Math.Max(r.Sold, 0), r.LastSoldAt, r.PriceCents))
             .ToList();
     }
 }

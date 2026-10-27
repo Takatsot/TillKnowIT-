@@ -11,9 +11,9 @@ public sealed class Organisation : VersionedEntity
 {
     private Organisation() { }
 
-    public static Organisation CreateShop(string name, Guid ownerPersonId)
+    public static Organisation CreateShop(string name, Guid ownerPersonId, string? municipalityCode = null)
     {
-        var shop = new Organisation { Type = OrganisationType.Shop, Name = name, Status = OrganisationStatus.Pending };
+        var shop = new Organisation { Type = OrganisationType.Shop, Name = name, Status = OrganisationStatus.Pending, MunicipalityCode = municipalityCode };
         shop.Raise(new ShopCreated(shop.Id, ownerPersonId, name));
         return shop;
     }
@@ -23,6 +23,15 @@ public sealed class Organisation : VersionedEntity
         new() { Type = OrganisationType.Supplier, Name = name.Trim(), Status = OrganisationStatus.Pending };
 
     public OrganisationType Type { get; private set; }
+
+    /// <summary>Where the shop trades, from the municipalities lookup. Suppliers deliver by municipality, so offers need it.</summary>
+    public string? MunicipalityCode { get; private set; }
+
+    public void MoveTo(string municipalityCode)
+    {
+        MunicipalityCode = municipalityCode;
+        Touch();
+    }
     public string Name { get; private set; } = default!;
     public OrganisationStatus Status { get; private set; }
 

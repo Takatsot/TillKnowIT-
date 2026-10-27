@@ -2,7 +2,7 @@ namespace ShopCore.Domain;
 
 public sealed record StockItem(
     Guid ProductId, string Name, string? Barcode, bool IsActive, DateTimeOffset AddedAt,
-    int OnHand, int LowStockLevel, DateOnly? ExpiryDate, int SoldLast30Days, DateTimeOffset? LastSoldAt);
+    int OnHand, int LowStockLevel, DateOnly? ExpiryDate, int SoldLast30Days, DateTimeOffset? LastSoldAt, long PriceCents = 0);
 
 public enum StockFilter { All, RunningLow, Out, NotSelling, Expiring }
 

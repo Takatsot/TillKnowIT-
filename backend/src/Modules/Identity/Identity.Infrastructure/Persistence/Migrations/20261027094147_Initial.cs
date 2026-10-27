@@ -23,6 +23,7 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    municipality_code = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -287,6 +288,7 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     { "catalogue.approve", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "dispute.resolve", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "lookup.manage", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
+                    { "marketplace.settings", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "shop.verify", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "supplier.verify", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "user.manage", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") }

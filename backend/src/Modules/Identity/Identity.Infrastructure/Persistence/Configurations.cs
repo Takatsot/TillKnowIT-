@@ -29,6 +29,7 @@ internal sealed class OrganisationConfiguration : IEntityTypeConfiguration<Organ
         b.Property(x => x.Type).HasConversion<string>().HasMaxLength(20);
         b.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         b.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        b.Property(x => x.MunicipalityCode).HasMaxLength(20);
         b.Property(x => x.Version).IsConcurrencyToken();
     }
 }

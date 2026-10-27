@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20261027093047_Initial")]
+    [Migration("20261027094147_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -180,6 +180,11 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("DeviceId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
+
+                    b.Property<string>("MunicipalityCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("municipality_code");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -761,6 +766,11 @@ namespace Identity.Infrastructure.Persistence.Migrations
                                 {
                                     RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
                                     PermissionCode = "dispute.resolve"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "marketplace.settings"
                                 },
                                 new
                                 {

@@ -13,7 +13,7 @@ public interface IShopStore
     Task Save(CancellationToken ct);
 }
 
-internal sealed class CreateShopHandler(IShopStore store) : ICommandHandler<CreateShop, Guid>
+internal sealed class CreateShopHandler(IShopStore store, Catalogue.Contracts.ILookupChecker lookups) : ICommandHandler<CreateShop, Guid>
 {
     public async Task<Result<Guid>> Handle(CreateShop command, CancellationToken ct)
     {
@@ -22,8 +22,16 @@ internal sealed class CreateShopHandler(IShopStore store) : ICommandHandler<Crea
         if (!await store.PersonExists(command.OwnerPersonId, ct))
             return Result<Guid>.Fail("person.not_found", "Owner not found.");
 
+        string? municipality = null;
+        if (!string.IsNullOrWhiteSpace(command.Area))
+        {
+            municipality = command.Area.Trim();
+            if (!await lookups.IsActive("municipalities", municipality, ct))
+                return Result<Guid>.Fail("shop.area_invalid", "That area is not one we know. Choose your municipality from the list.");
+        }
+
         // Status starts as pending until a field agent verifies the shop.
-        var shop = Organisation.CreateShop(command.Name.Trim(), command.OwnerPersonId);
+        var shop = Organisation.CreateShop(command.Name.Trim(), command.OwnerPersonId, municipality);
         await store.Add(shop, ct);
         await store.Save(ct);
         return Result<Guid>.Ok(shop.Id);

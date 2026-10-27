@@ -146,3 +146,17 @@ public sealed record VasSaleRequest(
 /// support first. Token is the electricity token to give the customer.
 /// </summary>
 public sealed record VasSaleResponse(Guid Id, string Status, long AmountCents, long CommissionCents, string? PartnerRef, string? Token, string? Message);
+
+/// <summary>What the marketplace needs to know about one of a shop's products. SuggestedOrderQuantity is in units, for two weeks of selling.</summary>
+public sealed record ShopProductInfo(
+    Guid ProductId, string Name, string? Barcode, long PriceCents, int OnHand, int LowStockLevel, DateOnly? ExpiryDate,
+    int? DaysLeft, int SuggestedOrderQuantity, List<string> Flags);
+
+/// <summary>Lets the marketplace ask about a shop's stock without reading ShopCore's tables.</summary>
+public interface IShopStockInfo
+{
+    Task<ShopProductInfo?> GetProduct(Guid shopId, Guid productId, CancellationToken ct);
+
+    /// <summary>Products that are running low, out but still selling, or expiring: the ones worth reordering. Soonest to run out first.</summary>
+    Task<List<ShopProductInfo>> NeedingReorder(Guid shopId, CancellationToken ct);
+}

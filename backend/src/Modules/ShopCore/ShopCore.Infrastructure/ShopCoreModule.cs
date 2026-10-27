@@ -12,6 +12,7 @@ using ShopCore.Application.Vas;
 using ShopCore.Application.Insights;
 using ShopCore.Application.Reports;
 using ShopCore.Application.Stock;
+using ShopCore.Contracts;
 using ShopCore.Application.Sync;
 using TillKnowIT.Dispatching;
 using ShopCore.Infrastructure.Persistence;
@@ -49,6 +50,7 @@ public static class ShopCoreModule
         services.AddScoped<IUploadStore, UploadStore>();
         services.AddScoped<ICreditReadStore, CreditReadStore>();
         services.AddScoped<IStockReadStore, StockReadStore>();
+        services.AddScoped<IShopStockInfo, ShopStockInfo>();
         services.AddScoped<IComplianceStore, ComplianceStore>();
         services.AddScoped<ISlipStore, SlipStore>();
         services.AddScoped<IVasStore, VasStore>();

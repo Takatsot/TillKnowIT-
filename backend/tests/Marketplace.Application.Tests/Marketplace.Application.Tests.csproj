@@ -26,6 +26,7 @@
     <ProjectReference Include="..\..\src\Modules\Identity\Identity.Contracts\Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Modules\Catalogue\Catalogue.Contracts\Catalogue.Contracts.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\TillKnowIT.Importing\TillKnowIT.Importing.csproj" />
+    <ProjectReference Include="..\..\src\Modules\ShopCore\ShopCore.Contracts\ShopCore.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

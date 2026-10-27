@@ -8,6 +8,7 @@
     <ProjectReference Include="..\..\Catalogue\Catalogue.Contracts\Catalogue.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Importing\TillKnowIT.Importing.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Reporting\TillKnowIT.Reporting.csproj" />
+    <ProjectReference Include="..\..\ShopCore\ShopCore.Contracts\ShopCore.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
