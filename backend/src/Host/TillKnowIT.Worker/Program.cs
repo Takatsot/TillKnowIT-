@@ -9,11 +9,14 @@ using Messaging.Infrastructure.Persistence;
 using ShopCore.Infrastructure;
 using ShopCore.Infrastructure.Persistence;
 using TillKnowIT.Outbox;
+using TillKnowIT.Storage;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 var db = builder.Configuration.GetConnectionString("Database")
          ?? throw new InvalidOperationException("ConnectionStrings:Database is not set.");
+
+builder.Services.AddEncryptedLocalFileStore(builder.Configuration["Storage:Root"], builder.Configuration["Storage:Key"]);
 
 // Same modules as the API, so event handlers in any module can run in the worker.
 builder.Services

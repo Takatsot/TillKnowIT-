@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using ShopCore.Application.Compliance;
 using ShopCore.Application.Credit;
 using ShopCore.Application.Insights;
 using ShopCore.Application.Reports;
@@ -26,6 +27,7 @@ public static class ShopCoreModule
         services.AddScoped<IUploadStore, UploadStore>();
         services.AddScoped<ICreditReadStore, CreditReadStore>();
         services.AddScoped<IStockReadStore, StockReadStore>();
+        services.AddScoped<IComplianceStore, ComplianceStore>();
         services.AddScoped<IInsightsReadStore, InsightsReadStore>();
         services.AddScoped<IReportReadStore, InsightsReadStore>();
         services.TryAddSingleton(TimeProvider.System);

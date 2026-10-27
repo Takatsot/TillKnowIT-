@@ -94,3 +94,8 @@ public sealed record BestSellerResponse(Guid ProductId, string Name, int Units, 
 public sealed record InsightsResponse(
     PeriodSummaryResponse Today, PeriodSummaryResponse Week, PeriodSummaryResponse Month,
     List<BestSellerResponse> BestSellers, List<StockRow> RunningLow, List<StockRow> NotSelling, List<StockRow> Expiring);
+
+/// <summary>Status is "valid", "expiring_soon" (30 days or less) or "expired". Documents with no expiry are always valid.</summary>
+public sealed record ComplianceDocumentResponse(Guid Id, string TypeCode, string FileName, DateOnly? ExpiresOn, int? DaysLeft, string Status);
+
+public sealed record DueComplianceReminder(Guid ShopId, Guid DocumentId, string TypeCode, DateOnly? ExpiresOn, int Reminder, string DedupeKey);

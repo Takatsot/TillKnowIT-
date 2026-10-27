@@ -47,6 +47,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     type_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     file_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    original_name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     expires_on = table.Column<DateOnly>(type: "date", nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),

@@ -4,12 +4,14 @@ using Marketplace.Infrastructure;
 using Messaging.Infrastructure;
 using ShopCore.Infrastructure;
 using TillKnowIT.SharedKernel;
+using TillKnowIT.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var db = builder.Configuration.GetConnectionString("Database")
          ?? throw new InvalidOperationException("ConnectionStrings:Database is not set.");
 
+builder.Services.AddEncryptedLocalFileStore(builder.Configuration["Storage:Root"], builder.Configuration["Storage:Key"]);
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services

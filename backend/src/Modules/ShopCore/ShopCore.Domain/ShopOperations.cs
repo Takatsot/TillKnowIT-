@@ -42,24 +42,6 @@ public sealed class SlipRequest : Entity
     public string Status { get; private set; } = "queued";
 }
 
-public sealed class ComplianceDocument : VersionedEntity
-{
-    private ComplianceDocument() { }
-
-    public ComplianceDocument(Guid shopId, string typeCode, string fileUrl, DateOnly? expiresOn)
-    {
-        ShopId = shopId;
-        TypeCode = typeCode;
-        FileUrl = fileUrl;
-        ExpiresOn = expiresOn;
-    }
-
-    public Guid ShopId { get; private set; }
-    public string TypeCode { get; private set; } = default!;
-    public string FileUrl { get; private set; } = default!;
-    public DateOnly? ExpiresOn { get; private set; }
-}
-
 public sealed class ShopSetting : VersionedEntity
 {
     private ShopSetting() { }

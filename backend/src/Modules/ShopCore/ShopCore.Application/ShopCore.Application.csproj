@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Identity\Identity.Contracts\Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Reporting\TillKnowIT.Reporting.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Storage\TillKnowIT.Storage.csproj" />
     <ProjectReference Include="..\..\Catalogue\Catalogue.Contracts\Catalogue.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>

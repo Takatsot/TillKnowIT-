@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261027080851_Initial")]
+    [Migration("20261027084741_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -120,6 +120,12 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("file_url");
+
+                    b.Property<string>("OriginalName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("original_name");
 
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier")

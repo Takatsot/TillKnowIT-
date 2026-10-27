@@ -118,6 +118,12 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("file_url");
 
+                    b.Property<string>("OriginalName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("original_name");
+
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("shop_id");

@@ -110,6 +110,7 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.HasKey(x => x.Id);
             e.Property(x => x.TypeCode).HasMaxLength(50).IsRequired();
             e.Property(x => x.FileUrl).HasMaxLength(500).IsRequired();
+            e.Property(x => x.OriginalName).HasMaxLength(200).IsRequired();
             e.Property(x => x.Version).IsConcurrencyToken();
             e.HasIndex(x => x.ExpiresOn);
         });

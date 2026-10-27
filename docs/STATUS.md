@@ -34,7 +34,7 @@ on the build machine. The first real run is the first item on the hand-over list
 | E7-1 Cash-up | Done | |
 | E8-1, E8-2 Insights | Done | Server endpoint and the same rules in TypeScript for offline use. Screens not built. |
 | E8-3 Reports and export | Partly | Five reports as CSV, Excel and PDF (own PDF writer, no library licence). Reports are LINQ queries, not T-SQL functions, and run immediately; background jobs for very large reports are not built. |
-| E9-1 Compliance documents | Todo | |
+| E9-1 Compliance documents | Partly | Upload (JPEG/PNG/PDF, 10 MB, content checked), AES-256-GCM encrypted storage, list with status, download, delete, and the 30-day / 7-day / expired reminder rules. Sending the reminders waits for the Messaging module (next). Local encrypted disk store; Azure Blob adapter not written. |
 | E10-1 Airtime and electricity | Todo | Needs a licensed partner. |
 | E11-1, E11-2 Summary and alerts | Todo | |
 | E12-1 Six languages | Partly | Structure and English done; translations need translators. |

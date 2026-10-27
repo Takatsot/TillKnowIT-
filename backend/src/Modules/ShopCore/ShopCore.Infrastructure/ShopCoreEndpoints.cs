@@ -70,6 +70,7 @@ public static class ShopCoreEndpoints
                 : Problem(result.Error!.Code, result.Error.Message, StatusCodes.Status422UnprocessableEntity);
         });
 
+        ComplianceEndpoints.Map(api);
         return api;
     }
 
