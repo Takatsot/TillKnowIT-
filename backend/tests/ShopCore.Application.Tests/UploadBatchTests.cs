@@ -8,11 +8,11 @@ using TillKnowIT.SharedKernel;
 
 namespace ShopCore.Application.Tests;
 
-public class UploadBatchTests
+public partial class UploadBatchTests
 {
     private static readonly DateTimeOffset Now = new(2026, 10, 26, 10, 0, 0, TimeSpan.Zero);
 
-    private sealed class FakeStore : IUploadStore
+    private sealed partial class FakeStore : IUploadStore
     {
         public HashSet<Guid> Products { get; } = [];
         public Dictionary<Guid, Dictionary<Guid, int>> Sold { get; } = [];

@@ -8,6 +8,26 @@ public sealed record ProductUpload(
     Guid Id, Guid StaffId, Guid? CatalogueProductId, string Name, string? Barcode, string CategoryCode,
     long CostCents, long PriceCents, int LowStockLevel, DateOnly? ExpiryDate, bool IsActive, DateTimeOffset UpdatedAt);
 
+/// <summary>A credit customer. Like products, the later UpdatedAt wins when two devices edit the same customer.</summary>
+public sealed record CreditAccountUpload(
+    Guid Id, Guid StaffId, string Name, string? Phone, long? CreditLimitCents, DateTimeOffset UpdatedAt);
+
+/// <summary>
+/// Type is sale, payment or cancel. AmountCents is signed: a credit sale is positive, a payment or a cancelled
+/// credit sale is negative. PaymentMethodCode (cash, card or qr) is only for payments.
+/// </summary>
+public sealed record CreditEntryUpload(
+    Guid Id, Guid StaffId, Guid AccountId, string Type, long AmountCents, Guid? SaleId, string? PaymentMethodCode,
+    DateTimeOffset CreatedAt);
+
+/// <summary>
+/// End-of-day cash-up. ExpectedCents is what the till worked out; the server works it out again from its own
+/// records and keeps its own figure, so over or short is always based on data that really synced.
+/// </summary>
+public sealed record CashUpUpload(
+    Guid Id, Guid StaffId, DateOnly Day, long FloatCents, long ExpectedCents, long CountedCents, string? Note,
+    DateTimeOffset CashedUpAt);
+
 public sealed record SaleLineUpload(Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents);
 
 public sealed record SaleUpload(
@@ -28,10 +48,14 @@ public sealed record SaleCancellationUpload(Guid Id, Guid StaffId, Guid SaleId, 
 public sealed record SyncUploadRequest(
     Guid ShopId, Guid DeviceId,
     List<SaleUpload>? Sales, List<StockMovementUpload>? StockMovements, List<SaleCancellationUpload>? Cancellations,
-    List<ProductUpload>? Products = null)
+    List<ProductUpload>? Products = null,
+    List<CreditAccountUpload>? CreditAccounts = null,
+    List<CreditEntryUpload>? CreditEntries = null,
+    List<CashUpUpload>? CashUps = null)
 {
     public const int MaxRecords = 500;
-    public int Count => (Sales?.Count ?? 0) + (StockMovements?.Count ?? 0) + (Cancellations?.Count ?? 0) + (Products?.Count ?? 0);
+    public int Count => (Sales?.Count ?? 0) + (StockMovements?.Count ?? 0) + (Cancellations?.Count ?? 0) + (Products?.Count ?? 0)
+        + (CreditAccounts?.Count ?? 0) + (CreditEntries?.Count ?? 0) + (CashUps?.Count ?? 0);
 }
 
 public static class UploadStatus
@@ -41,10 +65,15 @@ public static class UploadStatus
     public const string Rejected = "rejected";
 }
 
-/// <summary>Kind is product, sale, stock_movement or cancellation. Duplicates were already stored and are safe to drop from the queue.</summary>
+/// <summary>Kind is product, credit_account, sale, stock_movement, cancellation, credit_entry or cash_up. Duplicates were already stored and are safe to drop from the queue.</summary>
 public sealed record UploadRecordResult(string Kind, Guid Id, string Status, string? Code, string? Message);
 
 public sealed record SyncUploadResponse(List<UploadRecordResult> Results);
 
 /// <summary>Create or edit one product from the back office or a till that is online. The device must be an approved device of the shop.</summary>
 public sealed record SaveProductRequest(Guid ShopId, Guid DeviceId, ProductUpload Product);
+
+/// <summary>A credit customer with what they owe. OverLimit only warns; it never stops a sale.</summary>
+public sealed record CreditAccountBalance(Guid Id, string Name, string? Phone, long? CreditLimitCents, long BalanceCents, bool OverLimit);
+
+public sealed record CreditHistoryEntry(Guid Id, string Type, long AmountCents, Guid? SaleId, string? PaymentMethodCode, DateTimeOffset CreatedAt);

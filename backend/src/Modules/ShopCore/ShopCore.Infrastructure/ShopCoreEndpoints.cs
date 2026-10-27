@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using ShopCore.Application.Credit;
 using ShopCore.Application.Sync;
 using ShopCore.Contracts;
 using TillKnowIT.Dispatching;
@@ -29,6 +30,20 @@ public static class ShopCoreEndpoints
             req.Product.Id != id
                 ? Task.FromResult(Problem("product.id_mismatch", "The product id in the body does not match the address.", StatusCodes.Status422UnprocessableEntity))
                 : SaveProduct(req, d, created: false, ct));
+
+        api.MapGet("/shops/{shopId:guid}/credit-accounts", async (Guid shopId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new ListCreditAccounts(shopId), ct);
+            return Results.Ok(result.Value);
+        });
+
+        api.MapGet("/shops/{shopId:guid}/credit-accounts/{accountId:guid}/entries", async (Guid shopId, Guid accountId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new GetCreditHistory(shopId, accountId), ct);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : Problem(result.Error!.Code, result.Error.Message, StatusCodes.Status404NotFound);
+        });
 
         return api;
     }

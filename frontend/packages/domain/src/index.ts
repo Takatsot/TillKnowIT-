@@ -4,3 +4,5 @@ export * from "./sale";
 export * from "./stock";
 export * from "./pin";
 export * from "./product";
+export * from "./credit";
+export * from "./cashup";

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using ShopCore.Application.Credit;
 using ShopCore.Application.Sync;
 using TillKnowIT.Dispatching;
 using ShopCore.Infrastructure.Persistence;
@@ -20,6 +21,7 @@ public static class ShopCoreModule
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, ShopCoreMigrator>();
         services.AddScoped<IUploadStore, UploadStore>();
+        services.AddScoped<ICreditReadStore, CreditReadStore>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddDispatching(typeof(UploadBatch).Assembly);
         return services;

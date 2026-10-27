@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261026133655_Initial")]
+    [Migration("20261027080851_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -32,6 +32,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CashedUpAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("cashed_up_at");
 
                     b.Property<long>("CountedCents")
                         .HasColumnType("bigint")
@@ -228,6 +232,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
+                    b.Property<string>("PaymentMethodCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("payment_method_code");
+
                     b.Property<Guid?>("SaleId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
@@ -243,6 +252,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("AccountId")
                         .HasDatabaseName("ix_credit_entries_account_id");
+
+                    b.HasIndex("SaleId", "Type")
+                        .IsUnique()
+                        .HasDatabaseName("ix_credit_entries_sale_id_type")
+                        .HasFilter("sale_id IS NOT NULL");
 
                     b.ToTable("credit_entries", "shopcore");
                 });

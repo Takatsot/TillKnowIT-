@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20261026132955_Initial")]
+    [Migration("20261027080902_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -535,6 +535,11 @@ namespace Identity.Infrastructure.Persistence.Migrations
                                 new
                                 {
                                     RoleId = new Guid("63135645-6d68-f7b8-72e0-710926a3c998"),
+                                    PermissionCode = "credit.payment"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("63135645-6d68-f7b8-72e0-710926a3c998"),
                                     PermissionCode = "staff.manage"
                                 },
                                 new
@@ -609,6 +614,11 @@ namespace Identity.Infrastructure.Persistence.Migrations
                                 },
                                 new
                                 {
+                                    RoleId = new Guid("bbdebcea-b24c-c7e1-9d0d-583dfcf15005"),
+                                    PermissionCode = "credit.payment"
+                                },
+                                new
+                                {
                                     RoleId = new Guid("df96efb0-9ce8-44d4-6592-1fe7d95bb4ad"),
                                     PermissionCode = "sale.create"
                                 },
@@ -626,6 +636,11 @@ namespace Identity.Infrastructure.Persistence.Migrations
                                 {
                                     RoleId = new Guid("df96efb0-9ce8-44d4-6592-1fe7d95bb4ad"),
                                     PermissionCode = "vas.sell"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("df96efb0-9ce8-44d4-6592-1fe7d95bb4ad"),
+                                    PermissionCode = "credit.payment"
                                 },
                                 new
                                 {

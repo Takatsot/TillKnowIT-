@@ -90,6 +90,8 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.ToTable("credit_entries");
             e.HasKey(x => x.Id);
             e.Property(x => x.Type).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.PaymentMethodCode).HasMaxLength(50);
+            e.HasIndex(x => new { x.SaleId, x.Type }).IsUnique().HasFilter("sale_id IS NOT NULL");
             e.HasOne<CreditAccount>().WithMany().HasForeignKey(x => x.AccountId);
             e.HasIndex(x => x.AccountId);
         });

@@ -28,6 +28,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     counted_cents = table.Column<long>(type: "bigint", nullable: false),
                     difference_cents = table.Column<long>(type: "bigint", nullable: false),
                     note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    cashed_up_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -221,6 +222,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     amount_cents = table.Column<long>(type: "bigint", nullable: false),
                     sale_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    payment_method_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -369,6 +371,14 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 table: "credit_entries",
                 column: "account_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_credit_entries_sale_id_type",
+                schema: "shopcore",
+                table: "credit_entries",
+                columns: new[] { "sale_id", "type" },
+                unique: true,
+                filter: "sale_id IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "ix_outbox_messages_occurred_at",

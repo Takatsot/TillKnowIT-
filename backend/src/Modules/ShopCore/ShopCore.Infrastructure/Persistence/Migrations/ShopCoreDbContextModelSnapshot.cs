@@ -30,6 +30,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
+                    b.Property<DateTimeOffset>("CashedUpAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("cashed_up_at");
+
                     b.Property<long>("CountedCents")
                         .HasColumnType("bigint")
                         .HasColumnName("counted_cents");
@@ -225,6 +229,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
+                    b.Property<string>("PaymentMethodCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("payment_method_code");
+
                     b.Property<Guid?>("SaleId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
@@ -240,6 +249,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("AccountId")
                         .HasDatabaseName("ix_credit_entries_account_id");
+
+                    b.HasIndex("SaleId", "Type")
+                        .IsUnique()
+                        .HasDatabaseName("ix_credit_entries_sale_id_type")
+                        .HasFilter("sale_id IS NOT NULL");
 
                     b.ToTable("credit_entries", "shopcore");
                 });
