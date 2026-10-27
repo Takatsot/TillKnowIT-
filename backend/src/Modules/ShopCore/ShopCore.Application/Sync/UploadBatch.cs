@@ -1,3 +1,4 @@
+using Catalogue.Contracts;
 using Identity.Contracts;
 using ShopCore.Contracts;
 using ShopCore.Domain;
@@ -19,13 +20,20 @@ public interface IUploadStore
     /// <summary>Quantity sold per product, for each of the given sales that belong to the shop.</summary>
     Task<Dictionary<Guid, Dictionary<Guid, int>>> SaleQuantities(Guid shopId, IEnumerable<Guid> saleIds, CancellationToken ct);
 
+    /// <summary>The products with these ids, whichever shop owns them, so a clash with another shop is caught.</summary>
+    Task<Dictionary<Guid, Product>> GetProducts(IEnumerable<Guid> ids, CancellationToken ct);
+
+    /// <summary>Which product of the shop uses each barcode.</summary>
+    Task<Dictionary<string, Guid>> BarcodeOwners(Guid shopId, IEnumerable<string> barcodes, CancellationToken ct);
+
+    void Add(Product product);
     void Add(Sale sale);
     void Add(StockMovement movement);
     void Add(SaleCancellation cancellation);
     Task Save(CancellationToken ct);
 }
 
-internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker access, TimeProvider clock)
+internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker access, ILookupChecker lookups, TimeProvider clock)
     : ICommandHandler<UploadBatch, SyncUploadResponse>
 {
     public async Task<Result<SyncUploadResponse>> Handle(UploadBatch command, CancellationToken ct)
@@ -34,6 +42,7 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
         if (req.Count > SyncUploadRequest.MaxRecords)
             return Result<SyncUploadResponse>.Fail("upload.too_large", $"Send at most {SyncUploadRequest.MaxRecords} records at a time.");
 
+        var products = req.Products ?? [];
         var sales = req.Sales ?? [];
         var movements = req.StockMovements ?? [];
         var cancellations = req.Cancellations ?? [];
@@ -50,6 +59,10 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
         var productIds = sales.SelectMany(s => s.Lines ?? []).Select(l => l.ProductId)
             .Concat(movements.Select(m => m.ProductId)).Distinct().ToList();
         var knownProducts = await store.ExistingProductIds(req.ShopId, productIds, ct);
+        var editedProducts = await store.GetProducts(products.Select(p => p.Id), ct);
+        var barcodeOwners = await store.BarcodeOwners(req.ShopId,
+            products.Where(p => !string.IsNullOrWhiteSpace(p.Barcode)).Select(p => p.Barcode!.Trim()), ct);
+        var activeCategories = new Dictionary<string, bool>();
         var referencedSales = movements.Where(m => m.SaleId is not null).Select(m => m.SaleId!.Value)
             .Concat(cancellations.Select(c => c.SaleId)).Distinct().ToList();
         var soldQuantities = await store.SaleQuantities(req.ShopId, referencedSales, ct);
@@ -67,6 +80,60 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
         void Reject(string kind, Guid id, Error error) => Add(kind, id, UploadStatus.Rejected, error.Code, error.Message);
 
         var seen = new HashSet<Guid>();
+
+        // ---- products (first, so sales and movements in the same batch can use them) ----
+        foreach (var p in products)
+        {
+            const string kind = "product";
+
+            var allowed = await Allowed(p.StaffId, "product.edit");
+            if (!allowed.IsSuccess) { Reject(kind, p.Id, allowed.Error!); continue; }
+
+            var input = new ProductInput(p.Id, req.ShopId, p.StaffId, req.DeviceId, p.CatalogueProductId, p.Name, p.Barcode,
+                p.CategoryCode, p.CostCents, p.PriceCents, p.LowStockLevel, p.ExpiryDate, p.IsActive, p.UpdatedAt);
+            var checkedInput = Product.Check(input, now);
+            if (!checkedInput.IsSuccess) { Reject(kind, p.Id, checkedInput.Error!); continue; }
+            input = checkedInput.Value!;
+
+            if (!activeCategories.TryGetValue(input.CategoryCode, out var categoryOk))
+                activeCategories[input.CategoryCode] = categoryOk = await lookups.IsActive("categories", input.CategoryCode, ct);
+            if (!categoryOk) { Reject(kind, p.Id, new Error("product.category_invalid", "Unknown category.")); continue; }
+
+            if (input.Barcode is not null && barcodeOwners.TryGetValue(input.Barcode, out var owner) && owner != p.Id)
+            {
+                Reject(kind, p.Id, new Error("product.duplicate_barcode", "Another product in this shop already uses this barcode."));
+                continue;
+            }
+
+            string? oldBarcode = null;
+            if (editedProducts.TryGetValue(p.Id, out var existing))
+            {
+                if (existing.ShopId != req.ShopId)
+                {
+                    Reject(kind, p.Id, new Error("product.id_taken", "This product id belongs to another shop."));
+                    continue;
+                }
+                oldBarcode = existing.Barcode;
+                var updated = existing.Update(input);
+                if (!updated.IsSuccess)
+                {
+                    // Not an error: the server already has the same or a newer change, so the till can drop this one.
+                    Add(kind, p.Id, UploadStatus.Duplicate, updated.Error!.Code, updated.Error.Message);
+                    continue;
+                }
+            }
+            else
+            {
+                var created = Product.Record(input);
+                store.Add(created);
+                editedProducts[p.Id] = created;
+            }
+
+            if (oldBarcode is not null && oldBarcode != input.Barcode) barcodeOwners.Remove(oldBarcode);
+            if (input.Barcode is not null) barcodeOwners[input.Barcode] = p.Id;
+            knownProducts.Add(p.Id);
+            Add(kind, p.Id, UploadStatus.Accepted);
+        }
 
         // ---- sales ----
         foreach (var s in sales)

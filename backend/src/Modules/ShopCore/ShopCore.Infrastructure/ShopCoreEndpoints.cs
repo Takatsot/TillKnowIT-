@@ -21,6 +21,43 @@ public static class ShopCoreEndpoints
                 : Results.Problem(title: result.Error!.Message, statusCode: StatusCodes.Status413PayloadTooLarge,
                     extensions: new Dictionary<string, object?> { ["code"] = result.Error.Code });
         });
+
+        api.MapPost("/products", (SaveProductRequest req, IDispatcher d, CancellationToken ct) =>
+            SaveProduct(req, d, created: true, ct));
+
+        api.MapPatch("/products/{id:guid}", (Guid id, SaveProductRequest req, IDispatcher d, CancellationToken ct) =>
+            req.Product.Id != id
+                ? Task.FromResult(Problem("product.id_mismatch", "The product id in the body does not match the address.", StatusCodes.Status422UnprocessableEntity))
+                : SaveProduct(req, d, created: false, ct));
+
         return api;
     }
+
+    private static async Task<IResult> SaveProduct(SaveProductRequest req, IDispatcher d, bool created, CancellationToken ct)
+    {
+        var batch = new SyncUploadRequest(req.ShopId, req.DeviceId, null, null, null, [req.Product]);
+        var result = await d.Send(new UploadBatch(batch), ct);
+        if (!result.IsSuccess) return Problem(result.Error!.Code, result.Error.Message, StatusCodes.Status422UnprocessableEntity);
+
+        var outcome = result.Value!.Results.Single();
+        return outcome.Status switch
+        {
+            UploadStatus.Accepted => created
+                ? Results.Created($"/api/v1/products/{outcome.Id}", outcome)
+                : Results.Ok(outcome),
+            // A newer change is already saved. The till should take the server's copy.
+            UploadStatus.Duplicate => Problem(outcome.Code ?? "product.stale", outcome.Message ?? "Already saved.", StatusCodes.Status409Conflict),
+            _ => Problem(outcome.Code ?? "product.rejected", outcome.Message ?? "Rejected.", RejectedStatus(outcome.Code)),
+        };
+    }
+
+    private static int RejectedStatus(string? code) => code switch
+    {
+        "product.duplicate_barcode" or "product.id_taken" => StatusCodes.Status409Conflict,
+        "device.unknown" or "device.not_approved" or "staff.unknown" or "staff.disabled" or "permission.denied" => StatusCodes.Status403Forbidden,
+        _ => StatusCodes.Status422UnprocessableEntity,
+    };
+
+    private static IResult Problem(string code, string message, int status) =>
+        Results.Problem(title: message, statusCode: status, extensions: new Dictionary<string, object?> { ["code"] = code });
 }

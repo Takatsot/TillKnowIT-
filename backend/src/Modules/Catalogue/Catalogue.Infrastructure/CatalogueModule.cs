@@ -1,3 +1,6 @@
+using Catalogue.Application.Products;
+using Catalogue.Contracts;
+using TillKnowIT.Dispatching;
 using Catalogue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -16,6 +19,9 @@ public static class CatalogueModule
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, CatalogueMigrator>();
+        services.AddScoped<ICatalogueStore, CatalogueStore>();
+        services.AddScoped<ILookupChecker, LookupChecker>();
+        services.AddDispatching(typeof(FindProductByBarcode).Assembly);
         return services;
     }
 }

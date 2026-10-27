@@ -49,6 +49,25 @@ internal sealed class UploadStore(ShopCoreDbContext db) : IUploadStore
         return rows.GroupBy(r => r.SaleId).ToDictionary(g => g.Key, g => g.ToDictionary(r => r.ProductId, r => r.Quantity));
     }
 
+    public async Task<Dictionary<Guid, Product>> GetProducts(IEnumerable<Guid> ids, CancellationToken ct)
+    {
+        var list = ids.ToList();
+        return list.Count == 0 ? [] : await db.Products.Where(p => list.Contains(p.Id)).ToDictionaryAsync(p => p.Id, ct);
+    }
+
+    public async Task<Dictionary<string, Guid>> BarcodeOwners(Guid shopId, IEnumerable<string> barcodes, CancellationToken ct)
+    {
+        var list = barcodes.Distinct().ToList();
+        if (list.Count == 0) return [];
+        var rows = await db.Products.AsNoTracking()
+            .Where(p => p.ShopId == shopId && p.Barcode != null && list.Contains(p.Barcode))
+            .Select(p => new { Barcode = p.Barcode!, p.Id })
+            .ToListAsync(ct);
+        return rows.ToDictionary(r => r.Barcode, r => r.Id);
+    }
+
+    public void Add(Product product) => db.Products.Add(product);
+
     public void Add(Sale sale) => db.Sales.Add(sale);
 
     public void Add(StockMovement movement) => db.StockMovements.Add(movement);

@@ -1,3 +1,4 @@
+using Catalogue.Contracts;
 using Identity.Contracts;
 using Microsoft.Extensions.Time.Testing;
 using ShopCore.Application.Sync;
@@ -31,6 +32,15 @@ public class UploadBatchTests
         public Task<HashSet<Guid>> ExistingProductIds(Guid shopId, IEnumerable<Guid> ids, CancellationToken ct) => Task.FromResult(ids.Where(Products.Contains).ToHashSet());
         public Task<Dictionary<Guid, Dictionary<Guid, int>>> SaleQuantities(Guid shopId, IEnumerable<Guid> ids, CancellationToken ct) =>
             Task.FromResult(ids.Where(Sold.ContainsKey).ToDictionary(i => i, i => new Dictionary<Guid, int>(Sold[i])));
+        public Dictionary<Guid, Product> ProductEntities { get; } = [];
+        public Dictionary<string, Guid> Barcodes { get; } = [];
+        public List<Product> AddedProducts { get; } = [];
+
+        public Task<Dictionary<Guid, Product>> GetProducts(IEnumerable<Guid> ids, CancellationToken ct) =>
+            Task.FromResult(ids.Where(ProductEntities.ContainsKey).ToDictionary(i => i, i => ProductEntities[i]));
+        public Task<Dictionary<string, Guid>> BarcodeOwners(Guid shopId, IEnumerable<string> barcodes, CancellationToken ct) =>
+            Task.FromResult(barcodes.Where(Barcodes.ContainsKey).ToDictionary(b => b, b => Barcodes[b]));
+        public void Add(Product product) => AddedProducts.Add(product);
         public void Add(Sale sale) => AddedSales.Add(sale);
         public void Add(StockMovement movement) => AddedMovements.Add(movement);
         public void Add(SaleCancellation cancellation) => AddedCancellations.Add(cancellation);
@@ -49,6 +59,12 @@ public class UploadBatchTests
         }
     }
 
+    private sealed class FakeLookups : ILookupChecker
+    {
+        public Task<bool> IsActive(string type, string code, CancellationToken ct) =>
+            Task.FromResult(type == "categories" && code is "drinks" or "groceries");
+    }
+
     private readonly FakeStore _store = new();
     private readonly FakeAccess _access = new();
     private readonly Guid _shop = Guid.NewGuid();
@@ -59,9 +75,10 @@ public class UploadBatchTests
 
     public UploadBatchTests() => _store.Products.Add(_bread);
 
-    private Task<Result<SyncUploadResponse>> Upload(List<SaleUpload>? sales = null, List<StockMovementUpload>? moves = null, List<SaleCancellationUpload>? cancels = null) =>
-        new UploadBatchHandler(_store, _access, new FakeTimeProvider(Now))
-            .Handle(new UploadBatch(new SyncUploadRequest(_shop, _device, sales, moves, cancels)), default);
+    private Task<Result<SyncUploadResponse>> Upload(List<SaleUpload>? sales = null, List<StockMovementUpload>? moves = null,
+        List<SaleCancellationUpload>? cancels = null, List<ProductUpload>? products = null) =>
+        new UploadBatchHandler(_store, _access, new FakeLookups(), new FakeTimeProvider(Now))
+            .Handle(new UploadBatch(new SyncUploadRequest(_shop, _device, sales, moves, cancels, products)), default);
 
     private SaleUpload CashSale(Guid? id = null, Guid? product = null) => new(
         id ?? Guid.NewGuid(), _cashier, Now, "cash", 3600, 0, 5000, 1400, null,
@@ -231,6 +248,128 @@ public class UploadBatchTests
     {
         var result = await Upload(cancels: [Cancel(Guid.NewGuid())]);
         Assert.Equal("cancellation.sale_unknown", result.Value!.Results.Single().Code);
+    }
+
+    // ---- products ----
+
+    private ProductUpload Prod(Guid? id = null, string? barcode = "6001234567890", DateTimeOffset? at = null, string category = "groceries",
+        string name = "Bread", long price = 1800) =>
+        new(id ?? Guid.NewGuid(), _manager, null, name, barcode, category, 1400, price, 5, null, true, at ?? Now);
+
+    [Fact]
+    public async Task Creates_a_product_and_a_sale_for_it_can_arrive_in_the_same_batch()
+    {
+        var fresh = Prod();
+        var sale = CashSale(product: fresh.Id);
+
+        var result = await Upload([sale], products: [fresh]);
+
+        Assert.Equal(["accepted", "accepted"], result.Value!.Results.Select(r => r.Status));
+        Assert.Equal("product", result.Value.Results[0].Kind);
+        Assert.Single(_store.AddedProducts);
+        Assert.Single(_store.AddedSales);
+    }
+
+    [Fact]
+    public async Task Products_need_the_product_edit_permission()
+    {
+        _access.Denied[(_manager, "product.edit")] = Result.Fail("permission.denied", "no");
+        var result = await Upload(products: [Prod()]);
+        Assert.Equal("permission.denied", result.Value!.Results.Single().Code);
+        Assert.Empty(_store.AddedProducts);
+    }
+
+    [Theory]
+    [InlineData("", "product.name_invalid")]
+    [InlineData("   ", "product.name_invalid")]
+    public async Task Product_needs_a_name(string name, string code)
+    {
+        var result = await Upload(products: [Prod(name: name)]);
+        Assert.Equal(code, result.Value!.Results.Single().Code);
+    }
+
+    [Fact]
+    public async Task Bad_barcode_negative_price_and_unknown_category_are_rejected()
+    {
+        var result = await Upload(products: [
+            Prod(barcode: "12ab"),
+            Prod(barcode: null, price: -1),
+            Prod(barcode: null, category: "weapons"),
+        ]);
+
+        Assert.Equal(["product.barcode_invalid", "product.price_invalid", "product.category_invalid"], result.Value!.Results.Select(r => r.Code));
+    }
+
+    [Fact]
+    public async Task A_barcode_can_only_belong_to_one_product_in_a_shop()
+    {
+        _store.Barcodes["6001234567890"] = Guid.NewGuid();
+        var taken = await Upload(products: [Prod()]);
+        Assert.Equal("product.duplicate_barcode", taken.Value!.Results.Single().Code);
+
+        // Two new products in one batch cannot share one either.
+        _store.Barcodes.Clear();
+        var both = await Upload(products: [Prod(barcode: "6009999999999"), Prod(barcode: "6009999999999")]);
+        Assert.Equal(["accepted", "product.duplicate_barcode"], both.Value!.Results.Select(r => r.Code ?? r.Status));
+    }
+
+    [Fact]
+    public async Task Products_without_a_barcode_are_fine_and_may_repeat()
+    {
+        var result = await Upload(products: [Prod(barcode: null), Prod(barcode: null)]);
+        Assert.All(result.Value!.Results, r => Assert.Equal("accepted", r.Status));
+    }
+
+    [Fact]
+    public async Task Editing_a_product_keeps_the_latest_change_and_drops_an_older_one()
+    {
+        var id = Guid.NewGuid();
+        var existing = Product.Record(new ProductInput(id, _shop, _manager, _device, null, "Bread", "6001234567890", "groceries",
+            1400, 1800, 5, null, true, Now.AddHours(-2)));
+        _store.ProductEntities[id] = existing;
+
+        var newer = await Upload(products: [Prod(id, at: Now.AddHours(-1), price: 1900)]);
+        Assert.Equal("accepted", newer.Value!.Results.Single().Status);
+        Assert.Equal(1900, existing.PriceCents);
+
+        var older = await Upload(products: [Prod(id, at: Now.AddHours(-1.5), price: 1000)]);
+        Assert.Equal("duplicate", older.Value!.Results.Single().Status);
+        Assert.Equal("product.stale", older.Value.Results.Single().Code);
+        Assert.Equal(1900, existing.PriceCents);
+        Assert.Empty(_store.AddedProducts);
+    }
+
+    [Fact]
+    public async Task Retrying_the_same_product_change_is_a_duplicate_not_an_error()
+    {
+        var id = Guid.NewGuid();
+        var upload = Prod(id, at: Now.AddMinutes(-5));
+        var first = await Upload(products: [upload]);
+        _store.ProductEntities[id] = _store.AddedProducts.Single();
+
+        var retry = await Upload(products: [upload]);
+
+        Assert.Equal("accepted", first.Value!.Results.Single().Status);
+        Assert.Equal("duplicate", retry.Value!.Results.Single().Status);
+    }
+
+    [Fact]
+    public async Task A_product_id_from_another_shop_is_refused()
+    {
+        var id = Guid.NewGuid();
+        _store.ProductEntities[id] = Product.Record(new ProductInput(id, Guid.NewGuid(), _manager, _device, null, "Other", null, "groceries",
+            1, 2, 0, null, true, Now.AddDays(-1)));
+
+        var result = await Upload(products: [Prod(id, at: Now)]);
+
+        Assert.Equal("product.id_taken", result.Value!.Results.Single().Code);
+    }
+
+    [Fact]
+    public async Task A_till_clock_far_in_the_future_cannot_win_every_later_clash()
+    {
+        var result = await Upload(products: [Prod(at: Now.AddDays(30))]);
+        Assert.Equal("product.date_invalid", result.Value!.Results.Single().Code);
     }
 
     // ---- limits ----

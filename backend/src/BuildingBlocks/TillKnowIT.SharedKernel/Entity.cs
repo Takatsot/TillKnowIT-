@@ -41,4 +41,11 @@ public abstract class VersionedEntity : Entity
         UpdatedAt = DateTimeOffset.UtcNow;
         Version++;
     }
+
+    /// <summary>For edits made on a till: keep the time the till gave, which decides who wins in a clash.</summary>
+    protected void StampUpdate(DateTimeOffset updatedAt)
+    {
+        UpdatedAt = updatedAt;
+        Version++;
+    }
 }
