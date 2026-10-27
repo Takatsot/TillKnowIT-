@@ -27,6 +27,7 @@
     <ProjectReference Include="..\..\src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Payments\Payments.Infrastructure\Payments.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Wallet\Wallet.Infrastructure\Wallet.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Platform\Platform.Infrastructure\Platform.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

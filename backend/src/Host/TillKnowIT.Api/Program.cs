@@ -1,3 +1,4 @@
+using Platform.Infrastructure;
 using Wallet.Infrastructure;
 using Payments.Infrastructure;
 using Catalogue.Infrastructure;
@@ -23,6 +24,7 @@ builder.Services
     .AddShopCoreModule(db)
     .AddMarketplaceModule(db)
     .AddMessagingModule(db)
+    .AddPlatformModule(db)
     .AddWalletModule(builder.Configuration.GetConnectionString("Wallet") ?? db)
     .AddPaymentsModule(db);
 
@@ -49,6 +51,7 @@ api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 api.MapIdentityEndpoints();
 api.MapShopCoreEndpoints();
 api.MapCatalogueEndpoints();
+api.MapPlatformEndpoints();
 api.MapWalletEndpoints();
 api.MapPaymentsEndpoints();
 api.MapMarketplaceEndpoints();

@@ -5,7 +5,7 @@ namespace TillKnowIT.Architecture.Tests;
 
 public class ModuleRulesTests
 {
-    private static readonly string[] Modules = ["ShopCore", "Catalogue", "Marketplace", "Messaging", "Identity", "Payments", "Wallet"];
+    private static readonly string[] Modules = ["ShopCore", "Catalogue", "Marketplace", "Messaging", "Identity", "Payments", "Wallet", "Platform"];
 
     private static Assembly Load(string module, string layer) => Assembly.Load($"{module}.{layer}");
 

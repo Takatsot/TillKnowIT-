@@ -92,7 +92,23 @@ Backend only: the screens (parent app, till wallet payment, photo check) and the
 | Separate wallet database and service | Prepared | `ConnectionStrings:Wallet` puts the module in a database of its own today. The separate Container App, Key Vault and network rules are infrastructure work: see ADR 0003. |
 | Parent app, till screens, native NFC, penetration test | Todo | Front-end and infrastructure work; the penetration test and four-eyes reviews are process items. |
 
-## Phases 4 and 5
+## Phase 4: every business
+
+Backend and engines only; the screens, hardware adapters and kitchen view are front-end work. Rows are updated as each part lands.
+
+| Story | State | Notes |
+| --- | --- | --- |
+| B1-1 Business packs as data | Done | New Platform module: packs with versioned features and settings, 23 known feature flags, five seeded packs (spaza, cafe, butchery, salon, clothing and hardware). A platform admin creates and edits packs (each edit is a new version) and retires them (the default pack never). |
+| B1-2 Owner chooses a business type | Done | Only the owner; every change recorded; no data is touched, so switching back restores everything. `IShopFeatures` answers "is this feature on?" for the rest of the system; a shop that never chose is on the spaza pack with nothing extra. |
+| B2-3 Promotions and combos (engine) | Engine done | Percent, amount off, fixed price and combos; days, hours (South African time, including windows past midnight) and dates; no stacking, combos fitted first, per-line discounts add up exactly; property-tested over 500 random baskets. Storage and till evaluation come with the selling handlers. |
+| B2-5 Split payments (rules) | Rules done | Parts add up to the total plus tip, each method once, change worked out by the server, credit needs an account, wallet and voucher parts need a reference. |
+| B3-3 Tips (rules) | Rules done | By amount or percentage, half-up, never more than the bill. |
+| B2-2 Modifiers (rules) | Rules done | Required and optional groups, minimum and maximum, prices added; unknown or repeated options refused. |
+| B4-1 Weight pricing | Engine done | Price per kg, tare, half-up rounding. |
+| B4-2 Price-embedded barcodes | Engine done | Rules from the pack settings, EAN-13 check digit, weight or price; ordinary barcodes are left to the normal lookup. |
+| B2-4 Refunds (rules) | Rules done | Never more than was sold less earlier refunds, manager above a threshold, money goes back the way it came (voucher where it cannot). |
+
+## Phases 4 (rest) and 5
 
 Not started. These tables are filled in as each phase is built.
 

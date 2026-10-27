@@ -289,6 +289,7 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     { "dispute.resolve", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "lookup.manage", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "marketplace.settings", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
+                    { "pack.manage", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "school.manage", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "shop.verify", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "supplier.verify", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },

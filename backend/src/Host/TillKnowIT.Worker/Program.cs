@@ -1,3 +1,5 @@
+using Platform.Infrastructure;
+using Platform.Infrastructure.Persistence;
 using Wallet.Infrastructure;
 using Wallet.Infrastructure.Persistence;
 using Payments.Infrastructure;
@@ -39,7 +41,8 @@ builder.Services
     .AddOutboxProcessor<MarketplaceDbContext>()
     .AddOutboxProcessor<MessagingDbContext>()
     .AddOutboxProcessor<PaymentsDbContext>()
-    .AddOutboxProcessor<WalletDbContext>();
+    .AddOutboxProcessor<WalletDbContext>()
+    .AddOutboxProcessor<PlatformDbContext>();
 
 // Delivers queued messages. Pretend providers (log only) exist in Development; elsewhere a channel with no
 // real provider fails visibly rather than pretending to send.

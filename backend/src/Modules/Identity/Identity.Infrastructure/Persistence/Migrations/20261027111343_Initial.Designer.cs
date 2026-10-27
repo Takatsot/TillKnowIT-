@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20261027105533_Initial")]
+    [Migration("20261027111343_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -781,6 +781,11 @@ namespace Identity.Infrastructure.Persistence.Migrations
                                 {
                                     RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
                                     PermissionCode = "wallet.admin"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "pack.manage"
                                 },
                                 new
                                 {

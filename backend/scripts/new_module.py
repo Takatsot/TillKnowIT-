@@ -233,6 +233,8 @@ def worker(s):
 
 
 edit("src/Host/TillKnowIT.Worker/Program.cs", worker)
-edit("tests/TillKnowIT.Architecture.Tests/ModuleRulesTests.cs", lambda s: s.replace('"Identity"];', f'"Identity", "{NAME}"];', 1))
-edit("scripts/check-migrations.sh", lambda s: s.replace("Messaging Identity; do", f"Messaging Identity {NAME}; do", 1))
+# Append to whatever the module list is now, so this keeps working as modules are added.
+edit("tests/TillKnowIT.Architecture.Tests/ModuleRulesTests.cs",
+     lambda s: re.sub(r'(string\[\] Modules = \[[^\]]*?)\];', lambda m: m.group(1) + f', "{NAME}"];', s, count=1))
+edit("scripts/check-migrations.sh", lambda s: re.sub(r'(for module in [^;]*?); do', lambda m: m.group(1) + f' {NAME}; do', s, count=1))
 print(f"Module {NAME} scaffolded. Next: add entities, configurations, handlers, then run scripts/new_migration.sh {NAME}")
