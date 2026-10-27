@@ -246,6 +246,7 @@ public sealed class PurchaseOrder : VersionedEntity
         }
 
         ReceivedAt = now;
+        Raise(new OrderDelivered(Id, ShopId, SupplierId, TotalCents, ByShop: true));
         Touch();
         return Result.Ok();
     }
@@ -267,6 +268,7 @@ public sealed class PurchaseOrder : VersionedEntity
             foreach (var l in _lines.Where(l => l.Status != LineStatus.Declined && l.DeliveredCases is null)) l.SetDelivered(l.ConfirmedCases ?? l.OrderedCases);
             Status = OrderStatus.Delivered;
             DeliveredAt = now;
+            Raise(new OrderDelivered(Id, ShopId, SupplierId, TotalCents, ByShop: false));
         }
         Touch();
         return Result.Ok();
@@ -287,9 +289,18 @@ public sealed class PurchaseOrder : VersionedEntity
         Raise(new OrderReceived(Id, ShopId, SupplierId, supplierName, Reference, lines));
     }
 
-    public void MarkDisputed()
+    public Result MarkDisputed()
     {
-        if (Status == OrderStatus.Delivered) { Status = OrderStatus.Disputed; Touch(); }
+        if (Status == OrderStatus.Disputed) return Result.Ok();
+        if (Status != OrderStatus.Delivered) return Result.Fail("order.not_delivered", "Only a delivered order can be disputed.");
+        Status = OrderStatus.Disputed;
+        Touch();
+        return Result.Ok();
+    }
+
+    public void ClearDispute()
+    {
+        if (Status == OrderStatus.Disputed) { Status = OrderStatus.Delivered; Touch(); }
     }
 
     public void SetPaymentStatus(OrderPaymentStatus status)

@@ -56,7 +56,7 @@ on the build machine. The first real run is the first item on the hand-over list
 | M3-2 Sharing settings | Done | Off, usual or all; off until the owner chooses. Nothing reads it yet: it gates the demand totals (M7-2). |
 | M3-3 Suggested replacement | Todo | Could. |
 | M4-1 to M4-4 Ordering | Done | Create, build from order list, send (app, WhatsApp, email), supplier replies per line, delivery, shop receive (count wins), last prices, usual supplier, prefilled stock-in review. Port: real WhatsApp provider |
-| M5-1 to M5-4 Paying suppliers | Todo | Needs a payment partner that can hold money. |
+| M5-1 to M5-4 Paying suppliers | Done (code) | Pay in app or on delivery (supplier marks cash paid), hold until delivery, release on shop confirmation or after 72h, short deliveries refund the difference, disputes freeze money until an admin resolves, signed webhooks with replay protection, audited states, daily reconciliation to the cent, supplier statement as CSV/Excel/PDF. Port: real payment partner (only a Development fake exists; webhook secret per partner in config). Not atomic across modules: a failed order-status update after money moves is caught by reconciliation. |
 | M6-1 to M6-4 Group buying | Todo | |
 | M7-1, M7-2 Ratings and demand | Todo | |
 | Marketplace as its own service, Service Bus | Todo | |

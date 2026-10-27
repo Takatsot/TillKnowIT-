@@ -21,6 +21,7 @@ public static class MarketplaceModule
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, MarketplaceMigrator>();
         services.AddScoped<ISupplierStore, SupplierStore>();
+        services.AddScoped<Marketplace.Contracts.IOrderPayments, Marketplace.Application.Orders.OrderPaymentsService>();
         services.AddScoped<ISupplierProductStore, SupplierProductStore>();
         services.AddScoped<IDealStore, DealStore>();
         services.AddScoped<IOfferStore, OfferStore>();

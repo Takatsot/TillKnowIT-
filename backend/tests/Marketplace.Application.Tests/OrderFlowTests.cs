@@ -346,7 +346,10 @@ public class OrderFlowTests
         Assert.Equal([24000L, 22000L], _orders.Prices.OrderByDescending(p => p.CasePriceCents).Select(p => p.CasePriceCents));
         Assert.Single(_shopMarketplace.Usual);
 
-        var announced = Assert.IsType<OrderReceived>(Assert.Single(_orders.Orders.Single().DomainEvents));
+        var events = _orders.Orders.Single().DomainEvents;
+        var announced = Assert.Single(events.OfType<OrderReceived>());
+        var delivered = Assert.Single(events.OfType<OrderDelivered>());
+        Assert.Equal((true, 4 * 24000 + 22000 + 3300 + 5000L), (delivered.ByShop, delivered.TotalCents));   // payments releases this much
         Assert.Equal(("Fresh Foods", _orders.Orders.Single().Reference), (announced.SupplierName, announced.Reference));
         Assert.Equal((96, 1000L), (announced.Lines[0].Units, announced.Lines[0].UnitCostCents));         // 4 cases x 24, R240 / 24 = R10.00 (VAT included)
         Assert.Equal((24, 1054L), (announced.Lines[1].Units, announced.Lines[1].UnitCostCents));         // 1 case, R220 + 15% = R253 / 24 = R10.54

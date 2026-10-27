@@ -117,6 +117,15 @@ public static class MarketplaceEndpoints
 
         api.MapGet("/suppliers/{id:guid}/orders", async (Guid id, Guid callerPersonId, string? status, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListSupplierOrders(id, callerPersonId, status), ct)));
 
+        api.MapPost("/purchase-orders/{id:guid}/mark-paid", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new MarkOrderPaid(id, callerPersonId), ct)));
+
+        // M5-4: the supplier's statement as csv (default), xlsx or pdf. from and to are the days orders were sent.
+        api.MapGet("/suppliers/{id:guid}/statement", async (Guid id, Guid callerPersonId, DateOnly? from, DateOnly? to, string? format, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new GetSupplierStatement(id, callerPersonId, from, to, format), ct);
+            return result.IsSuccess ? Results.File(result.Value!.Content, result.Value.ContentType, result.Value.FileName) : Problem(result.Error!);
+        });
+
         api.MapPatch("/supplier-products/{id:guid}", async (Guid id, UpdateSupplierProductRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new UpdateSupplierProduct(id, req), ct)));
 
         return api;
@@ -133,7 +142,7 @@ public static class MarketplaceEndpoints
             "permission.denied" => 403,
             var c when c.EndsWith("not_found", StringComparison.Ordinal) => 404,
             "staff.already_member" or "supplier.not_pending" or "supplier.suspended" or "supplier.checklist_incomplete"
-                or "order.already_sent" or "order.cannot_cancel" or "order.not_awaiting_reply" or "order.not_confirmed" or "order.not_delivered" or "order.already_received" => 409,
+                or "order.already_sent" or "order.cannot_cancel" or "order.not_awaiting_reply" or "order.not_confirmed" or "order.not_delivered" or "order.already_received" or "order.paid_in_app" => 409,
             _ => 422,
         });
 }

@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\src\Modules\Marketplace\Marketplace.Infrastructure\Marketplace.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Messaging\Messaging.Infrastructure\Messaging.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Payments\Payments.Infrastructure\Payments.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

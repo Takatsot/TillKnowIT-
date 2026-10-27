@@ -17,5 +17,6 @@
     <ProjectReference Include="..\..\Modules\Marketplace\Marketplace.Infrastructure\Marketplace.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Messaging\Messaging.Infrastructure\Messaging.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Payments\Payments.Infrastructure\Payments.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
