@@ -29,6 +29,10 @@ internal static class MessagingSeed
         // Group buying: updates to each shop that joined.
         ("group.update", [MessageChannel.Whatsapp, MessageChannel.Email], null, "{shop}: group deal for {product} from {supplier}. {summary}"),
 
+        // Appointments: a reminder to a customer who agreed to be messaged.
+        ("appointment.reminder", [MessageChannel.Whatsapp, MessageChannel.Sms], null, "Hi {name}, a reminder of your {service} on {date} at {time}."),
+        ("appointment.reminder", [MessageChannel.Email], "Your appointment on {date}", "Hi {name},\n\nA reminder of your {service} on {date} at {time}."),
+
         // School wallets: to parents (push first; WhatsApp only where they opted in) and to the tuckshop owner.
         ("wallet.purchase", [MessageChannel.Push], null, "{child} spent {amount} at the tuckshop. Balance: {balance}."),
         ("wallet.topup", [MessageChannel.Push], null, "{amount} was added to {child}'s wallet. Balance: {balance}."),

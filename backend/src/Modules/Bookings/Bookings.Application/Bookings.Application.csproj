@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bookings.Domain\Bookings.Domain.csproj" />
+    <ProjectReference Include="..\Bookings.Contracts\Bookings.Contracts.csproj" />
+    <ProjectReference Include="..\..\Identity\Identity.Contracts\Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\Platform\Platform.Contracts\Platform.Contracts.csproj" />
+    <ProjectReference Include="..\..\Customers\Customers.Contracts\Customers.Contracts.csproj" />
+    <ProjectReference Include="..\..\Messaging\Messaging.Contracts\Messaging.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Reporting\TillKnowIT.Reporting.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Dispatching\TillKnowIT.Dispatching.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Bookings.Application.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -184,6 +184,37 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = new Guid("182d45de-8512-18ad-61ea-125e4008aee0"),
+                            Body = "Hi {name}, a reminder of your {service} on {date} at {time}.",
+                            Channel = "Whatsapp",
+                            Code = "appointment.reminder",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("276f84e2-6f58-8f14-bac1-50affb3270e7"),
+                            Body = "Hi {name}, a reminder of your {service} on {date} at {time}.",
+                            Channel = "Sms",
+                            Code = "appointment.reminder",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("0192edb0-850e-0013-07af-1cca173f7e26"),
+                            Body = "Hi {name},\n\nA reminder of your {service} on {date} at {time}.",
+                            Channel = "Email",
+                            Code = "appointment.reminder",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Subject = "Your appointment on {date}",
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("743083d3-4b10-9372-b4c6-9df6894441b6"),
                             Body = "{child} spent {amount} at the tuckshop. Balance: {balance}.",
                             Channel = "Push",

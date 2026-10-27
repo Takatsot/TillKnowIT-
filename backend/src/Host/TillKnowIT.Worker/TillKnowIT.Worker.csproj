@@ -20,5 +20,7 @@
     <ProjectReference Include="..\..\Modules\Payments\Payments.Infrastructure\Payments.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Wallet\Wallet.Infrastructure\Wallet.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Platform\Platform.Infrastructure\Platform.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Customers\Customers.Infrastructure\Customers.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Bookings\Bookings.Infrastructure\Bookings.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

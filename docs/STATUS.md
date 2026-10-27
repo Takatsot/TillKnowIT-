@@ -116,9 +116,9 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | B6-2 Lay-by | Done | Deposit minimum, maximum term, cancellation fee and minimum fee from the pack settings; payments appended; stock reserved while active or waiting; cancel or expire gives back what was paid less the fee; collected goods are an ordinary sale paid by lay-by; an hourly job expires overdue plans. Lay-by cash counts at cash-up. |
 | B6-3 Serial numbers | Done | Flag on the product; recorded against the sale, never more than were sold, a serial is sold once; searchable. The till enforces entering them. |
 | B7-3 Gift vouchers | Done | Code shown once and only its hash kept; balance from entries; partial redemption; expiry from the pack settings; a repeated redemption takes nothing twice; cash vouchers count at cash-up. Redemption needs a connection. |
-| B7-1 Customer on a sale | Rules in the sale | A sale can carry a customer id (needs the customers feature); the Customers module is next. |
-| B5 Appointments and commission | Todo | Bookings module. |
-| B7-1, B7-2 Customers and loyalty | Todo | Customers module. |
+| B7-1 Customers | Done | Customers module: SA phone normalisation, consent, directory; sale events feed it. |
+| B5 Appointments and commission | Done | Bookings module: services, staff, idempotent booking, clash refused online and flagged when booked offline, reschedule, consent-only WhatsApp reminders (24h, worker), commission rules (most specific wins, half-up) and report. 28 tests. |
+| B7-2 Loyalty | Done | Append-only points ledger, earn on sale, reversed on cancel/refund. 40 tests. |
 | B8-1, B8-2 Printer and cash drawer | Todo | Hardware package (front end). |
 | B8-3 Message bundles | Todo | Messaging. |
 

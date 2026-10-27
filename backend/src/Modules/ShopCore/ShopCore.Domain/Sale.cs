@@ -156,6 +156,7 @@ public sealed class Sale : Entity
         sale.StampFromDevice(input.Id, input.SoldAt, input.StaffId, input.TillDeviceId);
         foreach (var line in sale.Lines) line.AttachTo(sale.Id);
         foreach (var payment in sale.Payments) payment.AttachTo(sale.Id);
+        if (sale.CustomerId is { } customer) sale.Raise(new ShopCore.Contracts.SaleRecorded(sale.Id, sale.ShopId, customer, total, sale.SoldAt));
         return Result<Sale>.Ok(sale);
     }
 

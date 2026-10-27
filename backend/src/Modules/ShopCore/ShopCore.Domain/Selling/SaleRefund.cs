@@ -4,7 +4,7 @@ namespace ShopCore.Domain.Selling;
 
 public sealed record SaleRefundInput(
     Guid Id, Guid ShopId, Guid SaleId, Guid StaffId, Guid DeviceId, string Reason, string MethodCode, long AmountCents,
-    Guid? ApprovedBy, IReadOnlyList<(Guid ProductId, int Quantity, long AmountCents)> Lines, DateTimeOffset RefundedAt);
+    Guid? ApprovedBy, IReadOnlyList<(Guid ProductId, int Quantity, long AmountCents)> Lines, DateTimeOffset RefundedAt, long SaleTotalCents = 0);
 
 /// <summary>
 /// B2-4: goods taken back from a past sale. Append only and always tied to the sale it came from. Stock goes back (a Return movement per line)
@@ -29,6 +29,7 @@ public sealed class SaleRefund : Entity
             RefundedAt = i.RefundedAt, Lines = i.Lines.Select(l => new SaleRefundLine(i.Id, l.ProductId, l.Quantity, l.AmountCents)).ToList(),
         };
         refund.StampFromDevice(i.Id, i.RefundedAt, i.StaffId, i.DeviceId);
+        refund.Raise(new ShopCore.Contracts.SaleRefunded(i.Id, i.SaleId, i.ShopId, i.AmountCents, i.SaleTotalCents));
         return Result<SaleRefund>.Ok(refund);
     }
 

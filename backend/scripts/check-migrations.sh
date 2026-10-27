@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 status=0
-for module in ShopCore Catalogue Marketplace Messaging Identity Payments Wallet Platform; do
+for module in ShopCore Catalogue Marketplace Messaging Identity Payments Wallet Platform Customers Bookings; do
   if dotnet ef migrations has-pending-model-changes \
       --context "${module}DbContext" \
       --project "src/Modules/${module}/${module}.Infrastructure" \

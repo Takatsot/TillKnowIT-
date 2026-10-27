@@ -13,6 +13,7 @@ public sealed class SaleCancellation : Entity
 
         var c = new SaleCancellation { SaleId = saleId, ShopId = shopId, StaffId = staffId, Reason = reason.Trim(), CancelledAt = cancelledAt };
         c.StampFromDevice(id, cancelledAt, staffId, deviceId);
+        c.Raise(new ShopCore.Contracts.SaleCancelled(saleId, shopId));
         return Result<SaleCancellation>.Ok(c);
     }
 

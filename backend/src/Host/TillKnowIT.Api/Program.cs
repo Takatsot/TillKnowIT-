@@ -1,3 +1,5 @@
+using Bookings.Infrastructure;
+using Customers.Infrastructure;
 using Platform.Infrastructure;
 using Wallet.Infrastructure;
 using Payments.Infrastructure;
@@ -24,6 +26,8 @@ builder.Services
     .AddShopCoreModule(db)
     .AddMarketplaceModule(db)
     .AddMessagingModule(db)
+    .AddBookingsModule(db)
+    .AddCustomersModule(db)
     .AddPlatformModule(db)
     .AddWalletModule(builder.Configuration.GetConnectionString("Wallet") ?? db)
     .AddPaymentsModule(db);
@@ -51,6 +55,8 @@ api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 api.MapIdentityEndpoints();
 api.MapShopCoreEndpoints();
 api.MapCatalogueEndpoints();
+api.MapBookingsEndpoints();
+api.MapCustomersEndpoints();
 api.MapPlatformEndpoints();
 api.MapWalletEndpoints();
 api.MapPaymentsEndpoints();

@@ -79,7 +79,7 @@ public sealed class RefundProcessor(IRefundEffects store, IRefundStore refunds)
         if (method == ExtraPaymentMethods.Voucher && !c.OnlineAllowed) return Result<RefundOutcome>.Fail("refund.online_only", "A voucher has to be issued online.");
 
         var recorded = SaleRefund.Record(new SaleRefundInput(r.Id, c.ShopId, r.SaleId, r.StaffId, c.DeviceId, r.Reason, method, plan.Value.AmountCents, r.ApprovedBy,
-            plan.Value.Lines.Select(l => (l.ProductId, l.Quantity, l.AmountCents)).ToList(), r.RefundedAt), now);
+            plan.Value.Lines.Select(l => (l.ProductId, l.Quantity, l.AmountCents)).ToList(), r.RefundedAt, c.Sale.TotalCents), now);
         if (!recorded.IsSuccess) return Result<RefundOutcome>.Fail(recorded.Error!.Code, recorded.Error.Message);
 
         refunds.Add(recorded.Value!);
