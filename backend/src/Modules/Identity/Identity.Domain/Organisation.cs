@@ -18,6 +18,10 @@ public sealed class Organisation : VersionedEntity
         return shop;
     }
 
+    /// <summary>A supplier's business account. It stays pending until the platform admin verifies the supplier.</summary>
+    public static Organisation CreateSupplier(string name) =>
+        new() { Type = OrganisationType.Supplier, Name = name.Trim(), Status = OrganisationStatus.Pending };
+
     public OrganisationType Type { get; private set; }
     public string Name { get; private set; } = default!;
     public OrganisationStatus Status { get; private set; }

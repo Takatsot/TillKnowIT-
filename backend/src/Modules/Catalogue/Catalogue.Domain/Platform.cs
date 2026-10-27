@@ -5,7 +5,7 @@ namespace Catalogue.Domain;
 /// <summary>One table for all lookups (categories, units, payment_methods, vat_rates, adjustment_reasons, document_types, languages).</summary>
 public sealed partial class Lookup : Entity
 {
-    public static readonly string[] Types = ["categories", "units", "payment_methods", "vat_rates", "adjustment_reasons", "document_types", "languages"];
+    public static readonly string[] Types = ["categories", "units", "payment_methods", "vat_rates", "adjustment_reasons", "document_types", "languages", "municipalities"];
 
     /// <summary>The six launch languages and the five added in Phase 5.</summary>
     public static readonly string[] LanguageCodes = ["en", "zu", "xh", "st", "tn", "af", "nso", "ts", "ve", "nr", "ss"];

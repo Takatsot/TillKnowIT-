@@ -22,6 +22,9 @@ internal static class CatalogueSeed
         ("adjustment_reasons", ["counted|Counted", "expired|Expired", "damaged|Damaged", "missing|Missing", "own_use|Own use"]),
         ("document_types", ["trading_licence|Business or trading licence", "health_certificate|Certificate of acceptability",
             "food_permit|Food handling permit", "fire_certificate|Fire certificate", "other|Other document"]),
+        // The eight metropolitan municipalities. A platform admin adds the others as suppliers need them.
+        ("municipalities", ["jhb|City of Johannesburg", "tsh|City of Tshwane", "ekh|City of Ekurhuleni", "cpt|City of Cape Town",
+            "eth|eThekwini (Durban)", "nmb|Nelson Mandela Bay", "buf|Buffalo City", "man|Mangaung"]),
         ("languages", ["en|English", "zu|isiZulu", "xh|isiXhosa", "st|Sesotho", "tn|Setswana", "af|Afrikaans"]),
     ];
 

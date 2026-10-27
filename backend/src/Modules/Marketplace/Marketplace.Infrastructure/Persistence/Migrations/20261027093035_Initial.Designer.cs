@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Marketplace.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MarketplaceDbContext))]
-    [Migration("20261026132941_Initial")]
+    [Migration("20261027093035_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -26,84 +26,6 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Marketplace.Domain.PurchaseOrder", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("created_at");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("created_by");
-
-                    b.Property<Guid?>("DeviceId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("device_id");
-
-                    b.Property<Guid>("ShopId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("shop_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("status");
-
-                    b.Property<Guid>("SupplierId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("supplier_id");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int>("Version")
-                        .IsConcurrencyToken()
-                        .HasColumnType("int")
-                        .HasColumnName("version");
-
-                    b.HasKey("Id")
-                        .HasName("pk_purchase_orders");
-
-                    b.HasIndex("ShopId")
-                        .HasDatabaseName("ix_purchase_orders_shop_id");
-
-                    b.HasIndex("SupplierId")
-                        .HasDatabaseName("ix_purchase_orders_supplier_id");
-
-                    b.ToTable("purchase_orders", "marketplace");
-                });
-
-            modelBuilder.Entity("Marketplace.Domain.PurchaseOrderLine", b =>
-                {
-                    b.Property<Guid>("PurchaseOrderId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("purchase_order_id");
-
-                    b.Property<Guid>("SupplierProductId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("supplier_product_id");
-
-                    b.Property<long>("CasePriceCents")
-                        .HasColumnType("bigint")
-                        .HasColumnName("case_price_cents");
-
-                    b.Property<int>("QuantityCases")
-                        .HasColumnType("int")
-                        .HasColumnName("quantity_cases");
-
-                    b.HasKey("PurchaseOrderId", "SupplierProductId")
-                        .HasName("pk_purchase_order_lines");
-
-                    b.ToTable("purchase_order_lines", "marketplace");
-                });
-
             modelBuilder.Entity("Marketplace.Domain.Supplier", b =>
                 {
                     b.Property<Guid>("Id")
@@ -111,6 +33,21 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
+                    b.Property<Guid?>("ApplicantPersonId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("applicant_person_id");
+
+                    b.Property<string>("ChecklistDone")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("checklist_done");
+
+                    b.Property<string>("ContactName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("contact_name");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("created_at");
@@ -118,6 +55,14 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by_shop_id");
+
+                    b.Property<long>("DeliveryFeeCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delivery_fee_cents");
 
                     b.Property<Guid?>("DeviceId")
                         .HasColumnType("uniqueidentifier")
@@ -128,9 +73,9 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(320)")
                         .HasColumnName("email");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                    b.Property<long>("MinOrderCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("min_order_cents");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -138,13 +83,48 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
-                    b.Property<Guid>("OrganisationId")
+                    b.Property<Guid?>("OrganisationId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("organisation_id");
+
+                    b.Property<string>("PaymentTerms")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("payment_terms");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("RegistrationNo")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("registration_no");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
+
+                    b.Property<DateTimeOffset?>("VerifiedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("verified_at");
+
+                    b.Property<Guid?>("VerifiedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("verified_by");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
@@ -152,14 +132,68 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnName("version");
 
                     b.Property<string>("Whatsapp")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
                         .HasColumnName("whatsapp");
 
                     b.HasKey("Id")
                         .HasName("pk_suppliers");
 
+                    b.HasIndex("OrganisationId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_suppliers_organisation_id")
+                        .HasFilter("organisation_id IS NOT NULL");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_suppliers_status");
+
                     b.ToTable("suppliers", "marketplace");
+                });
+
+            modelBuilder.Entity("Marketplace.Domain.SupplierArea", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("Days")
+                        .HasColumnType("int")
+                        .HasColumnName("days");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("MunicipalityCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("municipality_code");
+
+                    b.Property<Guid>("SupplierId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("supplier_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_supplier_areas");
+
+                    b.HasIndex("MunicipalityCode")
+                        .HasDatabaseName("ix_supplier_areas_municipality_code");
+
+                    b.HasIndex("SupplierId", "MunicipalityCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_supplier_areas_supplier_id_municipality_code");
+
+                    b.ToTable("supplier_areas", "marketplace");
                 });
 
             modelBuilder.Entity("Marketplace.Domain.SupplierProduct", b =>
@@ -170,13 +204,17 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Barcode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(14)
+                        .HasColumnType("nvarchar(14)")
                         .HasColumnName("barcode");
 
                     b.Property<long>("CasePriceCents")
                         .HasColumnType("bigint")
                         .HasColumnName("case_price_cents");
+
+                    b.Property<Guid?>("CatalogueProductId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("catalogue_product_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset")
@@ -190,9 +228,14 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
-                    b.Property<bool>("IsAvailable")
+                    b.Property<string>("ExpiryPolicy")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("expiry_policy");
+
+                    b.Property<bool>("InStock")
                         .HasColumnType("bit")
-                        .HasColumnName("is_available");
+                        .HasColumnName("in_stock");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -212,6 +255,10 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
 
+                    b.Property<bool>("VatIncluded")
+                        .HasColumnType("bit")
+                        .HasColumnName("vat_included");
+
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
                         .HasColumnType("int")
@@ -220,8 +267,13 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_supplier_products");
 
+                    b.HasIndex("CatalogueProductId")
+                        .HasDatabaseName("ix_supplier_products_catalogue_product_id");
+
                     b.HasIndex("SupplierId", "Barcode")
-                        .HasDatabaseName("ix_supplier_products_supplier_id_barcode");
+                        .IsUnique()
+                        .HasDatabaseName("ix_supplier_products_supplier_id_barcode")
+                        .HasFilter("barcode IS NOT NULL");
 
                     b.ToTable("supplier_products", "marketplace");
                 });
@@ -271,24 +323,14 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                     b.ToTable("outbox_messages", "marketplace");
                 });
 
-            modelBuilder.Entity("Marketplace.Domain.PurchaseOrder", b =>
+            modelBuilder.Entity("Marketplace.Domain.SupplierArea", b =>
                 {
                     b.HasOne("Marketplace.Domain.Supplier", null)
                         .WithMany()
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_purchase_orders_suppliers_supplier_id");
-                });
-
-            modelBuilder.Entity("Marketplace.Domain.PurchaseOrderLine", b =>
-                {
-                    b.HasOne("Marketplace.Domain.PurchaseOrder", null)
-                        .WithMany("Lines")
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_purchase_order_lines_purchase_orders_purchase_order_id");
+                        .HasConstraintName("fk_supplier_areas_supplier_supplier_id");
                 });
 
             modelBuilder.Entity("Marketplace.Domain.SupplierProduct", b =>
@@ -299,11 +341,6 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_supplier_products_suppliers_supplier_id");
-                });
-
-            modelBuilder.Entity("Marketplace.Domain.PurchaseOrder", b =>
-                {
-                    b.Navigation("Lines");
                 });
 #pragma warning restore 612, 618
         }

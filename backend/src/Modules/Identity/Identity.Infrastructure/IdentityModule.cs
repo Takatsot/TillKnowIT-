@@ -30,6 +30,8 @@ public static class IdentityModule
         services.AddScoped<ISetupStore, SetupStore>();
         services.AddScoped<IMembershipReadStore, MembershipReadStore>();
         services.AddScoped<IPermissionChecker, PermissionChecker>();
+        services.AddScoped<IOrganisationAccess, OrganisationAccess>();
+        services.AddScoped<ISupplierOrganisations, SupplierOrganisationService>();
         services.AddScoped<IStaffStore, StaffStore>();
         services.AddScoped<IDeviceStore, DeviceStore>();
         services.AddSingleton<IPinHasher, Pbkdf2PinHasher>();

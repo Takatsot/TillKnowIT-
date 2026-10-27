@@ -223,6 +223,8 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 {
                     { new Guid("348e6554-ea72-2399-652b-d01e00d0d3db"), "field_agent", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Field agent\"}", 4 },
                     { new Guid("63135645-6d68-f7b8-72e0-710926a3c998"), "owner", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Owner\"}", 1 },
+                    { new Guid("8668a93b-f5d5-1d8a-fdc4-27a74ec41a59"), "supplier_rep", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Supplier sales rep\"}", 7 },
+                    { new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"), "supplier_admin", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Supplier admin\"}", 6 },
                     { new Guid("bbdebcea-b24c-c7e1-9d0d-583dfcf15005"), "manager", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Manager\"}", 2 },
                     { new Guid("df96efb0-9ce8-44d4-6592-1fe7d95bb4ad"), "cashier", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Cashier\"}", 3 },
                     { new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"), "platform_admin", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, true, "{\"en\":\"Platform admin\"}", 5 }
@@ -254,6 +256,16 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     { "stock.count", new Guid("63135645-6d68-f7b8-72e0-710926a3c998") },
                     { "stock.receive", new Guid("63135645-6d68-f7b8-72e0-710926a3c998") },
                     { "vas.sell", new Guid("63135645-6d68-f7b8-72e0-710926a3c998") },
+                    { "deals.manage", new Guid("8668a93b-f5d5-1d8a-fdc4-27a74ec41a59") },
+                    { "supplier.catalogue", new Guid("8668a93b-f5d5-1d8a-fdc4-27a74ec41a59") },
+                    { "supplier.orders", new Guid("8668a93b-f5d5-1d8a-fdc4-27a74ec41a59") },
+                    { "deals.manage", new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910") },
+                    { "supplier.catalogue", new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910") },
+                    { "supplier.demand", new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910") },
+                    { "supplier.manage", new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910") },
+                    { "supplier.orders", new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910") },
+                    { "supplier.reps", new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910") },
+                    { "supplier.statements", new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910") },
                     { "cashup.do", new Guid("bbdebcea-b24c-c7e1-9d0d-583dfcf15005") },
                     { "compliance.manage", new Guid("bbdebcea-b24c-c7e1-9d0d-583dfcf15005") },
                     { "credit.manage", new Guid("bbdebcea-b24c-c7e1-9d0d-583dfcf15005") },
@@ -273,8 +285,10 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     { "slip.send", new Guid("df96efb0-9ce8-44d4-6592-1fe7d95bb4ad") },
                     { "vas.sell", new Guid("df96efb0-9ce8-44d4-6592-1fe7d95bb4ad") },
                     { "catalogue.approve", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
+                    { "dispute.resolve", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "lookup.manage", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "shop.verify", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
+                    { "supplier.verify", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") },
                     { "user.manage", new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df") }
                 });
 

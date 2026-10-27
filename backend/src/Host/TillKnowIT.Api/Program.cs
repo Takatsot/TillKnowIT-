@@ -45,6 +45,7 @@ api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 api.MapIdentityEndpoints();
 api.MapShopCoreEndpoints();
 api.MapCatalogueEndpoints();
+api.MapMarketplaceEndpoints();
 
 app.Run();
 

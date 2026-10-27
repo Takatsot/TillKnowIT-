@@ -42,9 +42,29 @@ on the build machine. The first real run is the first item on the hand-over list
 | E13-1 Field agent setup | Partly | The seven-step checklist, step completion, and verify (all steps needed, permission checked) are done on the server. The field agent app itself is not built. |
 | E14-1, E14-2 Founding suppliers | Todo | |
 
-## Phases 2 to 5
+## Phase 2: supplier marketplace
 
-Not started. This table is filled in as each phase is built.
+| Story | State | Notes |
+| --- | --- | --- |
+| M1-1 Supplier applies | Done | Business details, registration number shape, contacts, delivery areas; pending until verified. |
+| M1-2 Verify or reject | Done | Four-item checklist, all required; rejection needs a reason; verified supplier's organisation becomes verified. |
+| M1-3 Invite reps | Done | Reps get the supplier-rep role; only someone allowed in that supplier can invite. |
+| M2-1 Supplier catalogue upload | Done | Excel/CSV with column matching, preview then apply, matched to the shared catalogue by barcode, case size, case price, unit price, VAT flag. |
+| M2-2 Areas, days, minimum order, fee | Done | Areas from the municipalities lookup (the eight metros are seeded; admins add more). |
+| M2-3 Deals | Todo | |
+| M3-1 Reorder options | Todo | |
+| M3-2 Sharing settings | Todo | |
+| M3-3 Suggested replacement | Todo | Could. |
+| M4-1 to M4-4 Ordering | Todo | |
+| M5-1 to M5-4 Paying suppliers | Todo | Needs a payment partner that can hold money. |
+| M6-1 to M6-4 Group buying | Todo | |
+| M7-1, M7-2 Ratings and demand | Todo | |
+| Marketplace as its own service, Service Bus | Todo | |
+| Supplier portal app | Todo | |
+
+## Phases 3 to 5
+
+Not started. These tables are filled in as each phase is built.
 
 ## Hand-over list
 

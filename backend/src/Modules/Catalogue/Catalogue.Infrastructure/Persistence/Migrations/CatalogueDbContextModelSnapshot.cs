@@ -587,6 +587,86 @@ namespace Catalogue.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = new Guid("31275fec-2408-5f05-2ba0-a34c6b663fb0"),
+                            Code = "jhb",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"City of Johannesburg\"}",
+                            SortOrder = 1,
+                            Type = "municipalities"
+                        },
+                        new
+                        {
+                            Id = new Guid("697cbc63-da73-8276-fa91-f72b01646193"),
+                            Code = "tsh",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"City of Tshwane\"}",
+                            SortOrder = 2,
+                            Type = "municipalities"
+                        },
+                        new
+                        {
+                            Id = new Guid("1c80024b-ea6b-939e-451b-405d265a874b"),
+                            Code = "ekh",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"City of Ekurhuleni\"}",
+                            SortOrder = 3,
+                            Type = "municipalities"
+                        },
+                        new
+                        {
+                            Id = new Guid("0cd9f10c-aca4-7e90-51ef-149455661181"),
+                            Code = "cpt",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"City of Cape Town\"}",
+                            SortOrder = 4,
+                            Type = "municipalities"
+                        },
+                        new
+                        {
+                            Id = new Guid("7be57393-a47a-5713-2952-a1655f82c4df"),
+                            Code = "eth",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"eThekwini (Durban)\"}",
+                            SortOrder = 5,
+                            Type = "municipalities"
+                        },
+                        new
+                        {
+                            Id = new Guid("1275fefe-e6db-77db-1d3e-591aa6f1e2ee"),
+                            Code = "nmb",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"Nelson Mandela Bay\"}",
+                            SortOrder = 6,
+                            Type = "municipalities"
+                        },
+                        new
+                        {
+                            Id = new Guid("757c6c13-d2f0-ee68-ad34-895b4b4d5a46"),
+                            Code = "buf",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"Buffalo City\"}",
+                            SortOrder = 7,
+                            Type = "municipalities"
+                        },
+                        new
+                        {
+                            Id = new Guid("349e2492-cbde-8a87-fcda-9feac2fa741d"),
+                            Code = "man",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"Mangaung\"}",
+                            SortOrder = 8,
+                            Type = "municipalities"
+                        },
+                        new
+                        {
                             Id = new Guid("21d59059-5ac8-eb08-7027-a755c6ebeba0"),
                             Code = "en",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),

@@ -23,6 +23,7 @@ public static class CatalogueModule
         services.AddScoped<ICatalogueStore, CatalogueStore>();
         services.AddScoped<ICatalogueAdminStore, CatalogueAdminStore>();
         services.AddScoped<ILookupChecker, LookupChecker>();
+        services.AddScoped<ICatalogueDirectory, CatalogueDirectory>();
         services.AddDispatching(typeof(FindProductByBarcode).Assembly);
         return services;
     }

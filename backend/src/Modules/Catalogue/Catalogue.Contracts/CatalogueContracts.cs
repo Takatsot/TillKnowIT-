@@ -31,3 +31,11 @@ public sealed record LookupResponse(string Type, string Code, Dictionary<string,
 
 /// <summary>Names add or replace translations by language code. Leave a field out to leave it as it is. A new lookup needs English.</summary>
 public sealed record SaveLookupRequest(Guid AdminPersonId, Dictionary<string, string>? Names, bool? IsActive, int? SortOrder);
+
+public sealed record CatalogueMatch(Guid Id, string Name, string Barcode);
+
+/// <summary>Finds approved shared-catalogue products by barcode, for modules that match their own product lists to it.</summary>
+public interface ICatalogueDirectory
+{
+    Task<Dictionary<string, CatalogueMatch>> FindApproved(IEnumerable<string> barcodes, CancellationToken ct);
+}

@@ -1,7 +1,9 @@
+using Marketplace.Application.Suppliers;
 using Marketplace.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
+using TillKnowIT.Dispatching;
 using TillKnowIT.Outbox;
 using TillKnowIT.SharedKernel;
 
@@ -16,6 +18,9 @@ public static class MarketplaceModule
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, MarketplaceMigrator>();
+        services.AddScoped<ISupplierStore, SupplierStore>();
+        services.AddScoped<ISupplierProductStore, SupplierProductStore>();
+        services.AddDispatching(typeof(ApplyAsSupplier).Assembly);
         return services;
     }
 }

@@ -364,6 +364,24 @@ namespace Identity.Infrastructure.Persistence.Migrations
                             IsActive = true,
                             Names = "{\"en\":\"Platform admin\"}",
                             SortOrder = 5
+                        },
+                        new
+                        {
+                            Id = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
+                            Code = "supplier_admin",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"Supplier admin\"}",
+                            SortOrder = 6
+                        },
+                        new
+                        {
+                            Id = new Guid("8668a93b-f5d5-1d8a-fdc4-27a74ec41a59"),
+                            Code = "supplier_rep",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            Names = "{\"en\":\"Supplier sales rep\"}",
+                            SortOrder = 7
                         });
                 });
 
@@ -730,6 +748,66 @@ namespace Identity.Infrastructure.Persistence.Migrations
                                 {
                                     RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
                                     PermissionCode = "user.manage"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "supplier.verify"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "dispute.resolve"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
+                                    PermissionCode = "supplier.manage"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
+                                    PermissionCode = "supplier.catalogue"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
+                                    PermissionCode = "supplier.orders"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
+                                    PermissionCode = "supplier.reps"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
+                                    PermissionCode = "supplier.statements"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
+                                    PermissionCode = "deals.manage"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
+                                    PermissionCode = "supplier.demand"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("8668a93b-f5d5-1d8a-fdc4-27a74ec41a59"),
+                                    PermissionCode = "supplier.catalogue"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("8668a93b-f5d5-1d8a-fdc4-27a74ec41a59"),
+                                    PermissionCode = "supplier.orders"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("8668a93b-f5d5-1d8a-fdc4-27a74ec41a59"),
+                                    PermissionCode = "deals.manage"
                                 });
                         });
 

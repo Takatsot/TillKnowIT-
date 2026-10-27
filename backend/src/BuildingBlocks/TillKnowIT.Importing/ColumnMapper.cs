@@ -15,8 +15,10 @@ public static partial class ColumnMapper
     public const string CaseCost = "case_cost";
     public const string UnitCost = "unit_cost";
     public const string Price = "price";
+    public const string VatIncluded = "vat_included";
+    public const string InStock = "in_stock";
 
-    public static readonly string[] Fields = [Barcode, Name, Quantity, UnitsPerCase, CaseCost, UnitCost, Price];
+    public static readonly string[] Fields = [Barcode, Name, Quantity, UnitsPerCase, CaseCost, UnitCost, Price, VatIncluded, InStock];
 
     private static readonly Dictionary<string, string[]> Synonyms = new()
     {
@@ -27,6 +29,8 @@ public static partial class ColumnMapper
         [CaseCost] = ["case cost", "case price", "cost per case", "pack price", "price per case"],
         [UnitCost] = ["unit cost", "cost", "cost price", "unit price", "price each", "cost per unit", "each"],
         [Price] = ["selling price", "retail price", "rrp", "sell price", "retail"],
+        [VatIncluded] = ["vat", "vat included", "incl vat", "vat inc", "incl", "includes vat", "vat incl"],
+        [InStock] = ["in stock", "stock", "available", "availability", "stock status"],
     };
 
     /// <summary>Best guess of the mapping from the header row. A field with no obvious column is left out for the owner to choose.</summary>
@@ -65,6 +69,19 @@ public static partial class ColumnMapper
 
     [GeneratedRegex(@"\s+")]
     private static partial Regex Spaces();
+
+    // ---- yes/no reading ----
+
+    /// <summary>"Yes", "Y", "true", "1", "incl", "available" are true; "No", "n", "false", "0", "excl" are false. Anything else is null, not a guess.</summary>
+    public static bool? ParseFlag(string? text)
+    {
+        switch (text?.Trim().ToLowerInvariant())
+        {
+            case "yes" or "y" or "true" or "1" or "incl" or "included" or "inc" or "incl." or "available" or "in stock" or "x": return true;
+            case "no" or "n" or "false" or "0" or "excl" or "excluded" or "exc" or "excl." or "unavailable" or "out of stock" or "out": return false;
+            default: return null;
+        }
+    }
 
     // ---- number reading ----
 
