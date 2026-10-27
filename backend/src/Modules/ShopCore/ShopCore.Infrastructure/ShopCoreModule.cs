@@ -8,6 +8,7 @@ using ShopCore.Application.Imports;
 using ShopCore.Application.Credit;
 using ShopCore.Application.Notifications;
 using ShopCore.Application.Slips;
+using ShopCore.Application.Vas;
 using ShopCore.Application.Insights;
 using ShopCore.Application.Reports;
 using ShopCore.Application.Stock;
@@ -50,6 +51,8 @@ public static class ShopCoreModule
         services.AddScoped<IStockReadStore, StockReadStore>();
         services.AddScoped<IComplianceStore, ComplianceStore>();
         services.AddScoped<ISlipStore, SlipStore>();
+        services.AddScoped<IVasStore, VasStore>();
+        services.TryAddSingleton(VasOptions.Default);
         services.AddScoped<IImportStore, ImportStore>();
         services.AddScoped<IProductRepointStore, ProductRepointStore>();
         services.AddScoped<INotificationReadStore, NotificationReadStore>();

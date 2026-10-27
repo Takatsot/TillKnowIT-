@@ -156,8 +156,15 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.ToTable("vas_sales");
             e.HasKey(x => x.Id);
             e.Property(x => x.ProductType).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Recipient).HasMaxLength(20).IsRequired();
+            e.Property(x => x.ProductCode).HasMaxLength(50);
             e.Property(x => x.PartnerRef).HasMaxLength(100);
-            e.Property(x => x.Status).HasMaxLength(20);
+            e.Property(x => x.Token).HasMaxLength(100);
+            e.Property(x => x.FailureReason).HasMaxLength(300);
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Version).IsConcurrencyToken();
+            e.HasIndex(x => new { x.ShopId, x.CreatedAt });
+            e.Ignore(x => x.EarnedCommissionCents);
         });
 
         // Movements, cancellations and credit entries are a ledger: deleting a product, sale or account must

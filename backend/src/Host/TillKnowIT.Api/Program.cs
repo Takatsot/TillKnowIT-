@@ -22,6 +22,10 @@ builder.Services
     .AddMarketplaceModule(db)
     .AddMessagingModule(db);
 
+// A fake VAS partner exists in Development only. Elsewhere airtime and electricity report "not available"
+// until the real partner adapter is registered.
+if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

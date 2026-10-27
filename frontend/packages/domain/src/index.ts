@@ -8,3 +8,4 @@ export * from "./credit";
 export * from "./cashup";
 export * from "./stockRules";
 export * from "./insights";
+export * from "./vas";

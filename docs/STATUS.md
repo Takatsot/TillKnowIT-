@@ -35,7 +35,7 @@ on the build machine. The first real run is the first item on the hand-over list
 | E8-1, E8-2 Insights | Done | Server endpoint and the same rules in TypeScript for offline use. Screens not built. |
 | E8-3 Reports and export | Partly | Five reports as CSV, Excel and PDF (own PDF writer, no library licence). Reports are LINQ queries, not T-SQL functions, and run immediately; background jobs for very large reports are not built. |
 | E9-1 Compliance documents | Done | Upload (JPEG/PNG/PDF, 10 MB, content checked), AES-256-GCM encrypted storage, list with status, download, delete, and WhatsApp/email reminders at 30 days, 7 days and expiry, sent once. Local encrypted disk store; the Azure Blob adapter is not written. |
-| E10-1 Airtime and electricity | Todo | Needs a licensed partner. |
+| E10-1 Airtime and electricity | Port | Sale flow, validation, limits, commission and the safety rules are done: the sale is saved before the partner is called, a repeat never buys twice, a no-answer is recorded as unknown and never retried. The partner adapter is not connected (needs a licensed partner); a fake exists in Development only, elsewhere the feature reports "not available". Limits and commission rates are placeholders. Reconciliation of unknown sales is not built. |
 | E11-1 Daily summary | Done | Sent once a day after 19:00 shop time to every verified shop, by WhatsApp or email. |
 | E11-2 Loss alerts | Done | Cancellations per hour and short cash-ups, levels from shop settings with defaults; plus a 48-hour offline-till alert. All sent once (dedupe keys). Push needs the owner app; WhatsApp/SMS/email providers are not connected. |
 | E12-1 Six languages | Partly | Structure and English done; translations need translators. |

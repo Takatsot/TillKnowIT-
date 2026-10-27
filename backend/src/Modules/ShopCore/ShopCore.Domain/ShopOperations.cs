@@ -38,27 +38,3 @@ public sealed class ShopSetting : VersionedEntity
     public string Key { get; private set; } = default!;
     public string Value { get; private set; } = default!;
 }
-
-public enum VasProductType { Airtime, Data, Electricity }
-
-/// <summary>Online only.</summary>
-public sealed class VasSale : Entity
-{
-    private VasSale() { }
-
-    public VasSale(Guid shopId, VasProductType type, long amountCents, long commissionCents, string? partnerRef)
-    {
-        ShopId = shopId;
-        ProductType = type;
-        AmountCents = amountCents;
-        CommissionCents = commissionCents;
-        PartnerRef = partnerRef;
-    }
-
-    public Guid ShopId { get; private set; }
-    public VasProductType ProductType { get; private set; }
-    public long AmountCents { get; private set; }
-    public long CommissionCents { get; private set; }
-    public string? PartnerRef { get; private set; }
-    public string Status { get; private set; } = "pending";
-}

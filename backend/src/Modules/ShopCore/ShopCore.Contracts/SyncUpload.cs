@@ -133,3 +133,16 @@ public sealed record ConfirmedLineRequest(Guid ProductId, int Quantity, long? Un
 public sealed record ConfirmStockImportRequest(Guid ShopId, Guid DeviceId, Guid StaffId, string? SupplierName, string? InvoiceRef, List<ConfirmedLineRequest> Lines);
 
 public sealed record RemapStockImportRequest(Guid ShopId, Guid DeviceId, Guid StaffId, Dictionary<string, string> Mapping);
+
+/// <summary>
+/// Sell airtime, data or electricity. Id is the idempotency key: send the same Id again after a timeout and you get the same
+/// answer, never a second purchase. ProductType is airtime, data or electricity; Recipient is a phone number or an 11-digit meter number.
+/// </summary>
+public sealed record VasSaleRequest(
+    Guid Id, Guid ShopId, Guid DeviceId, Guid StaffId, string ProductType, string Recipient, long AmountCents, string? ProductCode);
+
+/// <summary>
+/// Status is pending, completed, failed or unknown. Unknown means the partner did not answer: do not sell again, check with
+/// support first. Token is the electricity token to give the customer.
+/// </summary>
+public sealed record VasSaleResponse(Guid Id, string Status, long AmountCents, long CommissionCents, string? PartnerRef, string? Token, string? Message);

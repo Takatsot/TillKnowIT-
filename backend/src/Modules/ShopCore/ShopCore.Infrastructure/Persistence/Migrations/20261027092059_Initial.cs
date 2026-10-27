@@ -225,13 +225,19 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     product_type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    recipient = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    product_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     amount_cents = table.Column<long>(type: "bigint", nullable: false),
                     commission_cents = table.Column<long>(type: "bigint", nullable: false),
-                    partner_ref = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    partner_ref = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    token = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    failure_reason = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -480,6 +486,12 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore",
                 table: "stock_movements",
                 columns: new[] { "shop_id", "product_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_vas_sales_shop_id_created_at",
+                schema: "shopcore",
+                table: "vas_sales",
+                columns: new[] { "shop_id", "created_at" });
         }
 
         /// <inheritdoc />
