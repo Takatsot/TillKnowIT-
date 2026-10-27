@@ -303,6 +303,8 @@ public class MessagingTests
         "slip.sale" => SlipFormatter.Values("Mama's", [new SlipLine("Bread", 1, 1800)], 1800, Now, "https://x/y"),
         "daily.summary" => new() { ["shop"] = "s", ["sales"] = "1", ["profit"] = "1", ["customers"] = "1", ["low"] = "1", ["expiring"] = "1", ["cashup"] = "ok", ["cancellations"] = "0" },
         "alert.loss" => new() { ["shop"] = "s", ["message"] = "m" },
+        "order.new" => new() { ["shop"] = "s", ["order"] = "AB12CD34", ["lines"] = "1 x Coke", ["payment"] = "payable on delivery" },
+        "order.update" => new() { ["shop"] = "s", ["order"] = "AB12CD34", ["supplier"] = "Fresh Foods", ["summary"] = "ok", ["total"] = "R10.00" },
         "device.offline" => new() { ["shop"] = "s", ["device"] = "d", ["hours"] = "48" },
         _ when code.StartsWith("compliance.reminder.", StringComparison.Ordinal) => new() { ["shop"] = "s", ["document"] = "d", ["date"] = "2026-11-01", ["days"] = "7" },
         _ => throw new InvalidOperationException($"No sample values for {code}; add them here and to the sender."),

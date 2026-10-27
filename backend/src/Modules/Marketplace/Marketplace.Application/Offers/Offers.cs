@@ -17,6 +17,9 @@ public interface IOfferStore
     Task<List<OfferSource>> Sources(string barcode, string municipalityCode, CancellationToken ct);
     Task<List<Deal>> ActiveDeals(IEnumerable<Guid> supplierIds, string municipalityCode, DateTimeOffset now, CancellationToken ct);
     Task<List<ShopSupplier>> ShopSuppliers(Guid shopId, CancellationToken ct);
+
+    /// <summary>What the shop last paid each supplier, per case, for this product.</summary>
+    Task<Dictionary<Guid, long>> LastPrices(Guid shopId, string barcode, CancellationToken ct);
     Task<Dictionary<string, string>> Settings(CancellationToken ct);
 }
 
@@ -33,6 +36,7 @@ internal static class OfferBuilder
 
         var deals = await store.ActiveDeals(sources.Select(s => s.SupplierId).Distinct(), municipality, now, ct);
         var usual = (await store.ShopSuppliers(shopId, ct)).ToDictionary(s => s.SupplierId);
+        var lastPrices = await store.LastPrices(shopId, product.Barcode, ct);
         var quantity = Math.Max(product.SuggestedOrderQuantity, 1);
 
         var candidates = sources.Select(s =>
@@ -45,7 +49,7 @@ internal static class OfferBuilder
             usual.TryGetValue(s.SupplierId, out var shopSupplier);
 
             return new OfferCandidate(s.SupplierId, s.SupplierName, s.SupplierProductId, s.UnitsPerCase, s.CasePriceCents, s.VatIncluded,
-                s.DeliveryFeeCents, s.MinOrderCents, IsUsual: shopSupplier is not null, shopSupplier?.LastPriceCents, s.Rating,
+                s.DeliveryFeeCents, s.MinOrderCents, IsUsual: shopSupplier is not null, lastPrices.TryGetValue(s.SupplierId, out var last) ? last : null, s.Rating,
                 SupplierArea.DaysUntilNext(s.Days, today), deal?.Type, deal?.Terms, deal?.Title, deal?.IsSponsored ?? false);
         });
 

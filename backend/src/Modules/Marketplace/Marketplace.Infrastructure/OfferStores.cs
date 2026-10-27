@@ -50,6 +50,9 @@ internal sealed class OfferStore(MarketplaceDbContext db) : IOfferStore
     public Task<List<ShopSupplier>> ShopSuppliers(Guid shopId, CancellationToken ct) =>
         db.Set<ShopSupplier>().AsNoTracking().Where(s => s.ShopId == shopId).ToListAsync(ct);
 
+    public async Task<Dictionary<Guid, long>> LastPrices(Guid shopId, string barcode, CancellationToken ct) =>
+        await db.Set<LastPrice>().AsNoTracking().Where(p => p.ShopId == shopId && p.Barcode == barcode).ToDictionaryAsync(p => p.SupplierId, p => p.CasePriceCents, ct);
+
     public async Task<Dictionary<string, string>> Settings(CancellationToken ct) =>
         await db.Set<MarketplaceSetting>().AsNoTracking().ToDictionaryAsync(s => s.Key, s => s.Value, ct);
 }

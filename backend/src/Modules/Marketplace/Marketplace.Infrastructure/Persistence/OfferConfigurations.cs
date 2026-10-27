@@ -47,6 +47,19 @@ internal sealed class ShopSupplierConfiguration : IEntityTypeConfiguration<ShopS
     }
 }
 
+internal sealed class LastPriceConfiguration : IEntityTypeConfiguration<LastPrice>
+{
+    public void Configure(EntityTypeBuilder<LastPrice> b)
+    {
+        b.ToTable("last_prices");
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Barcode).HasMaxLength(14).IsRequired();
+        b.Property(x => x.Version).IsConcurrencyToken();
+        b.HasOne<Supplier>().WithMany().HasForeignKey(x => x.SupplierId);
+        b.HasIndex(x => new { x.ShopId, x.SupplierId, x.Barcode }).IsUnique();
+    }
+}
+
 internal sealed class MarketplaceSettingConfiguration : IEntityTypeConfiguration<MarketplaceSetting>
 {
     public void Configure(EntityTypeBuilder<MarketplaceSetting> b)

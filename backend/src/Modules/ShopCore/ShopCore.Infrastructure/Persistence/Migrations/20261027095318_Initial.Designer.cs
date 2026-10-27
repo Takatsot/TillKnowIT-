@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261027092059_Initial")]
+    [Migration("20261027095318_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

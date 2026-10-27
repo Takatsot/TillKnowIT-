@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Marketplace.Application.Offers;
+using Marketplace.Application.Orders;
 using Marketplace.Application.Suppliers;
 using Marketplace.Contracts;
 using Microsoft.AspNetCore.Builder;
@@ -91,6 +92,31 @@ public static class MarketplaceEndpoints
 
         api.MapPut("/admin/marketplace/settings/{key}", async (string key, SaveMarketplaceSettingRequest req, IDispatcher d, CancellationToken ct) => Done(await d.Send(new SaveMarketplaceSetting(key, req), ct)));
 
+        api.MapPost("/shops/{shopId:guid}/purchase-orders", async (Guid shopId, CreateOrderRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new CreateOrder(shopId, req), ct);
+            return result.IsSuccess ? Results.Created($"/api/v1/purchase-orders/{result.Value!.Id}", result.Value) : Problem(result.Error!);
+        });
+
+        api.MapPost("/shops/{shopId:guid}/purchase-orders/build", async (Guid shopId, BuildOrdersRequest req, IDispatcher d, CancellationToken ct) =>
+            Reply(await d.Send(new BuildOrders(shopId, req), ct)));
+
+        api.MapPost("/purchase-orders/{id:guid}/send", async (Guid id, SendOrderRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new SendOrder(id, req), ct)));
+
+        api.MapPost("/purchase-orders/{id:guid}/cancel", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new CancelOrder(id, callerPersonId), ct)));
+
+        api.MapPatch("/purchase-orders/{id:guid}/lines", async (Guid id, RespondToOrderRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new RespondToOrder(id, req), ct)));
+
+        api.MapPost("/purchase-orders/{id:guid}/deliver", async (Guid id, DeliverOrderRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new DeliverOrder(id, req), ct)));
+
+        api.MapPost("/purchase-orders/{id:guid}/receive", async (Guid id, ReceiveOrderRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ReceiveOrder(id, req), ct)));
+
+        api.MapGet("/purchase-orders/{id:guid}", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetOrder(id, callerPersonId), ct)));
+
+        api.MapGet("/shops/{shopId:guid}/purchase-orders", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListShopOrders(shopId, callerPersonId), ct)));
+
+        api.MapGet("/suppliers/{id:guid}/orders", async (Guid id, Guid callerPersonId, string? status, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListSupplierOrders(id, callerPersonId, status), ct)));
+
         api.MapPatch("/supplier-products/{id:guid}", async (Guid id, UpdateSupplierProductRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new UpdateSupplierProduct(id, req), ct)));
 
         return api;
@@ -106,7 +132,8 @@ public static class MarketplaceEndpoints
         {
             "permission.denied" => 403,
             var c when c.EndsWith("not_found", StringComparison.Ordinal) => 404,
-            "staff.already_member" or "supplier.not_pending" or "supplier.suspended" or "supplier.checklist_incomplete" => 409,
+            "staff.already_member" or "supplier.not_pending" or "supplier.suspended" or "supplier.checklist_incomplete"
+                or "order.already_sent" or "order.cannot_cancel" or "order.not_awaiting_reply" or "order.not_confirmed" or "order.not_delivered" or "order.already_received" => 409,
             _ => 422,
         });
 }

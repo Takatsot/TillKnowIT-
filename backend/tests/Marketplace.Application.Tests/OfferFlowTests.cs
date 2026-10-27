@@ -19,12 +19,14 @@ public class OfferFlowTests
         public List<(OfferSource Source, string Barcode, string Municipality)> Listings { get; } = [];
         public List<Deal> Deals { get; } = [];
         public List<ShopSupplier> Usual { get; } = [];
+        public Dictionary<Guid, long> Last { get; } = [];
         public Dictionary<string, string> Config { get; } = [];
         public Task<List<OfferSource>> Sources(string barcode, string municipality, CancellationToken ct) =>
             Task.FromResult(Listings.Where(l => l.Barcode == barcode && l.Municipality == municipality).Select(l => l.Source).ToList());
         public Task<List<Deal>> ActiveDeals(IEnumerable<Guid> ids, string municipality, DateTimeOffset now, CancellationToken ct) =>
             Task.FromResult(Deals.Where(d => ids.Contains(d.SupplierId) && d.IsActiveAt(now) && d.AppliesToArea(municipality)).ToList());
         public Task<List<ShopSupplier>> ShopSuppliers(Guid shopId, CancellationToken ct) => Task.FromResult(Usual.Where(u => u.ShopId == shopId).ToList());
+        public Task<Dictionary<Guid, long>> LastPrices(Guid shopId, string barcode, CancellationToken ct) => Task.FromResult(Last);
         public Task<Dictionary<string, string>> Settings(CancellationToken ct) => Task.FromResult(Config);
     }
 
@@ -140,9 +142,8 @@ public class OfferFlowTests
         _stock.Products.Add(product);
         Listing("Cheap", casePrice: 20000);
         var mine = Listing("My usual", casePrice: 26000);
-        var shopSupplier = new ShopSupplier(_shop, mine.SupplierId);
-        shopSupplier.RecordOrder(25000, Now.AddDays(-7));
-        _store.Usual.Add(shopSupplier);
+        _store.Usual.Add(new ShopSupplier(_shop, mine.SupplierId));
+        _store.Last[mine.SupplierId] = 25000;
 
         var offers = (await Offers().Handle(new GetOffers(_shop, _owner, product.ProductId), default)).Value!.Offers;
 

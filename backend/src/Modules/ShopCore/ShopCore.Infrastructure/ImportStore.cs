@@ -20,6 +20,9 @@ internal sealed class ImportStore(ShopCoreDbContext db) : IImportStore
 {
     public async Task Add(InvoiceImport import, CancellationToken ct) => await db.Set<InvoiceImport>().AddAsync(import, ct);
 
+    public Task<bool> ExistsByFile(Guid shopId, string fileUrl, CancellationToken ct) =>
+        db.Set<InvoiceImport>().AsNoTracking().AnyAsync(i => i.ShopId == shopId && i.FileUrl == fileUrl, ct);
+
     public Task<InvoiceImport?> Get(Guid shopId, Guid importId, CancellationToken ct) =>
         db.Set<InvoiceImport>().FirstOrDefaultAsync(i => i.Id == importId && i.ShopId == shopId, ct);
 

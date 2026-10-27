@@ -21,6 +21,11 @@ internal static class MessagingSeed
         ("slip.sale", [MessageChannel.Sms], null, "{shop}: {total} paid on {date}. Slip: {url}"),
         ("slip.sale", [MessageChannel.Email], "Your slip from {shop}", "Thank you for shopping at {shop}.\n\n{lines}\n\nTotal: {total}\nDate: {date}\n\nView your slip: {url}"),
 
+        // Orders: to a supplier by WhatsApp or email, and updates back to the shop's owner.
+        ("order.new", [MessageChannel.Whatsapp], null, "New order {order} from {shop}:\n{lines}\nPayment: {payment}.\nPlease reply with what you can deliver and when."),
+        ("order.new", [MessageChannel.Email], "New order {order} from {shop}", "{shop} has sent you order {order}:\n\n{lines}\n\nPayment: {payment}.\n\nPlease reply with what you can deliver and when."),
+        ("order.update", [MessageChannel.Whatsapp, MessageChannel.Email], null, "{supplier} replied to order {order} ({shop}). {summary}\nTotal: {total}."),
+
         // Messages to the owner.
         ("daily.summary", [MessageChannel.Whatsapp, MessageChannel.Push], null, Summary),
         ("daily.summary", [MessageChannel.Email], "Daily summary for {shop}", Summary),

@@ -40,7 +40,7 @@ public sealed class SharingSetting : VersionedEntity
     }
 }
 
-/// <summary>A supplier a shop buys from. "Usual" ones are shown first, with the price the shop last paid.</summary>
+/// <summary>A supplier a shop buys from. "Usual" ones are shown first. Added by the owner, or automatically once an order is received.</summary>
 public sealed class ShopSupplier : VersionedEntity
 {
     private ShopSupplier() { }
@@ -53,15 +53,39 @@ public sealed class ShopSupplier : VersionedEntity
 
     public Guid ShopId { get; private set; }
     public Guid SupplierId { get; private set; }
-
-    public long? LastPriceCents { get; private set; }
     public DateTimeOffset? LastOrderAt { get; private set; }
 
-    /// <summary>Remembers what the shop paid, so next time the usual supplier is shown with its last price.</summary>
-    public void RecordOrder(long? priceCents, DateTimeOffset now)
+    public void RecordOrder(DateTimeOffset now)
     {
-        LastPriceCents = priceCents ?? LastPriceCents;
         LastOrderAt = now;
+        Touch();
+    }
+}
+
+/// <summary>What a shop last paid a supplier for a product (by barcode), per case, so the usual supplier shows its last price.</summary>
+public sealed class LastPrice : VersionedEntity
+{
+    private LastPrice() { }
+
+    public LastPrice(Guid shopId, Guid supplierId, string barcode, long casePriceCents, DateTimeOffset now)
+    {
+        ShopId = shopId;
+        SupplierId = supplierId;
+        Barcode = barcode;
+        CasePriceCents = casePriceCents;
+        PaidAt = now;
+    }
+
+    public Guid ShopId { get; private set; }
+    public Guid SupplierId { get; private set; }
+    public string Barcode { get; private set; } = default!;
+    public long CasePriceCents { get; private set; }
+    public DateTimeOffset PaidAt { get; private set; }
+
+    public void Update(long casePriceCents, DateTimeOffset now)
+    {
+        CasePriceCents = casePriceCents;
+        PaidAt = now;
         Touch();
     }
 }

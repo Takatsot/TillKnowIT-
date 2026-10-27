@@ -159,6 +159,7 @@ public class StockImportTests
         public List<StockMovement> Movements { get; } = [];
         public int Saves { get; private set; }
         public Task Add(InvoiceImport i, CancellationToken ct) { Imports.Add(i); return Task.CompletedTask; }
+        public Task<bool> ExistsByFile(Guid shopId, string fileUrl, CancellationToken ct) => Task.FromResult(Imports.Any(i => i.ShopId == shopId && i.FileUrl == fileUrl));
         public Task<InvoiceImport?> Get(Guid shopId, Guid id, CancellationToken ct) => Task.FromResult(Imports.FirstOrDefault(i => i.Id == id && i.ShopId == shopId));
         public Task<List<ProductRef>> Products(Guid shopId, CancellationToken ct) => Task.FromResult(StockImportTests.Products);
         public Task<ImportMapping?> GetMapping(Guid shopId, string key, CancellationToken ct) => Task.FromResult(Mappings.FirstOrDefault(m => m.ShopId == shopId && m.SupplierKey == key));

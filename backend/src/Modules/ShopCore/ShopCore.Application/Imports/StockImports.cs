@@ -12,6 +12,9 @@ namespace ShopCore.Application.Imports;
 public interface IImportStore
 {
     Task Add(InvoiceImport import, CancellationToken ct);
+
+    /// <summary>Whether this shop already has an import for the file (or marketplace order) with this address.</summary>
+    Task<bool> ExistsByFile(Guid shopId, string fileUrl, CancellationToken ct);
     Task<InvoiceImport?> Get(Guid shopId, Guid importId, CancellationToken ct);
 
     /// <summary>The shop's active products, as much as matching needs.</summary>

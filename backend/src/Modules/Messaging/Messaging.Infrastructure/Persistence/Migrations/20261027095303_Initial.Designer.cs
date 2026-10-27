@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messaging.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MessagingDbContext))]
-    [Migration("20261027085518_Initial")]
+    [Migration("20261027095303_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -122,6 +122,47 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Language = "en",
                             Subject = "Your slip from {shop}",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("a211b0d1-208c-8fc4-c7af-8e81e47576f5"),
+                            Body = "New order {order} from {shop}:\n{lines}\nPayment: {payment}.\nPlease reply with what you can deliver and when.",
+                            Channel = "Whatsapp",
+                            Code = "order.new",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("8fbe44ef-b850-abb1-b543-92a329b55a86"),
+                            Body = "{shop} has sent you order {order}:\n\n{lines}\n\nPayment: {payment}.\n\nPlease reply with what you can deliver and when.",
+                            Channel = "Email",
+                            Code = "order.new",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Subject = "New order {order} from {shop}",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("17cd682e-72a1-2ad0-d4eb-45cec32719a2"),
+                            Body = "{supplier} replied to order {order} ({shop}). {summary}\nTotal: {total}.",
+                            Channel = "Whatsapp",
+                            Code = "order.update",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("55739b05-dd74-0d64-6f80-2f7f42f41c9d"),
+                            Body = "{supplier} replied to order {order} ({shop}). {summary}\nTotal: {total}.",
+                            Channel = "Email",
+                            Code = "order.update",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
                             Version = 1
                         },
                         new

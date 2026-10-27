@@ -138,6 +138,72 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "last_prices",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    barcode = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
+                    case_price_cents = table.Column<long>(type: "bigint", nullable: false),
+                    paid_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_last_prices", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_last_prices_supplier_supplier_id",
+                        column: x => x.supplier_id,
+                        principalSchema: "marketplace",
+                        principalTable: "suppliers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "purchase_orders",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    channel = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    delivery_date = table.Column<DateOnly>(type: "date", nullable: true),
+                    payment_method = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    payment_status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    min_order_cents = table.Column<long>(type: "bigint", nullable: false),
+                    delivery_fee_cents = table.Column<long>(type: "bigint", nullable: false),
+                    sent_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    confirmed_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    delivered_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    received_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_purchase_orders", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_purchase_orders_supplier_supplier_id",
+                        column: x => x.supplier_id,
+                        principalSchema: "marketplace",
+                        principalTable: "suppliers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "shop_suppliers",
                 schema: "marketplace",
                 columns: table => new
@@ -145,7 +211,6 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     supplier_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    last_price_cents = table.Column<long>(type: "bigint", nullable: true),
                     last_order_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -223,6 +288,36 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "purchase_order_lines",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    order_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    barcode = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: true),
+                    units_per_case = table.Column<int>(type: "int", nullable: false),
+                    ordered_cases = table.Column<int>(type: "int", nullable: false),
+                    case_price_cents = table.Column<long>(type: "bigint", nullable: false),
+                    vat_included = table.Column<bool>(type: "bit", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    confirmed_cases = table.Column<int>(type: "int", nullable: true),
+                    delivered_cases = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_purchase_order_lines", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_purchase_order_lines_purchase_orders_order_id",
+                        column: x => x.order_id,
+                        principalSchema: "marketplace",
+                        principalTable: "purchase_orders",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "ix_deals_is_cancelled_ends_at",
                 schema: "marketplace",
@@ -234,6 +329,19 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace",
                 table: "deals",
                 columns: new[] { "supplier_id", "starts_at" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_last_prices_shop_id_supplier_id_barcode",
+                schema: "marketplace",
+                table: "last_prices",
+                columns: new[] { "shop_id", "supplier_id", "barcode" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_last_prices_supplier_id",
+                schema: "marketplace",
+                table: "last_prices",
+                column: "supplier_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_marketplace_settings_key",
@@ -248,6 +356,24 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 table: "outbox_messages",
                 column: "occurred_at",
                 filter: "processed_at IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_purchase_order_lines_order_id",
+                schema: "marketplace",
+                table: "purchase_order_lines",
+                column: "order_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_purchase_orders_shop_id_created_at",
+                schema: "marketplace",
+                table: "purchase_orders",
+                columns: new[] { "shop_id", "created_at" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_purchase_orders_supplier_id_status",
+                schema: "marketplace",
+                table: "purchase_orders",
+                columns: new[] { "supplier_id", "status" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_sharing_settings_shop_id",
@@ -319,11 +445,19 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace");
 
             migrationBuilder.DropTable(
+                name: "last_prices",
+                schema: "marketplace");
+
+            migrationBuilder.DropTable(
                 name: "marketplace_settings",
                 schema: "marketplace");
 
             migrationBuilder.DropTable(
                 name: "outbox_messages",
+                schema: "marketplace");
+
+            migrationBuilder.DropTable(
+                name: "purchase_order_lines",
                 schema: "marketplace");
 
             migrationBuilder.DropTable(
@@ -340,6 +474,10 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "supplier_products",
+                schema: "marketplace");
+
+            migrationBuilder.DropTable(
+                name: "purchase_orders",
                 schema: "marketplace");
 
             migrationBuilder.DropTable(
