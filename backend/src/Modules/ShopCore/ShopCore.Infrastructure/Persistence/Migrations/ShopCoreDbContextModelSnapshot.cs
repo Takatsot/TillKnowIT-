@@ -645,6 +645,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
 
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)

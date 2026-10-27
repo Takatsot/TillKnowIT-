@@ -23,25 +23,6 @@ public sealed class SaleCancellation : Entity
     public DateTimeOffset CancelledAt { get; private set; }
 }
 
-public enum SlipChannel { Qr, Whatsapp, Sms, Email }
-
-public sealed class SlipRequest : Entity
-{
-    private SlipRequest() { }
-
-    public SlipRequest(Guid saleId, SlipChannel channel, string? destination)
-    {
-        SaleId = saleId;
-        Channel = channel;
-        Destination = destination;
-    }
-
-    public Guid SaleId { get; private set; }
-    public SlipChannel Channel { get; private set; }
-    public string? Destination { get; private set; }
-    public string Status { get; private set; } = "queued";
-}
-
 public sealed class ShopSetting : VersionedEntity
 {
     private ShopSetting() { }

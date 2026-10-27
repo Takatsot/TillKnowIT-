@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.SharedKernel\TillKnowIT.SharedKernel.csproj" />
+    <ProjectReference Include="..\ShopCore.Contracts\ShopCore.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

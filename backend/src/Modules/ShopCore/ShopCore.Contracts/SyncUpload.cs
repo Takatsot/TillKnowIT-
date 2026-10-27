@@ -99,3 +99,14 @@ public sealed record InsightsResponse(
 public sealed record ComplianceDocumentResponse(Guid Id, string TypeCode, string FileName, DateOnly? ExpiresOn, int? DaysLeft, string Status);
 
 public sealed record DueComplianceReminder(Guid ShopId, Guid DocumentId, string TypeCode, DateOnly? ExpiresOn, int Reminder, string DedupeKey);
+
+/// <summary>Channel is qr, whatsapp, sms or email. Destination is the phone number or email; QR needs none.</summary>
+public sealed record RequestSlipRequest(Guid ShopId, Guid DeviceId, Guid StaffId, string Channel, string? Destination, string? Language);
+
+/// <summary>Status is "shown" (QR) or "queued". Url is the slip link: draw it as the QR code, or it is what the message contains.</summary>
+public sealed record SlipResponse(string Status, string Url);
+
+public sealed record SlipLineView(string Name, int Quantity, long PriceCents);
+
+/// <summary>What the slip link shows. No staff, customer or device details, by design.</summary>
+public sealed record SlipView(string ShopName, string Date, List<SlipLineView> Lines, long TotalCents, long VatCents, string PaymentMethod, bool Cancelled);

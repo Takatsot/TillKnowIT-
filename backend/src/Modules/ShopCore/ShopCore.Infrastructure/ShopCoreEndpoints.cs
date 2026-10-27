@@ -71,6 +71,7 @@ public static class ShopCoreEndpoints
         });
 
         ComplianceEndpoints.Map(api);
+        SlipEndpoints.Map(api);
         return api;
     }
 

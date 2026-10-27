@@ -1,7 +1,10 @@
+using Messaging.Application;
+using Messaging.Application.Sending;
 using Messaging.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
+using TillKnowIT.Dispatching;
 using TillKnowIT.Outbox;
 using TillKnowIT.SharedKernel;
 
@@ -16,6 +19,9 @@ public static class MessagingModule
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, MessagingMigrator>();
+        services.AddScoped<IMessagingStore, MessagingStore>();
+        services.AddMessagingApplication();
+        services.AddDispatching(typeof(SendDueMessages).Assembly);
         return services;
     }
 }

@@ -1,0 +1,162 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace Messaging.Infrastructure.Persistence.Migrations
+{
+    /// <inheritdoc />
+    public partial class Initial : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.EnsureSchema(
+                name: "messaging");
+
+            migrationBuilder.CreateTable(
+                name: "message_templates",
+                schema: "messaging",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    language = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
+                    channel = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    body = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_message_templates", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "outbound_messages",
+                schema: "messaging",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    channel = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    destination = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: false),
+                    subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    body = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    template_code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    dedupe_key = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    attempts = table.Column<int>(type: "int", nullable: false),
+                    next_attempt_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    sent_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    provider_ref = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    error = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    cost_cents = table.Column<long>(type: "bigint", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_outbound_messages", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "outbox_messages",
+                schema: "messaging",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    payload = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    occurred_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    processed_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    attempts = table.Column<int>(type: "int", nullable: false),
+                    error = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_outbox_messages", x => x.id);
+                });
+
+            migrationBuilder.InsertData(
+                schema: "messaging",
+                table: "message_templates",
+                columns: new[] { "id", "body", "channel", "code", "created_at", "created_by", "device_id", "language", "subject", "updated_at", "version" },
+                values: new object[,]
+                {
+                    { new Guid("053bf730-0906-3522-3d4b-95fea84cf3f7"), "{shop}: your {document} expired on {date}. Renew it as soon as possible.", "Email", "compliance.reminder.0", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("058e98f4-6ad4-a6a7-ac28-5280a69ae317"), "Thank you for shopping at {shop}.\n\n{lines}\n\nTotal: {total}\nDate: {date}\n\nView your slip: {url}", "Email", "slip.sale", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", "Your slip from {shop}", null, 1 },
+                    { new Guid("073062e0-7371-d194-cb17-d050c1ecd3db"), "{shop}: your {document} expires in {days} days, on {date}. Renew it now.", "Push", "compliance.reminder.7", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("0f363cd0-c727-a40a-77b4-b8e7c9d454c6"), "{shop}: your {document} expires on {date}. Please renew it in good time.", "Email", "compliance.reminder.30", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("1bfed125-1154-39df-09d7-41e07b4a1400"), "{shop}: the till '{device}' has not synced for {hours} hours.", "Push", "device.offline", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("310a164f-7686-5d48-128f-455f738c722b"), "{shop}: the till '{device}' has not synced for {hours} hours.", "Email", "device.offline", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("452e2653-374d-6a32-2369-5b3800afb001"), "{shop}: your {document} expires in {days} days, on {date}. Renew it now.", "Whatsapp", "compliance.reminder.7", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("46aaa962-2f90-8cb6-f79a-194431e1796d"), "Thank you for shopping at {shop}.\n{lines}\nTotal: {total}\n{date}\nYour slip: {url}", "Whatsapp", "slip.sale", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("539baf4f-112e-9165-25bb-e69e7ad6d197"), "{shop} today: sales {sales}, profit {profit}, {customers} customers. Low stock: {low}. Expiring soon: {expiring}. Cash-up: {cashup}. Cancellations: {cancellations}.", "Email", "daily.summary", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", "Daily summary for {shop}", null, 1 },
+                    { new Guid("6c43dd65-2c14-1894-b3d3-234424d932f4"), "Alert for {shop}: {message}", "Email", "alert.loss", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("73c5b36f-b779-adad-b898-ef6772d4a41e"), "Alert for {shop}: {message}", "Whatsapp", "alert.loss", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("75cb284f-55d8-2fa8-a167-ce06a058264b"), "{shop}: {total} paid on {date}. Slip: {url}", "Sms", "slip.sale", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("7611294a-09e6-278e-9f13-f42246e2fd87"), "{shop}: your {document} expired on {date}. Renew it as soon as possible.", "Whatsapp", "compliance.reminder.0", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("9119c1c7-10d8-7447-d51e-0d463db651a7"), "{shop}: your {document} expires on {date}. Please renew it in good time.", "Push", "compliance.reminder.30", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("94845c7f-a5ca-33b3-4fdc-0b333cac208a"), "{shop}: your {document} expired on {date}. Renew it as soon as possible.", "Push", "compliance.reminder.0", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("9e248c1a-4948-2a6e-0616-7d107053b96d"), "Alert for {shop}: {message}", "Push", "alert.loss", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("9fa89d6b-8e57-4250-cbd8-b0b2e99685bc"), "{shop} today: sales {sales}, profit {profit}, {customers} customers. Low stock: {low}. Expiring soon: {expiring}. Cash-up: {cashup}. Cancellations: {cancellations}.", "Push", "daily.summary", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("add82f2b-f9ad-3d61-4474-caa8bde309d6"), "{shop}: your {document} expires on {date}. Please renew it in good time.", "Whatsapp", "compliance.reminder.30", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("cfbf27e9-401d-06b1-451c-79277314562d"), "{shop}: your {document} expires in {days} days, on {date}. Renew it now.", "Email", "compliance.reminder.7", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("e7e00541-9402-cb18-0be8-0dd74bfa85e1"), "{shop}: the till '{device}' has not synced for {hours} hours.", "Whatsapp", "device.offline", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 },
+                    { new Guid("fe6f1813-f3f3-885b-7352-f0a7b9604ce7"), "{shop} today: sales {sales}, profit {profit}, {customers} customers. Low stock: {low}. Expiring soon: {expiring}. Cash-up: {cashup}. Cancellations: {cancellations}.", "Whatsapp", "daily.summary", new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, "en", null, null, 1 }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_message_templates_code_language_channel",
+                schema: "messaging",
+                table: "message_templates",
+                columns: new[] { "code", "language", "channel" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_outbound_messages_dedupe_key",
+                schema: "messaging",
+                table: "outbound_messages",
+                column: "dedupe_key",
+                unique: true,
+                filter: "dedupe_key IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_outbound_messages_status_next_attempt_at",
+                schema: "messaging",
+                table: "outbound_messages",
+                columns: new[] { "status", "next_attempt_at" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_outbox_messages_occurred_at",
+                schema: "messaging",
+                table: "outbox_messages",
+                column: "occurred_at",
+                filter: "processed_at IS NULL");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "message_templates",
+                schema: "messaging");
+
+            migrationBuilder.DropTable(
+                name: "outbound_messages",
+                schema: "messaging");
+
+            migrationBuilder.DropTable(
+                name: "outbox_messages",
+                schema: "messaging");
+        }
+    }
+}

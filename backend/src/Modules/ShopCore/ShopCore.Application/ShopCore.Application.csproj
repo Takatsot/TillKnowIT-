@@ -17,6 +17,7 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Reporting\TillKnowIT.Reporting.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Storage\TillKnowIT.Storage.csproj" />
     <ProjectReference Include="..\..\Catalogue\Catalogue.Contracts\Catalogue.Contracts.csproj" />
+    <ProjectReference Include="..\..\Messaging\Messaging.Contracts\Messaging.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="ShopCore.Application.Tests" />

@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261027084741_Initial")]
+    [Migration("20261027085510_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -647,6 +647,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("SaleId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("sale_id");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
 
                     b.Property<string>("Status")
                         .IsRequired()

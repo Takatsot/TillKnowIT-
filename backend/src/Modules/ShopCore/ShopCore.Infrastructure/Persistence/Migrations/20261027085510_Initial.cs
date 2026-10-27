@@ -328,6 +328,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     sale_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     channel = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     destination = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: true),

@@ -66,6 +66,11 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(5)")
                         .HasColumnName("language");
 
+                    b.Property<string>("Subject")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("subject");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("updated_at");
@@ -83,6 +88,220 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_message_templates_code_language_channel");
 
                     b.ToTable("message_templates", "messaging");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("46aaa962-2f90-8cb6-f79a-194431e1796d"),
+                            Body = "Thank you for shopping at {shop}.\n{lines}\nTotal: {total}\n{date}\nYour slip: {url}",
+                            Channel = "Whatsapp",
+                            Code = "slip.sale",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("75cb284f-55d8-2fa8-a167-ce06a058264b"),
+                            Body = "{shop}: {total} paid on {date}. Slip: {url}",
+                            Channel = "Sms",
+                            Code = "slip.sale",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("058e98f4-6ad4-a6a7-ac28-5280a69ae317"),
+                            Body = "Thank you for shopping at {shop}.\n\n{lines}\n\nTotal: {total}\nDate: {date}\n\nView your slip: {url}",
+                            Channel = "Email",
+                            Code = "slip.sale",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Subject = "Your slip from {shop}",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("fe6f1813-f3f3-885b-7352-f0a7b9604ce7"),
+                            Body = "{shop} today: sales {sales}, profit {profit}, {customers} customers. Low stock: {low}. Expiring soon: {expiring}. Cash-up: {cashup}. Cancellations: {cancellations}.",
+                            Channel = "Whatsapp",
+                            Code = "daily.summary",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("9fa89d6b-8e57-4250-cbd8-b0b2e99685bc"),
+                            Body = "{shop} today: sales {sales}, profit {profit}, {customers} customers. Low stock: {low}. Expiring soon: {expiring}. Cash-up: {cashup}. Cancellations: {cancellations}.",
+                            Channel = "Push",
+                            Code = "daily.summary",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("539baf4f-112e-9165-25bb-e69e7ad6d197"),
+                            Body = "{shop} today: sales {sales}, profit {profit}, {customers} customers. Low stock: {low}. Expiring soon: {expiring}. Cash-up: {cashup}. Cancellations: {cancellations}.",
+                            Channel = "Email",
+                            Code = "daily.summary",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Subject = "Daily summary for {shop}",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("73c5b36f-b779-adad-b898-ef6772d4a41e"),
+                            Body = "Alert for {shop}: {message}",
+                            Channel = "Whatsapp",
+                            Code = "alert.loss",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("9e248c1a-4948-2a6e-0616-7d107053b96d"),
+                            Body = "Alert for {shop}: {message}",
+                            Channel = "Push",
+                            Code = "alert.loss",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("6c43dd65-2c14-1894-b3d3-234424d932f4"),
+                            Body = "Alert for {shop}: {message}",
+                            Channel = "Email",
+                            Code = "alert.loss",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("e7e00541-9402-cb18-0be8-0dd74bfa85e1"),
+                            Body = "{shop}: the till '{device}' has not synced for {hours} hours.",
+                            Channel = "Whatsapp",
+                            Code = "device.offline",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("1bfed125-1154-39df-09d7-41e07b4a1400"),
+                            Body = "{shop}: the till '{device}' has not synced for {hours} hours.",
+                            Channel = "Push",
+                            Code = "device.offline",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("310a164f-7686-5d48-128f-455f738c722b"),
+                            Body = "{shop}: the till '{device}' has not synced for {hours} hours.",
+                            Channel = "Email",
+                            Code = "device.offline",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("add82f2b-f9ad-3d61-4474-caa8bde309d6"),
+                            Body = "{shop}: your {document} expires on {date}. Please renew it in good time.",
+                            Channel = "Whatsapp",
+                            Code = "compliance.reminder.30",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("9119c1c7-10d8-7447-d51e-0d463db651a7"),
+                            Body = "{shop}: your {document} expires on {date}. Please renew it in good time.",
+                            Channel = "Push",
+                            Code = "compliance.reminder.30",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("0f363cd0-c727-a40a-77b4-b8e7c9d454c6"),
+                            Body = "{shop}: your {document} expires on {date}. Please renew it in good time.",
+                            Channel = "Email",
+                            Code = "compliance.reminder.30",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("452e2653-374d-6a32-2369-5b3800afb001"),
+                            Body = "{shop}: your {document} expires in {days} days, on {date}. Renew it now.",
+                            Channel = "Whatsapp",
+                            Code = "compliance.reminder.7",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("073062e0-7371-d194-cb17-d050c1ecd3db"),
+                            Body = "{shop}: your {document} expires in {days} days, on {date}. Renew it now.",
+                            Channel = "Push",
+                            Code = "compliance.reminder.7",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("cfbf27e9-401d-06b1-451c-79277314562d"),
+                            Body = "{shop}: your {document} expires in {days} days, on {date}. Renew it now.",
+                            Channel = "Email",
+                            Code = "compliance.reminder.7",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("7611294a-09e6-278e-9f13-f42246e2fd87"),
+                            Body = "{shop}: your {document} expired on {date}. Renew it as soon as possible.",
+                            Channel = "Whatsapp",
+                            Code = "compliance.reminder.0",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("94845c7f-a5ca-33b3-4fdc-0b333cac208a"),
+                            Body = "{shop}: your {document} expired on {date}. Renew it as soon as possible.",
+                            Channel = "Push",
+                            Code = "compliance.reminder.0",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("053bf730-0906-3522-3d4b-95fea84cf3f7"),
+                            Body = "{shop}: your {document} expired on {date}. Renew it as soon as possible.",
+                            Channel = "Email",
+                            Code = "compliance.reminder.0",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        });
                 });
 
             modelBuilder.Entity("Messaging.Domain.OutboundMessage", b =>
@@ -91,6 +310,10 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int")
+                        .HasColumnName("attempts");
 
                     b.Property<string>("Body")
                         .IsRequired()
@@ -116,6 +339,11 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
+                    b.Property<string>("DedupeKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("dedupe_key");
+
                     b.Property<string>("Destination")
                         .IsRequired()
                         .HasMaxLength(320)
@@ -126,17 +354,55 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
+                    b.Property<string>("Error")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("error");
+
+                    b.Property<DateTimeOffset>("NextAttemptAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("next_attempt_at");
+
+                    b.Property<string>("ProviderRef")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("provider_ref");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("sent_at");
+
+                    b.Property<Guid?>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("status");
 
+                    b.Property<string>("Subject")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("subject");
+
+                    b.Property<string>("TemplateCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("template_code");
+
                     b.HasKey("Id")
                         .HasName("pk_outbound_messages");
 
-                    b.HasIndex("Status")
-                        .HasDatabaseName("ix_outbound_messages_status");
+                    b.HasIndex("DedupeKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_outbound_messages_dedupe_key")
+                        .HasFilter("dedupe_key IS NOT NULL");
+
+                    b.HasIndex("Status", "NextAttemptAt")
+                        .HasDatabaseName("ix_outbound_messages_status_next_attempt_at");
 
                     b.ToTable("outbound_messages", "messaging");
                 });

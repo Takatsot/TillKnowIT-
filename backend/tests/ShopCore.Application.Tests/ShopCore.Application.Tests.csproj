@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\src\Modules\ShopCore\ShopCore.Contracts\ShopCore.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Modules\Identity\Identity.Contracts\Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Modules\Catalogue\Catalogue.Contracts\Catalogue.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Messaging\Messaging.Contracts\Messaging.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

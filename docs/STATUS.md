@@ -25,7 +25,7 @@ on the build machine. The first real run is the first item on the hand-over list
 | E2-3 Approve catalogue products | Todo | |
 | E3-1 to E3-4 Selling, payment, cancel | Rules | Server upload and till rules done. The selling screen and local database are blocked on the PowerSync test against SQL Server (ADR 0001). |
 | E3-5 Expired items blocked | Todo | |
-| E3-6 Slips on request | Todo | |
+| E3-6 Slips on request | Done | QR (signed link, free), WhatsApp, SMS and email through the Messaging module; at most 3 per sale; public slip page shows no staff or customer details. QR image drawing is a till screen. WhatsApp, SMS and email providers are not connected (Port, see Messaging below). |
 | E4-1 Receive stock | Rules | |
 | E4-2 Excel/CSV import | Todo | |
 | E4-3 Invoice reading | Todo | Needs a reading service. |

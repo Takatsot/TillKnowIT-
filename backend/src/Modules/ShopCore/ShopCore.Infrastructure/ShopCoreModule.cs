@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ShopCore.Application.Compliance;
 using ShopCore.Application.Credit;
+using ShopCore.Application.Slips;
 using ShopCore.Application.Insights;
 using ShopCore.Application.Reports;
 using ShopCore.Application.Stock;
@@ -17,6 +18,23 @@ namespace ShopCore.Infrastructure;
 
 public static class ShopCoreModule
 {
+    /// <summary>
+    /// Slip links: where they point and the secret that signs them (32 random bytes in base64, from Key Vault outside development).
+    /// Without a valid secret the API refuses to start, rather than sign links with a guessable key.
+    /// </summary>
+    public static IServiceCollection AddSlipOptions(this IServiceCollection services, string? baseUrl, string? base64Key)
+    {
+        if (string.IsNullOrWhiteSpace(baseUrl)) throw new InvalidOperationException("Slips:BaseUrl is not set.");
+        if (string.IsNullOrWhiteSpace(base64Key)) throw new InvalidOperationException("Slips:SigningKey is not set.");
+        byte[] key;
+        try { key = Convert.FromBase64String(base64Key); }
+        catch (FormatException) { throw new InvalidOperationException("Slips:SigningKey must be base64."); }
+        if (key.Length != 32) throw new InvalidOperationException("Slips:SigningKey must be 32 bytes (44 base64 characters).");
+
+        services.AddSingleton(new SlipOptions(key, baseUrl));
+        return services;
+    }
+
     public static IServiceCollection AddShopCoreModule(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<ShopCoreDbContext>(o => o
@@ -28,6 +46,7 @@ public static class ShopCoreModule
         services.AddScoped<ICreditReadStore, CreditReadStore>();
         services.AddScoped<IStockReadStore, StockReadStore>();
         services.AddScoped<IComplianceStore, ComplianceStore>();
+        services.AddScoped<ISlipStore, SlipStore>();
         services.AddScoped<IInsightsReadStore, InsightsReadStore>();
         services.AddScoped<IReportReadStore, InsightsReadStore>();
         services.TryAddSingleton(TimeProvider.System);

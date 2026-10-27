@@ -34,4 +34,9 @@ builder.Services
     .AddOutboxProcessor<MarketplaceDbContext>()
     .AddOutboxProcessor<MessagingDbContext>();
 
+// Delivers queued messages. Pretend providers (log only) exist in Development; elsewhere a channel with no
+// real provider fails visibly rather than pretending to send.
+builder.Services.AddMessageSender();
+if (builder.Environment.IsDevelopment()) builder.Services.AddMessagingDevProviders();
+
 builder.Build().Run();

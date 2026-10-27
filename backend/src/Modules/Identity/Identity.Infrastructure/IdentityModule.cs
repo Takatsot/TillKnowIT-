@@ -24,6 +24,7 @@ public static class IdentityModule
         services.AddScoped<IModuleMigrator, IdentityMigrator>();
         services.AddScoped<IShopStore, ShopStore>();
         services.AddScoped<ITillAccessChecker, TillAccessChecker>();
+        services.AddScoped<IShopDirectory, ShopDirectory>();
         services.AddScoped<IStaffStore, StaffStore>();
         services.AddScoped<IDeviceStore, DeviceStore>();
         services.AddSingleton<IPinHasher, Pbkdf2PinHasher>();

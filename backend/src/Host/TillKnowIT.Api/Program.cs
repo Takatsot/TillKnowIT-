@@ -12,6 +12,7 @@ var db = builder.Configuration.GetConnectionString("Database")
          ?? throw new InvalidOperationException("ConnectionStrings:Database is not set.");
 
 builder.Services.AddEncryptedLocalFileStore(builder.Configuration["Storage:Root"], builder.Configuration["Storage:Key"]);
+builder.Services.AddSlipOptions(builder.Configuration["Slips:BaseUrl"], builder.Configuration["Slips:SigningKey"]);
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services
