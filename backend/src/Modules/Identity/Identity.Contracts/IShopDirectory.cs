@@ -19,3 +19,9 @@ public interface IDeviceDirectory
 {
     Task<List<StaleDevice>> NotSeenSince(DateTimeOffset cutoff, CancellationToken ct);
 }
+
+/// <summary>Whether a person may do something because of the role they hold, for features with no till involved (platform admin, field agent).</summary>
+public interface IPermissionChecker
+{
+    Task<bool> Has(Guid personId, string permission, CancellationToken ct);
+}

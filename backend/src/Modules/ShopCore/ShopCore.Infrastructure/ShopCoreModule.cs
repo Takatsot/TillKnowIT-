@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using ShopCore.Application.Catalogue;
 using ShopCore.Application.Compliance;
 using ShopCore.Application.Credit;
 using ShopCore.Application.Notifications;
@@ -48,6 +49,7 @@ public static class ShopCoreModule
         services.AddScoped<IStockReadStore, StockReadStore>();
         services.AddScoped<IComplianceStore, ComplianceStore>();
         services.AddScoped<ISlipStore, SlipStore>();
+        services.AddScoped<IProductRepointStore, ProductRepointStore>();
         services.AddScoped<INotificationReadStore, NotificationReadStore>();
         services.AddScoped<OwnerMessenger>();
         services.AddScoped<IInsightsReadStore, InsightsReadStore>();

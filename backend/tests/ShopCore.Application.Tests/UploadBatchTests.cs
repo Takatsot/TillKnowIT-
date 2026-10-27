@@ -250,6 +250,38 @@ public partial class UploadBatchTests
         Assert.Equal("cancellation.sale_unknown", result.Value!.Results.Single().Code);
     }
 
+    // ---- selling expired items (E3-5) ----
+
+    [Fact]
+    public async Task A_manager_can_approve_selling_an_expired_item_and_the_approval_is_kept_on_the_line()
+    {
+        var sale = CashSale() with { Lines = [new SaleLineUpload(_bread, "Bread", 2, 1800, 1400, ExpiryOverrideBy: _manager)] };
+
+        var result = await Upload([sale]);
+
+        Assert.Equal("accepted", result.Value!.Results.Single().Status);
+        Assert.Equal(_manager, _store.AddedSales.Single().Lines.Single().ExpiryOverrideBy);
+    }
+
+    [Fact]
+    public async Task An_override_by_someone_whose_role_does_not_allow_it_rejects_the_sale_for_the_owner_to_see()
+    {
+        _access.Denied[(_cashier, "sale.override_expiry")] = Result.Fail("permission.denied", "no");
+        var sale = CashSale() with { Lines = [new SaleLineUpload(_bread, "Bread", 2, 1800, 1400, ExpiryOverrideBy: _cashier)] };
+
+        var result = await Upload([sale]);
+
+        Assert.Equal("sale.override_not_allowed", result.Value!.Results.Single().Code);
+        Assert.Empty(_store.AddedSales);
+    }
+
+    [Fact]
+    public async Task Ordinary_lines_need_no_override_check()
+    {
+        _access.Denied[(_cashier, "sale.override_expiry")] = Result.Fail("permission.denied", "no");
+        Assert.Equal("accepted", (await Upload([CashSale()])).Value!.Results.Single().Status);
+    }
+
     // ---- stock counts and receiving ----
 
     [Fact]

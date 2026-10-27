@@ -308,7 +308,8 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     quantity = table.Column<int>(type: "int", nullable: false),
                     price_cents = table.Column<long>(type: "bigint", nullable: false),
-                    cost_cents = table.Column<long>(type: "bigint", nullable: false)
+                    cost_cents = table.Column<long>(type: "bigint", nullable: false),
+                    expiry_override_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {

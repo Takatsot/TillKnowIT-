@@ -236,9 +236,21 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
                 continue;
             }
 
+            // A sale of an expired item needs a manager's override, and the manager's role must allow it.
+            var overrideDenied = false;
+            foreach (var overrider in lines.Where(l => l.ExpiryOverrideBy is not null).Select(l => l.ExpiryOverrideBy!.Value).Distinct())
+            {
+                var may = await Allowed(overrider, "sale.override_expiry");
+                if (may.IsSuccess) continue;
+                Reject(kind, s.Id, new Error("sale.override_not_allowed", "The person who approved selling an expired item may not do that."));
+                overrideDenied = true;
+                break;
+            }
+            if (overrideDenied) continue;
+
             var recorded = Sale.Record(new SaleInput(s.Id, req.ShopId, req.DeviceId, s.StaffId, s.SoldAt, s.PaymentMethodCode,
                 s.TotalCents, s.VatCents, s.TenderedCents, s.ChangeCents, s.AccountId,
-                lines.Select(l => new SaleLineInput(l.ProductId, l.Name, l.Quantity, l.PriceCents, l.CostCents)).ToList()), now);
+                lines.Select(l => new SaleLineInput(l.ProductId, l.Name, l.Quantity, l.PriceCents, l.CostCents, l.ExpiryOverrideBy)).ToList()), now);
             if (!recorded.IsSuccess) { Reject(kind, s.Id, recorded.Error!); continue; }
 
             store.Add(recorded.Value!);

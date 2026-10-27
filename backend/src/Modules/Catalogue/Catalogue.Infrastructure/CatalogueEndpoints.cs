@@ -27,6 +27,7 @@ public static class CatalogueEndpoints
                 : Problem(result);
         });
 
+        CatalogueAdminEndpoints.Map(api);
         return api;
     }
 

@@ -28,7 +28,8 @@ public sealed record CashUpUpload(
     Guid Id, Guid StaffId, DateOnly Day, long FloatCents, long ExpectedCents, long CountedCents, string? Note,
     DateTimeOffset CashedUpAt);
 
-public sealed record SaleLineUpload(Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents);
+/// <summary>ExpiryOverrideBy is the manager who approved selling an expired item. Their role must allow sale.override_expiry.</summary>
+public sealed record SaleLineUpload(Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents, Guid? ExpiryOverrideBy = null);
 
 public sealed record SaleUpload(
     Guid Id, Guid StaffId, DateTimeOffset SoldAt, string PaymentMethodCode, long TotalCents, long VatCents,

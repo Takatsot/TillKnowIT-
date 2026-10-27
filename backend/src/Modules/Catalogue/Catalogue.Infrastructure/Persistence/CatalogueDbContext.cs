@@ -23,8 +23,10 @@ public sealed class CatalogueDbContext(DbContextOptions<CatalogueDbContext> opti
             e.Property(x => x.CategoryCode).HasMaxLength(50).IsRequired();
             e.Property(x => x.PhotoUrl).HasMaxLength(500);
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.ReviewNote).HasMaxLength(500);
             e.Property(x => x.Version).IsConcurrencyToken();
             e.HasIndex(x => x.Barcode).IsUnique();
+            e.HasIndex(x => x.Status);
         });
         // Platform tables live in the "platform" schema but are owned by this module.
         b.Entity<Lookup>(e =>

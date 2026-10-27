@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20261027080902_Initial")]
+    [Migration("20261027090713_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -370,6 +370,58 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Identity.Domain.SetupStep", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CompletedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("completed_at");
+
+                    b.Property<Guid>("CompletedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("completed_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("Item")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("item");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_shop_setup_steps");
+
+                    b.HasIndex("ShopId", "Item")
+                        .IsUnique()
+                        .HasDatabaseName("ix_shop_setup_steps_shop_id_item");
+
+                    b.ToTable("shop_setup_steps", "identity");
+                });
+
             modelBuilder.Entity("TillKnowIT.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -685,6 +737,16 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Permissions");
+                });
+
+            modelBuilder.Entity("Identity.Domain.SetupStep", b =>
+                {
+                    b.HasOne("Identity.Domain.Organisation", null)
+                        .WithMany()
+                        .HasForeignKey("ShopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_shop_setup_steps_organisations_shop_id");
                 });
 #pragma warning restore 612, 618
         }

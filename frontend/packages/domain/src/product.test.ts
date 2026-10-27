@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barcodeTaken, checkProduct, incomingChangeWins, isBarcode, isExpired, type ProductDraft } from "./product";
+import { barcodeTaken, checkProduct, expiredItemsBlockingSale, incomingChangeWins, isBarcode, isExpired, type ProductDraft } from "./product";
 
 const NOW = new Date("2026-10-27T10:00:00Z");
 const categories = ["groceries", "drinks"];
@@ -62,5 +62,18 @@ describe("barcodes and clashes", () => {
     expect(isExpired("2026-10-26", "2026-10-27")).toBe(true);
     expect(isExpired("2026-10-27", "2026-10-27")).toBe(false);
     expect(isExpired(null, "2026-10-27")).toBe(false);
+  });
+});
+
+describe("selling expired items (E3-5)", () => {
+  const today = "2026-10-27";
+  it("blocks expired items with no override and names them", () => {
+    const blocked = expiredItemsBlockingSale([
+      { name: "Milk", expiryDate: "2026-10-26" },
+      { name: "Bread", expiryDate: "2026-10-27" },
+      { name: "Tins", expiryDate: null },
+      { name: "Yoghurt", expiryDate: "2026-10-01", expiryOverrideBy: "manager-1" },
+    ], today);
+    expect(blocked).toEqual(["Milk"]);
   });
 });

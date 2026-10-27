@@ -50,6 +50,10 @@ namespace Catalogue.Infrastructure.Persistence.Migrations
                     category_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     photo_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    merged_into_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    review_note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    reviewed_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    reviewed_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -176,6 +180,12 @@ namespace Catalogue.Infrastructure.Persistence.Migrations
                 table: "catalogue_products",
                 column: "barcode",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_catalogue_products_status",
+                schema: "catalogue",
+                table: "catalogue_products",
+                column: "status");
 
             migrationBuilder.CreateIndex(
                 name: "ix_feature_flags_key",

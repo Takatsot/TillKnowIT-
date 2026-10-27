@@ -19,12 +19,12 @@ on the build machine. The first real run is the first item on the hand-over list
 | E1-2 Staff and PINs | Done | PBKDF2 PINs, add/update/disable. |
 | E1-3 Devices | Done | Register, approve, wipe, check-in. |
 | E1-4 PIN unlock offline | Done | Server check and till screen, lockout 5 tries / 5 minutes. |
-| E1-5 Choose membership | Todo | |
+| E1-5 Choose membership | Done | Memberships listed per person (till shows the choice only when more than one). |
 | E2-1 Barcode lookup | Done | Catalogue lookup and suggestions. |
 | E2-2 Add/edit product | Done | Sync batch and REST, last change wins. |
-| E2-3 Approve catalogue products | Todo | |
+| E2-3 Approve catalogue products | Done | Review queue: approve (with tidy-ups), reject (reason required) or merge (shops move to the approved product). Admin lookup management with translations; everything audited. |
 | E3-1 to E3-4 Selling, payment, cancel | Rules | Server upload and till rules done. The selling screen and local database are blocked on the PowerSync test against SQL Server (ADR 0001). |
-| E3-5 Expired items blocked | Todo | |
+| E3-5 Expired items blocked | Done | Rule on the till; a manager override is kept on the sale line and the server checks the manager's role allows it. |
 | E3-6 Slips on request | Done | QR (signed link, free), WhatsApp, SMS and email through the Messaging module; at most 3 per sale; public slip page shows no staff or customer details. QR image drawing is a till screen. WhatsApp, SMS and email providers are not connected (Port, see Messaging below). |
 | E4-1 Receive stock | Rules | |
 | E4-2 Excel/CSV import | Todo | |
@@ -39,7 +39,7 @@ on the build machine. The first real run is the first item on the hand-over list
 | E11-1 Daily summary | Done | Sent once a day after 19:00 shop time to every verified shop, by WhatsApp or email. |
 | E11-2 Loss alerts | Done | Cancellations per hour and short cash-ups, levels from shop settings with defaults; plus a 48-hour offline-till alert. All sent once (dedupe keys). Push needs the owner app; WhatsApp/SMS/email providers are not connected. |
 | E12-1 Six languages | Partly | Structure and English done; translations need translators. |
-| E13-1 Field agent app | Todo | |
+| E13-1 Field agent setup | Partly | The seven-step checklist, step completion, and verify (all steps needed, permission checked) are done on the server. The field agent app itself is not built. |
 | E14-1, E14-2 Founding suppliers | Todo | |
 
 ## Phases 2 to 5

@@ -4,6 +4,7 @@
     <ProjectReference Include="..\Catalogue.Domain\Catalogue.Domain.csproj" />
     <ProjectReference Include="..\Catalogue.Contracts\Catalogue.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Dispatching\TillKnowIT.Dispatching.csproj" />
+    <ProjectReference Include="..\..\Identity\Identity.Contracts\Identity.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

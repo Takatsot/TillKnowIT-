@@ -13,7 +13,8 @@ public static class PaymentMethods
     public static bool IsValid(string? code) => code is Cash or Card or Qr or Credit;
 }
 
-public sealed record SaleLineInput(Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents);
+/// <summary>ExpiryOverrideBy is the manager who approved selling an expired item, with their PIN. Null for ordinary lines.</summary>
+public sealed record SaleLineInput(Guid ProductId, string Name, int Quantity, long PriceCents, long CostCents, Guid? ExpiryOverrideBy = null);
 
 public sealed record SaleInput(
     Guid Id, Guid ShopId, Guid TillDeviceId, Guid StaffId, DateTimeOffset SoldAt,
@@ -83,7 +84,7 @@ public sealed class Sale : Entity
             AccountId = input.AccountId,
             SoldAt = input.SoldAt,
             Lines = input.Lines
-                .Select(l => new SaleLine(l.ProductId, l.Name.Trim(), l.Quantity, l.PriceCents, l.CostCents))
+                .Select(l => new SaleLine(l.ProductId, l.Name.Trim(), l.Quantity, l.PriceCents, l.CostCents, l.ExpiryOverrideBy))
                 .ToList(),
         };
         sale.StampFromDevice(input.Id, input.SoldAt, input.StaffId, input.TillDeviceId);
@@ -109,8 +110,9 @@ public sealed class SaleLine
 {
     private SaleLine() { }
 
-    public SaleLine(Guid productId, string name, int quantity, long priceCents, long costCents)
+    public SaleLine(Guid productId, string name, int quantity, long priceCents, long costCents, Guid? expiryOverrideBy = null)
     {
+        ExpiryOverrideBy = expiryOverrideBy;
         ProductId = productId;
         Name = name;
         Quantity = quantity;
@@ -126,4 +128,7 @@ public sealed class SaleLine
     public int Quantity { get; private set; }
     public long PriceCents { get; private set; }
     public long CostCents { get; private set; }
+
+    /// <summary>Who approved selling this item although it had expired. Kept for the owner to review.</summary>
+    public Guid? ExpiryOverrideBy { get; private set; }
 }

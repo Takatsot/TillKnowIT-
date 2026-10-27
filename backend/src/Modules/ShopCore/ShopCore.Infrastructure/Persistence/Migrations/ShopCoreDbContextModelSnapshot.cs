@@ -537,6 +537,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("cost_cents");
 
+                    b.Property<Guid?>("ExpiryOverrideBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("expiry_override_by");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)

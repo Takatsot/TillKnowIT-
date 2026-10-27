@@ -1,4 +1,5 @@
 using Identity.Application.Devices;
+using Identity.Application.Setup;
 using Identity.Application.Shops;
 using Identity.Application.Staff;
 using Identity.Contracts;
@@ -76,6 +77,27 @@ public static class IdentityEndpoints
             return result.IsSuccess ? Results.NoContent() : Problem(result);
         });
 
+        api.MapGet("/people/{personId:guid}/memberships", async (Guid personId, IDispatcher d, CancellationToken ct) =>
+            Results.Ok((await d.Ask(new ListMemberships(personId), ct)).Value));
+
+        api.MapGet("/shops/{shopId:guid}/setup", async (Guid shopId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new GetSetupChecklist(shopId), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
+        });
+
+        api.MapPut("/shops/{shopId:guid}/setup/{item}", async (Guid shopId, string item, CompleteSetupStepRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new CompleteSetupStep(shopId, req.AgentPersonId, item, req.Note), ct);
+            return result.IsSuccess ? Results.NoContent() : Problem(result);
+        });
+
+        api.MapPost("/shops/{shopId:guid}/verify", async (Guid shopId, VerifyShopRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new VerifyShop(shopId, req.AgentPersonId), ct);
+            return result.IsSuccess ? Results.NoContent() : Problem(result);
+        });
+
         return api;
     }
 
@@ -86,7 +108,8 @@ public static class IdentityEndpoints
         {
             "staff.pin_rejected" => StatusCodes.Status401Unauthorized,
             "staff.locked" => StatusCodes.Status423Locked,
-            "staff.already_member" => StatusCodes.Status409Conflict,
+            "staff.already_member" or "shop.suspended" or "setup.incomplete" => StatusCodes.Status409Conflict,
+            "permission.denied" => StatusCodes.Status403Forbidden,
             var c when c.EndsWith("not_found", StringComparison.Ordinal) => StatusCodes.Status404NotFound,
             _ => StatusCodes.Status422UnprocessableEntity,
         };

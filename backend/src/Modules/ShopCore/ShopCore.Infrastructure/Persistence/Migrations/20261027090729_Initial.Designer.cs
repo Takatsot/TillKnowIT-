@@ -12,7 +12,7 @@ using ShopCore.Infrastructure.Persistence;
 namespace ShopCore.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ShopCoreDbContext))]
-    [Migration("20261027085510_Initial")]
+    [Migration("20261027090729_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -539,6 +539,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     b.Property<long>("CostCents")
                         .HasColumnType("bigint")
                         .HasColumnName("cost_cents");
+
+                    b.Property<Guid?>("ExpiryOverrideBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("expiry_override_by");
 
                     b.Property<string>("Name")
                         .IsRequired()

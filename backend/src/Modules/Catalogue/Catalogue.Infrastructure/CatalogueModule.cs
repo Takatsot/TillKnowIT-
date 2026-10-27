@@ -1,3 +1,4 @@
+using Catalogue.Application.Admin;
 using Catalogue.Application.Products;
 using Catalogue.Contracts;
 using TillKnowIT.Dispatching;
@@ -20,6 +21,7 @@ public static class CatalogueModule
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, CatalogueMigrator>();
         services.AddScoped<ICatalogueStore, CatalogueStore>();
+        services.AddScoped<ICatalogueAdminStore, CatalogueAdminStore>();
         services.AddScoped<ILookupChecker, LookupChecker>();
         services.AddDispatching(typeof(FindProductByBarcode).Assembly);
         return services;

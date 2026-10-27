@@ -82,3 +82,16 @@ internal sealed class DeviceConfiguration : IEntityTypeConfiguration<Device>
         b.HasOne<Organisation>().WithMany().HasForeignKey(x => x.ShopId);
     }
 }
+
+internal sealed class SetupStepConfiguration : IEntityTypeConfiguration<SetupStep>
+{
+    public void Configure(EntityTypeBuilder<SetupStep> b)
+    {
+        b.ToTable("shop_setup_steps");
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Item).HasMaxLength(50).IsRequired();
+        b.Property(x => x.Note).HasMaxLength(500);
+        b.HasOne<Organisation>().WithMany().HasForeignKey(x => x.ShopId);
+        b.HasIndex(x => new { x.ShopId, x.Item }).IsUnique();
+    }
+}

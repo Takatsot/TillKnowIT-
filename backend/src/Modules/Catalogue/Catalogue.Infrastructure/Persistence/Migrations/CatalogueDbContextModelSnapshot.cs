@@ -102,6 +102,10 @@ namespace Catalogue.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
+                    b.Property<Guid?>("MergedIntoId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("merged_into_id");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -112,6 +116,19 @@ namespace Catalogue.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("photo_url");
+
+                    b.Property<string>("ReviewNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("review_note");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("reviewed_at");
+
+                    b.Property<Guid?>("ReviewedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("reviewed_by");
 
                     b.Property<string>("Size")
                         .HasMaxLength(50)
@@ -139,6 +156,9 @@ namespace Catalogue.Infrastructure.Persistence.Migrations
                     b.HasIndex("Barcode")
                         .IsUnique()
                         .HasDatabaseName("ix_catalogue_products_barcode");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_catalogue_products_status");
 
                     b.ToTable("catalogue_products", "catalogue");
                 });

@@ -53,3 +53,18 @@ export function incomingChangeWins(incoming: Date, current: Date): boolean {
 }
 
 export const isExpired = (expiryDate: string | null, today: string): boolean => expiryDate !== null && expiryDate < today;
+
+export interface SellableItem {
+  name: string;
+  /** ISO date (yyyy-mm-dd) or null. */
+  expiryDate: string | null;
+  /** The manager who approved selling this item although it has expired, with their PIN. */
+  expiryOverrideBy?: string | null;
+}
+
+/**
+ * E3-5: items that stop a sale because they have expired and nobody approved selling them.
+ * An item that expires today is still sellable. The server checks that the approving manager's role allows the override.
+ */
+export const expiredItemsBlockingSale = (items: readonly SellableItem[], today: string): string[] =>
+  items.filter((i) => isExpired(i.expiryDate, today) && !i.expiryOverrideBy).map((i) => i.name);

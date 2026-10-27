@@ -124,6 +124,33 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "shop_setup_steps",
+                schema: "identity",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    item = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    completed_by = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    completed_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_shop_setup_steps", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_shop_setup_steps_organisations_shop_id",
+                        column: x => x.shop_id,
+                        principalSchema: "identity",
+                        principalTable: "organisations",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "memberships",
                 schema: "identity",
                 columns: table => new
@@ -296,6 +323,13 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 table: "roles",
                 column: "code",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_shop_setup_steps_shop_id_item",
+                schema: "identity",
+                table: "shop_setup_steps",
+                columns: new[] { "shop_id", "item" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -318,7 +352,7 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "organisations",
+                name: "shop_setup_steps",
                 schema: "identity");
 
             migrationBuilder.DropTable(
@@ -327,6 +361,10 @@ namespace Identity.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "roles",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "organisations",
                 schema: "identity");
         }
     }

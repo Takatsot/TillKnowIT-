@@ -13,3 +13,21 @@ public sealed record SuggestProductRequest(string Barcode, string Name, string? 
 
 /// <summary>Status is "suggested", "approved" or "rejected". A barcode that is already known returns the existing entry.</summary>
 public sealed record SuggestProductResponse(Guid Id, string Status, bool AlreadyKnown);
+
+public sealed record SuggestionResponse(Guid Id, string Barcode, string Name, string? Size, string CategoryCode, DateTimeOffset SuggestedAt);
+
+/// <summary>Name, size and category are optional corrections made while approving.</summary>
+public sealed record ApproveSuggestionRequest(Guid AdminPersonId, string? Name, string? Size, string? CategoryCode);
+
+public sealed record RejectSuggestionRequest(Guid AdminPersonId, string Reason);
+
+/// <summary>The suggestion duplicates an existing approved product; shops that used it are moved to that product.</summary>
+public sealed record MergeSuggestionRequest(Guid AdminPersonId, Guid IntoProductId);
+
+/// <summary>A suggestion was merged into an approved product. Shops that used the suggestion point at the approved one instead.</summary>
+public sealed record CatalogueProductMerged(Guid FromId, Guid IntoId) : TillKnowIT.SharedKernel.DomainEvent;
+
+public sealed record LookupResponse(string Type, string Code, Dictionary<string, string> Names, bool IsActive, int SortOrder);
+
+/// <summary>Names add or replace translations by language code. Leave a field out to leave it as it is. A new lookup needs English.</summary>
+public sealed record SaveLookupRequest(Guid AdminPersonId, Dictionary<string, string>? Names, bool? IsActive, int? SortOrder);

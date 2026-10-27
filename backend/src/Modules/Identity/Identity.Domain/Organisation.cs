@@ -22,10 +22,28 @@ public sealed class Organisation : VersionedEntity
     public string Name { get; private set; } = default!;
     public OrganisationStatus Status { get; private set; }
 
-    /// <summary>Field agent approval.</summary>
-    public void Verify()
+    public void Suspend()
     {
+        Status = OrganisationStatus.Suspended;
+        Touch();
+    }
+
+    /// <summary>Back to pending, so a field agent has to verify the shop again.</summary>
+    public void Reinstate()
+    {
+        if (Status != OrganisationStatus.Suspended) return;
+        Status = OrganisationStatus.Pending;
+        Touch();
+    }
+
+    /// <summary>Field agent approval. A suspended shop cannot be verified; it has to be reinstated first.</summary>
+    public Result Verify()
+    {
+        if (Status == OrganisationStatus.Suspended)
+            return Result.Fail("shop.suspended", "This shop is suspended.");
+        if (Status == OrganisationStatus.Verified) return Result.Ok();
         Status = OrganisationStatus.Verified;
         Touch();
+        return Result.Ok();
     }
 }

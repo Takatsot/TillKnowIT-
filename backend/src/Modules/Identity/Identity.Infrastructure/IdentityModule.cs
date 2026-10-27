@@ -1,5 +1,6 @@
 using Identity.Contracts;
 using Identity.Application.Devices;
+using Identity.Application.Setup;
 using Identity.Application.Shops;
 using Identity.Application.Staff;
 using Identity.Infrastructure.Persistence;
@@ -26,6 +27,9 @@ public static class IdentityModule
         services.AddScoped<ITillAccessChecker, TillAccessChecker>();
         services.AddScoped<IShopDirectory, ShopDirectory>();
         services.AddScoped<IDeviceDirectory, DeviceDirectory>();
+        services.AddScoped<ISetupStore, SetupStore>();
+        services.AddScoped<IMembershipReadStore, MembershipReadStore>();
+        services.AddScoped<IPermissionChecker, PermissionChecker>();
         services.AddScoped<IStaffStore, StaffStore>();
         services.AddScoped<IDeviceStore, DeviceStore>();
         services.AddSingleton<IPinHasher, Pbkdf2PinHasher>();
