@@ -37,6 +37,8 @@ public sealed class StockMovement : Entity
             return Result<StockMovement>.Fail("stock.sale_required", "Sale and cancel movements must point at their sale.");
         if (i.UnitCostCents < 0)
             return Result<StockMovement>.Fail("stock.cost_invalid", "Cost cannot be negative.");
+        if ((i.SupplierName?.Length ?? 0) > 200 || (i.InvoiceRef?.Length ?? 0) > 100 || (i.ReasonCode?.Length ?? 0) > 50)
+            return Result<StockMovement>.Fail("stock.text_too_long", "The supplier, invoice number or reason is too long.");
 
         var movement = new StockMovement
         {
@@ -46,7 +48,7 @@ public sealed class StockMovement : Entity
             Quantity = i.Quantity,
             SaleId = i.SaleId,
             UnitCostCents = i.UnitCostCents,
-            ReasonCode = i.ReasonCode,
+            ReasonCode = i.ReasonCode?.Trim(),
             SupplierName = i.SupplierName,
             InvoiceRef = i.InvoiceRef,
         };

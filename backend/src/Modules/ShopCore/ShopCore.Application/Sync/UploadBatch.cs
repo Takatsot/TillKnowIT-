@@ -88,6 +88,7 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
         var barcodeOwners = await store.BarcodeOwners(req.ShopId,
             products.Where(p => !string.IsNullOrWhiteSpace(p.Barcode)).Select(p => p.Barcode!.Trim()), ct);
         var activeCategories = new Dictionary<string, bool>();
+        var activeReasons = new Dictionary<string, bool>();
 
         var creditAccountUploads = req.CreditAccounts ?? [];
         var creditEntryUploads = req.CreditEntries ?? [];
@@ -266,6 +267,19 @@ internal sealed class UploadBatchHandler(IUploadStore store, ITillAccessChecker 
             {
                 Reject(kind, m.Id, new Error("product.unknown", "This product is not on the server yet. Upload products first."));
                 continue;
+            }
+
+            // Counts and write-offs say why, and the reason must be one the shop can pick (counted, expired, damaged, missing, own use).
+            if (type is StockMovementType.Count or StockMovementType.WriteOff && !string.IsNullOrWhiteSpace(m.ReasonCode))
+            {
+                var reason = m.ReasonCode.Trim();
+                if (!activeReasons.TryGetValue(reason, out var reasonOk))
+                    activeReasons[reason] = reasonOk = await lookups.IsActive("adjustment_reasons", reason, ct);
+                if (!reasonOk)
+                {
+                    Reject(kind, m.Id, new Error("stock.reason_invalid", "Unknown reason."));
+                    continue;
+                }
             }
 
             if (type is StockMovementType.Sale or StockMovementType.Cancel && m.SaleId is { } saleId)

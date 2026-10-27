@@ -62,7 +62,7 @@ public partial class UploadBatchTests
     private sealed class FakeLookups : ILookupChecker
     {
         public Task<bool> IsActive(string type, string code, CancellationToken ct) =>
-            Task.FromResult(type == "categories" && code is "drinks" or "groceries");
+            Task.FromResult((type == "categories" && code is "drinks" or "groceries") || (type == "adjustment_reasons" && code is "counted" or "damaged"));
     }
 
     private readonly FakeStore _store = new();
@@ -248,6 +248,36 @@ public partial class UploadBatchTests
     {
         var result = await Upload(cancels: [Cancel(Guid.NewGuid())]);
         Assert.Equal("cancellation.sale_unknown", result.Value!.Results.Single().Code);
+    }
+
+    // ---- stock counts and receiving ----
+
+    [Fact]
+    public async Task Count_and_write_off_reasons_must_come_from_the_lookup()
+    {
+        var count = new StockMovementUpload(Guid.NewGuid(), _manager, _bread, "count", -3, Now, null, null, "counted", null, null);
+        var writeOff = new StockMovementUpload(Guid.NewGuid(), _manager, _bread, "write_off", -2, Now, null, null, "damaged", null, null);
+        var bogus = new StockMovementUpload(Guid.NewGuid(), _manager, _bread, "write_off", -2, Now, null, null, "because", null, null);
+
+        var result = await Upload(moves: [count, writeOff, bogus]);
+
+        Assert.Equal(["accepted", "accepted", "stock.reason_invalid"], result.Value!.Results.Select(r => r.Code ?? r.Status));
+        Assert.Equal(2, _store.AddedMovements.Count);
+    }
+
+    [Fact]
+    public async Task A_receipt_keeps_its_supplier_invoice_and_cost_and_refuses_runaway_text()
+    {
+        var receive = new StockMovementUpload(Guid.NewGuid(), _manager, _bread, "receive", 24, Now, null, 1400, null, "Makro", "INV-1001");
+        var tooLong = receive with { Id = Guid.NewGuid(), SupplierName = new string('x', 201) };
+
+        var result = await Upload(moves: [receive, tooLong]);
+
+        Assert.Equal(["accepted", "stock.text_too_long"], result.Value!.Results.Select(r => r.Code ?? r.Status));
+        var saved = _store.AddedMovements.Single();
+        Assert.Equal("Makro", saved.SupplierName);
+        Assert.Equal("INV-1001", saved.InvoiceRef);
+        Assert.Equal(1400, saved.UnitCostCents);
     }
 
     // ---- products ----

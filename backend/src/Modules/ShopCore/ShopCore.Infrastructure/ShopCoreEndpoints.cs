@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using ShopCore.Application.Credit;
+using ShopCore.Application.Stock;
 using ShopCore.Application.Sync;
 using ShopCore.Contracts;
 using TillKnowIT.Dispatching;
@@ -43,6 +44,14 @@ public static class ShopCoreEndpoints
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : Problem(result.Error!.Code, result.Error.Message, StatusCodes.Status404NotFound);
+        });
+
+        api.MapGet("/shops/{shopId:guid}/stock", async (Guid shopId, string? filter, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new ListStock(shopId, filter), ct);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : Problem(result.Error!.Code, result.Error.Message, StatusCodes.Status422UnprocessableEntity);
         });
 
         return api;

@@ -77,3 +77,11 @@ public sealed record SaveProductRequest(Guid ShopId, Guid DeviceId, ProductUploa
 public sealed record CreditAccountBalance(Guid Id, string Name, string? Phone, long? CreditLimitCents, long BalanceCents, bool OverLimit);
 
 public sealed record CreditHistoryEntry(Guid Id, string Type, long AmountCents, Guid? SaleId, string? PaymentMethodCode, DateTimeOffset CreatedAt);
+
+/// <summary>
+/// One product in the stock list. Flags can be out, low, not_selling, expiring, expired and needs_count.
+/// DaysLeft is null when nothing is selling or nothing is left.
+/// </summary>
+public sealed record StockRow(
+    Guid ProductId, string Name, string? Barcode, int OnHand, int LowStockLevel, DateOnly? ExpiryDate,
+    int? DaysLeft, int SuggestedOrderQuantity, List<string> Flags);
