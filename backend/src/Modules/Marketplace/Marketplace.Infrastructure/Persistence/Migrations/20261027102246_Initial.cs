@@ -15,6 +15,30 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 name: "marketplace");
 
             migrationBuilder.CreateTable(
+                name: "group_deals",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    bulk_price_cents = table.Column<long>(type: "bigint", nullable: false),
+                    min_total_cases = table.Column<int>(type: "int", nullable: false),
+                    closes_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    area_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_group_deals", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "marketplace_settings",
                 schema: "marketplace",
                 columns: table => new
@@ -49,6 +73,28 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_outbox_messages", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ratings",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    order_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplier_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    on_time = table.Column<bool>(type: "bit", nullable: false),
+                    complete = table.Column<bool>(type: "bit", nullable: false),
+                    score = table.Column<int>(type: "int", nullable: false),
+                    comment = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_ratings", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -102,6 +148,32 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_suppliers", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "group_commitments",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    group_deal_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    cases = table.Column<int>(type: "int", nullable: false),
+                    order_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_group_commitments", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_group_commitments_group_deal_group_deal_id",
+                        column: x => x.group_deal_id,
+                        principalSchema: "marketplace",
+                        principalTable: "group_deals",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -331,6 +403,25 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 columns: new[] { "supplier_id", "starts_at" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_group_commitments_group_deal_id_shop_id",
+                schema: "marketplace",
+                table: "group_commitments",
+                columns: new[] { "group_deal_id", "shop_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_group_deals_area_code_status",
+                schema: "marketplace",
+                table: "group_deals",
+                columns: new[] { "area_code", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_group_deals_supplier_id_status",
+                schema: "marketplace",
+                table: "group_deals",
+                columns: new[] { "supplier_id", "status" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_last_prices_shop_id_supplier_id_barcode",
                 schema: "marketplace",
                 table: "last_prices",
@@ -374,6 +465,19 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace",
                 table: "purchase_orders",
                 columns: new[] { "supplier_id", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ratings_order_id",
+                schema: "marketplace",
+                table: "ratings",
+                column: "order_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ratings_supplier_id",
+                schema: "marketplace",
+                table: "ratings",
+                column: "supplier_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_sharing_settings_shop_id",
@@ -445,6 +549,10 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace");
 
             migrationBuilder.DropTable(
+                name: "group_commitments",
+                schema: "marketplace");
+
+            migrationBuilder.DropTable(
                 name: "last_prices",
                 schema: "marketplace");
 
@@ -461,6 +569,10 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace");
 
             migrationBuilder.DropTable(
+                name: "ratings",
+                schema: "marketplace");
+
+            migrationBuilder.DropTable(
                 name: "sharing_settings",
                 schema: "marketplace");
 
@@ -474,6 +586,10 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "supplier_products",
+                schema: "marketplace");
+
+            migrationBuilder.DropTable(
+                name: "group_deals",
                 schema: "marketplace");
 
             migrationBuilder.DropTable(

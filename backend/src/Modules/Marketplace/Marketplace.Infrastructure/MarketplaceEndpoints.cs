@@ -126,6 +126,27 @@ public static class MarketplaceEndpoints
             return result.IsSuccess ? Results.File(result.Value!.Content, result.Value.ContentType, result.Value.FileName) : Problem(result.Error!);
         });
 
+        // M6: group buying. A shop only ever sees the group's total and its own quantity.
+        api.MapPost("/suppliers/{id:guid}/group-deals", async (Guid id, PostGroupDealRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new PostGroupDeal(id, req), ct);
+            return result.IsSuccess ? Results.Created($"/api/v1/group-deals/{result.Value!.Id}", result.Value) : Problem(result.Error!);
+        });
+        api.MapGet("/suppliers/{id:guid}/group-deals", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListSupplierGroupDeals(id, callerPersonId), ct)));
+        api.MapGet("/shops/{shopId:guid}/group-deals", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListGroupDeals(shopId, callerPersonId), ct)));
+        api.MapPost("/shops/{shopId:guid}/group-deals/{id:guid}/commitments", async (Guid shopId, Guid id, JoinGroupDealRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new JoinGroupDeal(id, shopId, req), ct)));
+        api.MapPost("/group-deals/{id:guid}/cancel", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new CancelGroupDeal(id, callerPersonId), ct)));
+        api.MapPost("/group-deals/{id:guid}/close", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new CloseGroupDealEarly(id, callerPersonId), ct)));
+
+        // M7: rate a delivery; a supplier's own rating summary and demand totals (opted-in shops only, counts only).
+        api.MapPost("/purchase-orders/{id:guid}/rating", async (Guid id, RateOrderRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new RateOrder(id, req), ct);
+            return result.IsSuccess ? Results.Created($"/api/v1/purchase-orders/{id}", result.Value) : Problem(result.Error!);
+        });
+        api.MapGet("/suppliers/{id:guid}/ratings", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetSupplierRatings(id, callerPersonId), ct)));
+        api.MapGet("/suppliers/{id:guid}/demand", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetDemand(id, callerPersonId), ct)));
+
         api.MapPatch("/supplier-products/{id:guid}", async (Guid id, UpdateSupplierProductRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new UpdateSupplierProduct(id, req), ct)));
 
         return api;
@@ -142,7 +163,7 @@ public static class MarketplaceEndpoints
             "permission.denied" => 403,
             var c when c.EndsWith("not_found", StringComparison.Ordinal) => 404,
             "staff.already_member" or "supplier.not_pending" or "supplier.suspended" or "supplier.checklist_incomplete"
-                or "order.already_sent" or "order.cannot_cancel" or "order.not_awaiting_reply" or "order.not_confirmed" or "order.not_delivered" or "order.already_received" or "order.paid_in_app" => 409,
+                or "order.already_sent" or "order.cannot_cancel" or "order.not_awaiting_reply" or "order.not_confirmed" or "order.not_delivered" or "order.already_received" or "order.paid_in_app" or "group.closed" or "group.not_open" or "group.minimum_not_met" or "rating.already_rated" or "rating.not_delivered" => 409,
             _ => 422,
         });
 }

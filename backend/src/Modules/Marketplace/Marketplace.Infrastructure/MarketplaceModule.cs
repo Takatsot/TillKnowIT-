@@ -27,6 +27,9 @@ public static class MarketplaceModule
         services.AddScoped<IOfferStore, OfferStore>();
         services.AddScoped<IShopMarketplaceStore, ShopMarketplaceStore>();
         services.AddScoped<IOrderStore, OrderStore>();
+        services.AddScoped<IGroupDealStore, GroupDealStore>();
+        services.AddScoped<IRatingStore, RatingStore>();
+        services.AddScoped<GroupDealClosing>();
         services.AddScoped<OrderNotifier>();
         services.AddDispatching(typeof(ApplyAsSupplier).Assembly);
         return services;

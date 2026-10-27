@@ -26,6 +26,9 @@ internal static class MessagingSeed
         ("order.new", [MessageChannel.Email], "New order {order} from {shop}", "{shop} has sent you order {order}:\n\n{lines}\n\nPayment: {payment}.\n\nPlease reply with what you can deliver and when."),
         ("order.update", [MessageChannel.Whatsapp, MessageChannel.Email], null, "{supplier} replied to order {order} ({shop}). {summary}\nTotal: {total}."),
 
+        // Group buying: updates to each shop that joined.
+        ("group.update", [MessageChannel.Whatsapp, MessageChannel.Email], null, "{shop}: group deal for {product} from {supplier}. {summary}"),
+
         // Messages to the owner.
         ("daily.summary", [MessageChannel.Whatsapp, MessageChannel.Push], null, Summary),
         ("daily.summary", [MessageChannel.Email], "Daily summary for {shop}", Summary),

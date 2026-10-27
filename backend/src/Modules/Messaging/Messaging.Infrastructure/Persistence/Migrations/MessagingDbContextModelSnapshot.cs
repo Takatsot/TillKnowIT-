@@ -164,6 +164,26 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = new Guid("c315586b-7e34-1123-d228-cc52e67fa6a1"),
+                            Body = "{shop}: group deal for {product} from {supplier}. {summary}",
+                            Channel = "Whatsapp",
+                            Code = "group.update",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("9bb9bd4e-722c-39f9-b98e-0d9a9760ec76"),
+                            Body = "{shop}: group deal for {product} from {supplier}. {summary}",
+                            Channel = "Email",
+                            Code = "group.update",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("fe6f1813-f3f3-885b-7352-f0a7b9604ce7"),
                             Body = "{shop} today: sales {sales}, profit {profit}, {customers} customers. Low stock: {low}. Expiring soon: {expiring}. Cash-up: {cashup}. Cancellations: {cancellations}.",
                             Channel = "Whatsapp",

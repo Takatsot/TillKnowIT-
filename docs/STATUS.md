@@ -57,10 +57,12 @@ on the build machine. The first real run is the first item on the hand-over list
 | M3-3 Suggested replacement | Todo | Could. |
 | M4-1 to M4-4 Ordering | Done | Create, build from order list, send (app, WhatsApp, email), supplier replies per line, delivery, shop receive (count wins), last prices, usual supplier, prefilled stock-in review. Port: real WhatsApp provider |
 | M5-1 to M5-4 Paying suppliers | Done (code) | Pay in app or on delivery (supplier marks cash paid), hold until delivery, release on shop confirmation or after 72h, short deliveries refund the difference, disputes freeze money until an admin resolves, signed webhooks with replay protection, audited states, daily reconciliation to the cent, supplier statement as CSV/Excel/PDF. Port: real payment partner (only a Development fake exists; webhook secret per partner in config). Not atomic across modules: a failed order-status update after money moves is caught by reconciliation. |
-| M6-1 to M6-4 Group buying | Todo | |
-| M7-1, M7-2 Ratings and demand | Todo | |
-| Marketplace as its own service, Service Bus | Todo | |
-| Supplier portal app | Todo | |
+| M6-1 to M6-3 Group buying | Done | Supplier posts a group deal (price, minimum, closing date, area); shops in the area join with a quantity and see only the total and their own quantity; at the deadline it is either one sent order per shop at the bulk price (supplier terms and delivery fee apply) or everyone is told and nobody is charged; supplier can close early once the minimum is met or cancel. Closing is safe to re-run. 500 commitments close well under a minute (tested). |
+| M6-4 Invite-only groups | Todo | Could. |
+| M7-1 Rate a delivery | Done | On time, complete, 1 to 5, one per order; a supplier average counts in offer ranking only after 3 ratings. |
+| M7-2 Demand totals | Done | Counts per area and product of opted-in shops low on the supplier's items; counts under 3 are never shown; no names, sales or stock levels (tested). Shops that never chose to share are not even queried. Calls each shop in a loop for now: batch it if areas get large. |
+| Marketplace as its own service, Service Bus | Decided not yet | See ADR 0002: same hosts, same boundaries; split when there is a reason. |
+| Supplier portal app | Todo | Front-end only; the API for it is all there. |
 
 ## Phases 3 to 5
 

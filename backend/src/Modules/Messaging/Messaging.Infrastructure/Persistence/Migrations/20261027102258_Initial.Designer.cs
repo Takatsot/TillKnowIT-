@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messaging.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MessagingDbContext))]
-    [Migration("20261027095303_Initial")]
+    [Migration("20261027102258_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -161,6 +161,26 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                             Body = "{supplier} replied to order {order} ({shop}). {summary}\nTotal: {total}.",
                             Channel = "Email",
                             Code = "order.update",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("c315586b-7e34-1123-d228-cc52e67fa6a1"),
+                            Body = "{shop}: group deal for {product} from {supplier}. {summary}",
+                            Channel = "Whatsapp",
+                            Code = "group.update",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("9bb9bd4e-722c-39f9-b98e-0d9a9760ec76"),
+                            Body = "{shop}: group deal for {product} from {supplier}. {summary}",
+                            Channel = "Email",
+                            Code = "group.update",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Language = "en",
                             Version = 1

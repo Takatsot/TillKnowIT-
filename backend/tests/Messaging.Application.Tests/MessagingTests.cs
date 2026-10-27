@@ -305,6 +305,7 @@ public class MessagingTests
         "alert.loss" => new() { ["shop"] = "s", ["message"] = "m" },
         "order.new" => new() { ["shop"] = "s", ["order"] = "AB12CD34", ["lines"] = "1 x Coke", ["payment"] = "payable on delivery" },
         "order.update" => new() { ["shop"] = "s", ["order"] = "AB12CD34", ["supplier"] = "Fresh Foods", ["summary"] = "ok", ["total"] = "R10.00" },
+        "group.update" => new() { ["shop"] = "s", ["product"] = "Coke", ["supplier"] = "Fresh Foods", ["summary"] = "ok" },
         "device.offline" => new() { ["shop"] = "s", ["device"] = "d", ["hours"] = "48" },
         _ when code.StartsWith("compliance.reminder.", StringComparison.Ordinal) => new() { ["shop"] = "s", ["document"] = "d", ["date"] = "2026-11-01", ["days"] = "7" },
         _ => throw new InvalidOperationException($"No sample values for {code}; add them here and to the sender."),

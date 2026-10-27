@@ -35,9 +35,13 @@ internal sealed class OfferStore(MarketplaceDbContext db) : IOfferStore
                           join a in db.Set<SupplierArea>().AsNoTracking() on s.Id equals a.SupplierId
                           where p.Barcode == barcode && p.InStock && s.Status == SupplierStatus.Verified && a.MunicipalityCode == municipalityCode
                           select new { p, s, a.Days }).ToListAsync(ct);
-        // Ratings arrive with the ratings feature; until then every supplier is unrated.
+        // A supplier's average counts only once enough deliveries have been rated; until then it is unrated.
+        var supplierIds = rows.Select(r => r.s.Id).Distinct().ToList();
+        var averages = (await db.Set<Rating>().AsNoTracking().Where(x => supplierIds.Contains(x.SupplierId))
+                .GroupBy(x => x.SupplierId).Select(g => new { g.Key, Count = g.Count(), Average = g.Average(x => (double)x.Score) }).ToListAsync(ct))
+            .Where(g => g.Count >= Rating.MinRatingsToShow).ToDictionary(g => g.Key, g => g.Average);
         return rows.Select(r => new OfferSource(r.s.Id, r.s.Name, r.s.MinOrderCents, r.s.DeliveryFeeCents, r.p.Id, r.p.UnitsPerCase,
-            r.p.CasePriceCents, r.p.VatIncluded, r.Days, null)).ToList();
+            r.p.CasePriceCents, r.p.VatIncluded, r.Days, averages.TryGetValue(r.s.Id, out var avg) ? avg : null)).ToList();
     }
 
     public async Task<List<Deal>> ActiveDeals(IEnumerable<Guid> supplierIds, string municipalityCode, DateTimeOffset now, CancellationToken ct)

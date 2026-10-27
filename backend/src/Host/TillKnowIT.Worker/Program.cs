@@ -44,6 +44,7 @@ builder.Services.AddMessageSender();
 builder.Services.AddOwnerNotifications();
 builder.Services.AddInvoiceReading();
 builder.Services.AddPaymentRelease();
+builder.Services.AddGroupDealClosing();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddMessagingDevProviders();
