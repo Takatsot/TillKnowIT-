@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ShopCore.Application.Credit;
+using ShopCore.Application.Insights;
+using ShopCore.Application.Reports;
 using ShopCore.Application.Stock;
 using ShopCore.Application.Sync;
 using TillKnowIT.Dispatching;
@@ -24,6 +26,8 @@ public static class ShopCoreModule
         services.AddScoped<IUploadStore, UploadStore>();
         services.AddScoped<ICreditReadStore, CreditReadStore>();
         services.AddScoped<IStockReadStore, StockReadStore>();
+        services.AddScoped<IInsightsReadStore, InsightsReadStore>();
+        services.AddScoped<IReportReadStore, InsightsReadStore>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddDispatching(typeof(UploadBatch).Assembly);
         return services;

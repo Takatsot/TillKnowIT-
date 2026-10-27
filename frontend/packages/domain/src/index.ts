@@ -7,3 +7,4 @@ export * from "./product";
 export * from "./credit";
 export * from "./cashup";
 export * from "./stockRules";
+export * from "./insights";

@@ -85,3 +85,12 @@ public sealed record CreditHistoryEntry(Guid Id, string Type, long AmountCents, 
 public sealed record StockRow(
     Guid ProductId, string Name, string? Barcode, int OnHand, int LowStockLevel, DateOnly? ExpiryDate,
     int? DaysLeft, int SuggestedOrderQuantity, List<string> Flags);
+
+public sealed record PeriodSummaryResponse(int Days, long SalesCents, long ProfitCents, int Customers, long AverageSaleCents);
+
+public sealed record BestSellerResponse(Guid ProductId, string Name, int Units, long RevenueCents, long ProfitCents);
+
+/// <summary>E8-1 and E8-2: the owner's numbers. The three lists are the first 10 products each.</summary>
+public sealed record InsightsResponse(
+    PeriodSummaryResponse Today, PeriodSummaryResponse Week, PeriodSummaryResponse Month,
+    List<BestSellerResponse> BestSellers, List<StockRow> RunningLow, List<StockRow> NotSelling, List<StockRow> Expiring);

@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using ShopCore.Application.Credit;
+using ShopCore.Application.Insights;
+using ShopCore.Application.Reports;
 using ShopCore.Application.Stock;
 using ShopCore.Application.Sync;
 using ShopCore.Contracts;
@@ -51,6 +53,20 @@ public static class ShopCoreEndpoints
             var result = await d.Ask(new ListStock(shopId, filter), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
+                : Problem(result.Error!.Code, result.Error.Message, StatusCodes.Status422UnprocessableEntity);
+        });
+
+        api.MapGet("/shops/{shopId:guid}/insights", async (Guid shopId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new GetInsights(shopId), ct);
+            return Results.Ok(result.Value);
+        });
+
+        api.MapGet("/shops/{shopId:guid}/reports/{code}", async (Guid shopId, string code, DateOnly? from, DateOnly? to, string? format, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new RunReport(shopId, code, from, to, format), ct);
+            return result.IsSuccess
+                ? Results.File(result.Value!.Content, result.Value.ContentType, result.Value.FileName)
                 : Problem(result.Error!.Code, result.Error.Message, StatusCodes.Status422UnprocessableEntity);
         });
 

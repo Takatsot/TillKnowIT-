@@ -32,7 +32,8 @@ on the build machine. The first real run is the first item on the hand-over list
 | E5-1, E5-2 Stock list, counts | Done | |
 | E6-1 Credit book | Done | |
 | E7-1 Cash-up | Done | |
-| E8-1 to E8-3 Insights and reports | Todo | |
+| E8-1, E8-2 Insights | Done | Server endpoint and the same rules in TypeScript for offline use. Screens not built. |
+| E8-3 Reports and export | Partly | Five reports as CSV, Excel and PDF (own PDF writer, no library licence). Reports are LINQ queries, not T-SQL functions, and run immediately; background jobs for very large reports are not built. |
 | E9-1 Compliance documents | Todo | |
 | E10-1 Airtime and electricity | Todo | Needs a licensed partner. |
 | E11-1, E11-2 Summary and alerts | Todo | |
