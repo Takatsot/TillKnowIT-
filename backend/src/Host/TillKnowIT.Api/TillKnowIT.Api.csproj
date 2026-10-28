@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\Modules\Platform\Platform.Infrastructure\Platform.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Customers\Customers.Infrastructure\Customers.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Bookings\Bookings.Infrastructure\Bookings.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Billing\Billing.Infrastructure\Billing.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

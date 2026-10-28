@@ -124,10 +124,14 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 
 ## Phase 5
 
-Not started. These tables are filled in as each phase is built.
-
-## Hand-over list
-
-1. Start Docker and run the API and Worker against SQL Server: confirms migrations apply, seed loads, the outbox claim query works, and cascade paths are accepted.
-2. Run the PowerSync-on-SQL-Server spike from ADR 0001 before building the local database and selling screen.
-3. Decide OTP sign-in (Entra External ID) so endpoint authentication can replace the TODOs.
+| Item | Status | Notes |
+| --- | --- | --- |
+| G3-1 Plans | Done | Billing module: plans and features as data; seeded shop and supplier plans with PLACEHOLDER prices until the pilot pricing decision. |
+| G3-2 Subscribe, upgrade, downgrade, cancel | Done | Upgrade pays the pro-rata difference now (declined = no change); downgrade and cancel at period end; invoice with VAT emailed. |
+| G3-3 Sponsored campaigns | Done | Budget, areas, dates; showings billed by use and capped at the budget; always labelled sponsored. Marketplace does not show them yet. |
+| G3-4 Failed payments | Done | Retry, reminders on set days, extras limited after grace; the till is never blocked. Real gateway not connected (dev charger only). |
+| G1 Branches, transfers | Todo | |
+| G2 Accounting export | Todo | |
+| G4 Pay-later | Todo | |
+| G5 Insights | Todo | |
+| G6 Languages, groups, partner API | Todo | |

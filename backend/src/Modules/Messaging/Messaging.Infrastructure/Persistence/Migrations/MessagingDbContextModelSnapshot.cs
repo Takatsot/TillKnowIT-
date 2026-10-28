@@ -215,6 +215,59 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = new Guid("dd80b1f6-6b90-7164-ee67-546ba91565ae"),
+                            Body = "Hi {name},\n\nInvoice {number} is {status}. Total {total} (VAT {vat}), due {due}.",
+                            Channel = "Email",
+                            Code = "invoice.issued",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Subject = "Invoice {number} from TillKnowIT",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("6a385c11-81e9-90c5-2e93-b39d7df1aecb"),
+                            Body = "Hi {name}, we could not take your {plan} payment of {total}. Please update your payment. Your extra features pause in {days} days; your till keeps working.",
+                            Channel = "Whatsapp",
+                            Code = "billing.reminder",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("7b630b6f-09f9-5e2a-3d78-46b41ec9f533"),
+                            Body = "Hi {name}, we could not take your {plan} payment of {total}. Please update your payment. Your extra features pause in {days} days; your till keeps working.",
+                            Channel = "Email",
+                            Code = "billing.reminder",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Subject = "Your TillKnowIT payment did not go through",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("488e1a63-ca2a-f9f7-911d-079c2473dacf"),
+                            Body = "Hi {name}, your {plan} extras are paused until the payment is made. Your till is not affected.",
+                            Channel = "Whatsapp",
+                            Code = "billing.limited",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("215e5faa-6b8a-edc6-81d0-2018089583ba"),
+                            Body = "Hi {name}, your {plan} extras are paused until the payment is made. Your till is not affected.",
+                            Channel = "Email",
+                            Code = "billing.limited",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Subject = "Your TillKnowIT extras are paused",
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("743083d3-4b10-9372-b4c6-9df6894441b6"),
                             Body = "{child} spent {amount} at the tuckshop. Balance: {balance}.",
                             Channel = "Push",

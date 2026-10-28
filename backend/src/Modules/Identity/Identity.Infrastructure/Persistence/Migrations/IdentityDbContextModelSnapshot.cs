@@ -821,6 +821,21 @@ namespace Identity.Infrastructure.Persistence.Migrations
                                 },
                                 new
                                 {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "billing.manage"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "insights.manage"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "partner.manage"
+                                },
+                                new
+                                {
                                     RoleId = new Guid("b10731c0-eb8c-60f3-8a5c-88f239d2a910"),
                                     PermissionCode = "supplier.manage"
                                 },

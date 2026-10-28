@@ -33,6 +33,13 @@ internal static class MessagingSeed
         ("appointment.reminder", [MessageChannel.Whatsapp, MessageChannel.Sms], null, "Hi {name}, a reminder of your {service} on {date} at {time}."),
         ("appointment.reminder", [MessageChannel.Email], "Your appointment on {date}", "Hi {name},\n\nA reminder of your {service} on {date} at {time}."),
 
+        // Billing: the invoice to whoever pays, and chasing a payment that failed. Only the plan's extras are ever limited, never the till.
+        ("invoice.issued", [MessageChannel.Email], "Invoice {number} from TillKnowIT", "Hi {name},\n\nInvoice {number} is {status}. Total {total} (VAT {vat}), due {due}."),
+        ("billing.reminder", [MessageChannel.Whatsapp], null, "Hi {name}, we could not take your {plan} payment of {total}. Please update your payment. Your extra features pause in {days} days; your till keeps working."),
+        ("billing.reminder", [MessageChannel.Email], "Your TillKnowIT payment did not go through", "Hi {name}, we could not take your {plan} payment of {total}. Please update your payment. Your extra features pause in {days} days; your till keeps working."),
+        ("billing.limited", [MessageChannel.Whatsapp], null, "Hi {name}, your {plan} extras are paused until the payment is made. Your till is not affected."),
+        ("billing.limited", [MessageChannel.Email], "Your TillKnowIT extras are paused", "Hi {name}, your {plan} extras are paused until the payment is made. Your till is not affected."),
+
         // School wallets: to parents (push first; WhatsApp only where they opted in) and to the tuckshop owner.
         ("wallet.purchase", [MessageChannel.Push], null, "{child} spent {amount} at the tuckshop. Balance: {balance}."),
         ("wallet.topup", [MessageChannel.Push], null, "{amount} was added to {child}'s wallet. Balance: {balance}."),

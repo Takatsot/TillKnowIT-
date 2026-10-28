@@ -1,3 +1,5 @@
+using Billing.Infrastructure;
+using Billing.Infrastructure.Persistence;
 using Bookings.Infrastructure;
 using Bookings.Infrastructure.Persistence;
 using Customers.Infrastructure;
@@ -48,7 +50,8 @@ builder.Services
     .AddOutboxProcessor<WalletDbContext>()
     .AddOutboxProcessor<PlatformDbContext>()
     .AddOutboxProcessor<CustomersDbContext>()
-    .AddOutboxProcessor<BookingsDbContext>();
+    .AddOutboxProcessor<BookingsDbContext>()
+    .AddOutboxProcessor<BillingDbContext>();
 
 // Delivers queued messages. Pretend providers (log only) exist in Development; elsewhere a channel with no
 // real provider fails visibly rather than pretending to send.
@@ -60,12 +63,14 @@ builder.Services.AddGroupDealClosing();
 builder.Services.AddLaybyExpiry();
 builder.Services.AddAppointmentReminders();
 builder.Services.AddWalletJobs();
+builder.Services.AddBillingJobs();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddMessagingDevProviders();
     builder.Services.AddDevInvoiceReader();
     builder.Services.AddDevPaymentPartner();
     builder.Services.AddDevStoredValuePartner();
+    builder.Services.AddDevBillingCharger();
 }
 
 builder.Build().Run();

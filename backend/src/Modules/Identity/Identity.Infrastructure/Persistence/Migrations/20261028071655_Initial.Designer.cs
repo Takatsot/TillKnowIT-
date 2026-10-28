@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20261027114858_Initial")]
+    [Migration("20261028071655_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -821,6 +821,21 @@ namespace Identity.Infrastructure.Persistence.Migrations
                                 {
                                     RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
                                     PermissionCode = "pack.manage"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "billing.manage"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "insights.manage"
+                                },
+                                new
+                                {
+                                    RoleId = new Guid("f53edd22-7d1f-7628-e3a5-f713240fb3df"),
+                                    PermissionCode = "partner.manage"
                                 },
                                 new
                                 {

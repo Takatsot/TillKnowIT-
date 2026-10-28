@@ -306,6 +306,8 @@ public class MessagingTests
         "order.new" => new() { ["shop"] = "s", ["order"] = "AB12CD34", ["lines"] = "1 x Coke", ["payment"] = "payable on delivery" },
         "order.update" => new() { ["shop"] = "s", ["order"] = "AB12CD34", ["supplier"] = "Fresh Foods", ["summary"] = "ok", ["total"] = "R10.00" },
         "appointment.reminder" => new() { ["name"] = "Thandi", ["service"] = "Haircut", ["date"] = "Monday 26 October", ["time"] = "10:00" },
+        "invoice.issued" => new() { ["name"] = "Thandi", ["number"] = "INV-202610-000001", ["status"] = "paid", ["total"] = "R229.85", ["vat"] = "R29.98", ["due"] = "3 November 2026" },
+        "billing.reminder" or "billing.limited" => new() { ["name"] = "Thandi", ["plan"] = "shop_pro", ["days"] = "5", ["total"] = "R229.85" },
         "wallet.purchase" => new() { ["child"] = "Thandi", ["amount"] = "R10.00", ["balance"] = "R40.00" },
         "wallet.topup" => new() { ["child"] = "Thandi", ["amount"] = "R100.00", ["balance"] = "R140.00" },
         "wallet.low_balance" => new() { ["child"] = "Thandi", ["balance"] = "R5.00" },

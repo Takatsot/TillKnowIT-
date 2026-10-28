@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Billing.Domain\Billing.Domain.csproj" />
+    <ProjectReference Include="..\Billing.Contracts\Billing.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Dispatching\TillKnowIT.Dispatching.csproj" />
+    <ProjectReference Include="..\..\Identity\Identity.Contracts\Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\Messaging\Messaging.Contracts\Messaging.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Billing.Application.Tests" />
+  </ItemGroup>
+
+</Project>

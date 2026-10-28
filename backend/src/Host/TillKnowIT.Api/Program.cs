@@ -1,3 +1,4 @@
+using Billing.Infrastructure;
 using Bookings.Infrastructure;
 using Customers.Infrastructure;
 using Platform.Infrastructure;
@@ -26,6 +27,7 @@ builder.Services
     .AddShopCoreModule(db)
     .AddMarketplaceModule(db)
     .AddMessagingModule(db)
+    .AddBillingModule(db)
     .AddBookingsModule(db)
     .AddCustomersModule(db)
     .AddPlatformModule(db)
@@ -34,7 +36,7 @@ builder.Services
 
 // A fake VAS partner exists in Development only. Elsewhere airtime and electricity report "not available"
 // until the real partner adapter is registered.
-if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner().AddDevPaymentPartner().AddDevStoredValuePartner();
+if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner().AddDevPaymentPartner().AddDevStoredValuePartner().AddDevBillingCharger();
 
 var app = builder.Build();
 
@@ -55,6 +57,7 @@ api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 api.MapIdentityEndpoints();
 api.MapShopCoreEndpoints();
 api.MapCatalogueEndpoints();
+api.MapBillingEndpoints();
 api.MapBookingsEndpoints();
 api.MapCustomersEndpoints();
 api.MapPlatformEndpoints();

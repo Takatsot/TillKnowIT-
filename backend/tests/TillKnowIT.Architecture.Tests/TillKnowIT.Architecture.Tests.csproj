@@ -30,6 +30,7 @@
     <ProjectReference Include="..\..\src\Modules\Platform\Platform.Infrastructure\Platform.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Customers\Customers.Infrastructure\Customers.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Bookings\Bookings.Infrastructure\Bookings.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Billing\Billing.Infrastructure\Billing.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
