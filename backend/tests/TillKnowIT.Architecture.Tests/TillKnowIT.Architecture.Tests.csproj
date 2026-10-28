@@ -32,6 +32,7 @@
     <ProjectReference Include="..\..\src\Modules\Bookings\Bookings.Infrastructure\Bookings.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Billing\Billing.Infrastructure\Billing.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Finance\Finance.Infrastructure\Finance.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Insights\Insights.Infrastructure\Insights.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

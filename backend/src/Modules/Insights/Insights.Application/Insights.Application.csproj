@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Insights.Domain\Insights.Domain.csproj" />
+    <ProjectReference Include="..\Insights.Contracts\Insights.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Dispatching\TillKnowIT.Dispatching.csproj" />
+    <ProjectReference Include="..\..\Identity\Identity.Contracts\Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\ShopCore\ShopCore.Contracts\ShopCore.Contracts.csproj" />
+    <ProjectReference Include="..\..\Billing\Billing.Contracts\Billing.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Insights.Application.Tests" />
+  </ItemGroup>
+
+</Project>

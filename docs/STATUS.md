@@ -136,5 +136,6 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | G2 Accounting export | Todo | |
 | G4-1 Pay-later consent | Done | Finance module: consent per named partner, withdrawable (nothing shared once withdrawn), every share logged and shown to the owner. We never lend: the partner decides. Only a dev partner exists; no real provider or agreement yet. |
 | G4-2 Pay an order with terms | Done | Partner pays the supplier (port), order marked paid, repayments tracked from signed partner callbacks (idempotent), credit comes back as repayments arrive. |
-| G5 Insights | Todo | |
+| G5-1 Insights opt-in | Done | Off by default, owner-only, explanation text shown. |
+| G5-2 Area trend reports | Done (in the monolith) | Insights module with its own schema: daily aggregates from opted-in verified shops only, no shop/person/device on the row, rows with fewer than 10 shops are never stored (code and a database check constraint) or shown; weekly trends with revenue bands. The spec's separate Insights service and warehouse database are NOT built: this runs in the same host and database server for now. Legal/data-ethics review still required before release. |
 | G6 Languages, groups, partner API | Todo | |

@@ -1,3 +1,5 @@
+using Insights.Infrastructure;
+using Insights.Infrastructure.Persistence;
 using Finance.Infrastructure;
 using Finance.Infrastructure.Persistence;
 using Billing.Infrastructure;
@@ -54,7 +56,8 @@ builder.Services
     .AddOutboxProcessor<CustomersDbContext>()
     .AddOutboxProcessor<BookingsDbContext>()
     .AddOutboxProcessor<BillingDbContext>()
-    .AddOutboxProcessor<FinanceDbContext>();
+    .AddOutboxProcessor<FinanceDbContext>()
+    .AddOutboxProcessor<InsightsDbContext>();
 
 // Delivers queued messages. Pretend providers (log only) exist in Development; elsewhere a channel with no
 // real provider fails visibly rather than pretending to send.
@@ -67,6 +70,7 @@ builder.Services.AddLaybyExpiry();
 builder.Services.AddAppointmentReminders();
 builder.Services.AddWalletJobs();
 builder.Services.AddBillingJobs();
+builder.Services.AddInsightAggregation();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddMessagingDevProviders();

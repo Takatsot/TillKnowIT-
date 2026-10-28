@@ -66,6 +66,7 @@ public static class ShopCoreModule
         services.AddScoped<OwnerMessenger>();
         services.AddScoped<IInsightsReadStore, InsightsReadStore>();
         services.AddScoped<ITransferStore, TransferStore>();
+        services.AddScoped<ShopCore.Contracts.ICategorySalesSource, CategorySalesSource>();
         services.AddScoped<ShopCore.Contracts.ISalesHistory, ShopCore.Application.Insights.SalesHistory>();
         services.AddScoped<IReportReadStore, InsightsReadStore>();
         services.TryAddSingleton(TimeProvider.System);

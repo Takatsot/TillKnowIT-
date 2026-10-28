@@ -1,3 +1,4 @@
+using Insights.Infrastructure;
 using Finance.Infrastructure;
 using Billing.Infrastructure;
 using Bookings.Infrastructure;
@@ -28,6 +29,7 @@ builder.Services
     .AddShopCoreModule(db)
     .AddMarketplaceModule(db)
     .AddMessagingModule(db)
+    .AddInsightsModule(db)
     .AddFinanceModule(db)
     .AddBillingModule(db)
     .AddBookingsModule(db)
@@ -60,6 +62,7 @@ api.MapIdentityEndpoints();
 api.MapShopCoreEndpoints();
 api.MapTransferEndpoints();
 api.MapCatalogueEndpoints();
+api.MapInsightsEndpoints();
 api.MapFinanceEndpoints();
 api.MapBillingEndpoints();
 api.MapBookingsEndpoints();
