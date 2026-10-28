@@ -66,3 +66,18 @@ public interface IMessageAllowance
     /// <summary>For the business behind the shop (a branch uses its head shop's bundle).</summary>
     Task<MessageAllowance> Check(Guid shopId, CancellationToken ct);
 }
+
+/// <summary>
+/// How the marketplace asks about paid placements. A deal can only be marked sponsored while its supplier has a running campaign, and each showing to a shop is charged to that campaign.
+/// </summary>
+public interface ISponsoredPlacements
+{
+    /// <summary>True if the supplier's plan includes sponsored placements and it has a campaign with budget left.</summary>
+    Task<bool> CanSponsor(Guid supplierOrganisationId, CancellationToken ct);
+
+    /// <summary>
+    /// Counts one showing in an area against a running campaign. True if it was charged (or was already charged for this reference), false if there is no campaign or its budget is used up;
+    /// then the placement is not sponsored and must not be labelled or boosted as if it were.
+    /// </summary>
+    Task<bool> Charge(Guid supplierOrganisationId, string area, string reference, CancellationToken ct);
+}

@@ -1,4 +1,6 @@
 using Identity.Contracts;
+using Billing.Contracts;
+using Marketplace.Application.Suppliers;
 using Marketplace.Contracts;
 using Marketplace.Domain;
 using ShopCore.Contracts;
@@ -68,7 +70,8 @@ public sealed record GetOffers(Guid ShopId, Guid CallerPersonId, Guid ProductId)
 public sealed record GetOrderList(Guid ShopId, Guid CallerPersonId) : IQuery<List<OrderListItem>>;
 
 internal sealed class OfferHandlers(
-    IOfferStore store, IShopStockInfo stock, IShopDirectory shops, IOrganisationAccess access, TimeProvider clock)
+    IOfferStore store, IShopStockInfo stock, IShopDirectory shops, IOrganisationAccess access, TimeProvider clock,
+    ISupplierStore? suppliers = null, ISponsoredPlacements? sponsorship = null)
     : IQueryHandler<GetOffers, OffersResponse>, IQueryHandler<GetOrderList, List<OrderListItem>>
 {
     public async Task<Result<OffersResponse>> Handle(GetOffers q, CancellationToken ct)
@@ -82,8 +85,27 @@ internal sealed class OfferHandlers(
 
         var now = clock.GetUtcNow();
         var offers = await OfferBuilder.Build(store, product, municipality, q.ShopId, now, DateOnly.FromDateTime(now.ToOffset(TimeSpan.FromHours(2)).DateTime), weights, ct);
+        offers = await ChargeSponsored(offers, q.ShopId, municipality, now, ct);
         return Result<OffersResponse>.Ok(new OffersResponse(product.ProductId, product.Name, Math.Max(product.SuggestedOrderQuantity, 1),
             product.PriceCents > 0 ? product.PriceCents : null, offers.Select(OfferBuilder.ToResponse).ToList()));
+    }
+
+    /// <summary>
+    /// Showing a sponsored offer to a shop is what the supplier pays for: one showing per shop, deal and day. If the supplier's budget is used up the offer is shown as an ordinary one:
+    /// it is not labelled "Sponsored" because it is no longer paid for, and it gets no boost.
+    /// </summary>
+    private async Task<List<RankedOffer>> ChargeSponsored(List<RankedOffer> offers, Guid shopId, string area, DateTimeOffset now, CancellationToken ct)
+    {
+        if (sponsorship is null || suppliers is null || !offers.Any(o => o.IsSponsored)) return offers;
+        var result = new List<RankedOffer>();
+        foreach (var o in offers)
+        {
+            if (!o.IsSponsored) { result.Add(o); continue; }
+            var org = (await suppliers.Get(o.SupplierId, ct))?.OrganisationId;
+            var charged = org is { } id && await sponsorship.Charge(id, area, $"{shopId:N}:{o.SupplierId:N}:{o.DealTitle}:{now:yyyyMMdd}", ct);
+            result.Add(charged ? o : o with { IsSponsored = false, Label = null });
+        }
+        return result;
     }
 
     public async Task<Result<List<OrderListItem>>> Handle(GetOrderList q, CancellationToken ct)

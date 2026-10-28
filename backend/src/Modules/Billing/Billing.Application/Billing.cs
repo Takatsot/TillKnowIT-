@@ -468,6 +468,30 @@ internal sealed class BillingRunHandlers(IBillingStore store, Invoicing invoicin
     }
 }
 
+public sealed class SponsoredPlacementService(IBillingStore store, IEntitlements entitlements, TimeProvider clock) : ISponsoredPlacements
+{
+    private DateOnly Today => BusinessDay.Of(clock.GetUtcNow());
+
+    public async Task<bool> CanSponsor(Guid supplierOrganisationId, CancellationToken ct) =>
+        await entitlements.Has(supplierOrganisationId, Audience.Supplier, PlanFeatures.Sponsored, ct)
+        && (await store.CampaignsOf(supplierOrganisationId, ct)).Any(c => c.Status == CampaignStatus.Active && c.EndsOn >= Today && c.SpentCents + c.ShowingCents <= c.BudgetCents);
+
+    public async Task<bool> Charge(Guid supplierOrganisationId, string area, string reference, CancellationToken ct)
+    {
+        if (!await entitlements.Has(supplierOrganisationId, Audience.Supplier, PlanFeatures.Sponsored, ct)) return false;
+        var key = $"show:{reference}";
+        if (await store.UsageByReference(supplierOrganisationId, key, ct) is not null) return true;   // this showing was already charged
+
+        var campaign = (await store.CampaignsOf(supplierOrganisationId, ct)).FirstOrDefault(c => c.RunsOn(Today, area));
+        if (campaign is null) return false;
+        var counted = campaign.Show(1);
+        if (!counted.IsSuccess) { await store.Save(ct); return false; }
+        store.Add(UsageRecord.Create(supplierOrganisationId, CampaignHandlers.Metric, 1, key, clock.GetUtcNow(), campaign.ShowingCents).Value!);
+        await store.Save(ct);
+        return true;
+    }
+}
+
 // ---------------------------------------------------------------- G3-3: sponsored campaigns
 
 public sealed record CreateCampaign(CreateCampaignRequest Request) : ICommand<CampaignResponse>;

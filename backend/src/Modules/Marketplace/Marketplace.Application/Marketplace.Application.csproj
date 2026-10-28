@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Reporting\TillKnowIT.Reporting.csproj" />
     <ProjectReference Include="..\..\ShopCore\ShopCore.Contracts\ShopCore.Contracts.csproj" />
     <ProjectReference Include="..\..\Messaging\Messaging.Contracts\Messaging.Contracts.csproj" />
+    <ProjectReference Include="..\..\Billing\Billing.Contracts\Billing.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

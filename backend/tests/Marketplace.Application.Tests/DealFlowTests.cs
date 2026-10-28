@@ -65,11 +65,34 @@ public class DealFlowTests
         _access.Granted.Add((_owner, org, "deals.manage"));
     }
 
+    private sealed class FakeSponsorship : Billing.Contracts.ISponsoredPlacements
+    {
+        public bool Allowed { get; set; }
+        public Task<bool> CanSponsor(Guid org, CancellationToken ct) => Task.FromResult(Allowed);
+        public Task<bool> Charge(Guid org, string area, string reference, CancellationToken ct) => Task.FromResult(Allowed);
+    }
+
     private CreateDealHandler Create() => new(_suppliers, _suppliers, _deals, _access, new FakeTimeProvider(Now));
+    private CreateDealHandler CreateWith(FakeSponsorship sponsorship) => new(_suppliers, _suppliers, _deals, _access, new FakeTimeProvider(Now), sponsorship);
     private DealQueries Queries() => new(_suppliers, _deals, _access, new FakeTimeProvider(Now));
 
     private CreateDealRequest Request(string type = "discount", DealTermsDto? terms = null, string[]? areas = null, bool sponsored = false, int startDays = 0, int endDays = 20, string title = "Spring special") =>
         new(_owner, title, type, terms ?? new DealTermsDto(_coke.Id, 10, null, null, null, null, null), Now.AddDays(startDays), Now.AddDays(endDays), [.. areas ?? ["jhb"]], sponsored);
+
+    [Fact]
+    public async Task A_sponsored_deal_needs_a_paid_campaign_but_an_ordinary_deal_does_not()
+    {
+        var sponsorship = new FakeSponsorship { Allowed = false };
+
+        var refused = await CreateWith(sponsorship).Handle(new CreateDeal(_supplier.Id, Request(sponsored: true)), default);
+        var ordinary = await CreateWith(sponsorship).Handle(new CreateDeal(_supplier.Id, Request(sponsored: false)), default);
+        sponsorship.Allowed = true;
+        var paid = await CreateWith(sponsorship).Handle(new CreateDeal(_supplier.Id, Request(sponsored: true, title: "Paid")), default);
+
+        Assert.Equal("deal.sponsorship_not_paid", refused.Error!.Code);
+        Assert.True(ordinary.IsSuccess);
+        Assert.Equal("Sponsored", paid.Value!.Label);
+    }
 
     [Fact]
     public async Task A_verified_supplier_creates_a_deal_for_one_of_its_products_in_areas_it_serves()

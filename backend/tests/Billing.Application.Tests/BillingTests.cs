@@ -510,6 +510,46 @@ public class BillingFlowTests
         Assert.Equal("campaign.not_found", (await Campaigns.Handle(new PauseCampaign(Guid.NewGuid(), _owner, true), default)).Error!.Code);
     }
 
+    // ---- sponsored placements (G3-3 with the marketplace) ----
+
+    private SponsoredPlacementService Placements => new(_store, Entitlement, _clock);
+
+    [Fact]
+    public async Task A_supplier_can_sponsor_only_with_the_plan_and_a_running_campaign_with_budget()
+    {
+        Assert.False(await Placements.CanSponsor(_org, default));
+        await Subscribe("supplier_premium");
+        Assert.False(await Placements.CanSponsor(_org, default));   // the plan alone is not enough
+        await NewCampaign();
+        Assert.True(await Placements.CanSponsor(_org, default));
+    }
+
+    [Fact]
+    public async Task A_showing_is_charged_to_a_campaign_running_in_the_area_once_per_reference_and_stops_at_the_budget()
+    {
+        await Subscribe("supplier_premium");
+        await NewCampaign(budget: 300, price: 100);
+
+        Assert.True(await Placements.Charge(_org, "soweto", "a", default));
+        Assert.True(await Placements.Charge(_org, "soweto", "a", default));   // the same showing again is not charged twice
+        Assert.False(await Placements.Charge(_org, "durban", "b", default));  // no campaign there
+        Assert.True(await Placements.Charge(_org, "soweto", "c", default));
+        Assert.True(await Placements.Charge(_org, "soweto", "d", default));
+        Assert.False(await Placements.Charge(_org, "soweto", "e", default));  // the R3 budget is used up
+
+        Assert.Equal(3, _store.UsageRows.Count);
+        Assert.All(_store.UsageRows, u => Assert.Equal(100, u.UnitCents));
+        Assert.Equal(300, _store.Campaigns.Single().SpentCents);
+        Assert.False(await Placements.CanSponsor(_org, default));
+    }
+
+    [Fact]
+    public async Task Without_the_plan_a_showing_is_never_charged()
+    {
+        Assert.False(await Placements.Charge(_org, "soweto", "a", default));
+        Assert.Empty(_store.UsageRows);
+    }
+
     // ---- message bundle (B8-3) ----
 
     private sealed class OwnerShops : IShopDirectory

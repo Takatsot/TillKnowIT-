@@ -128,7 +128,7 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | --- | --- | --- |
 | G3-1 Plans | Done | Billing module: plans and features as data; seeded shop and supplier plans with PLACEHOLDER prices until the pilot pricing decision. |
 | G3-2 Subscribe, upgrade, downgrade, cancel | Done | Upgrade pays the pro-rata difference now (declined = no change); downgrade and cancel at period end; invoice with VAT emailed. |
-| G3-3 Sponsored campaigns | Done | Budget, areas, dates; showings billed by use and capped at the budget; always labelled sponsored. Marketplace does not show them yet. |
+| G3-3 Sponsored campaigns | Done | Budget, areas, dates; showings billed by use and capped at the budget; always labelled sponsored. A sponsored deal needs the plan and a running campaign; each showing of a sponsored offer to a shop is charged once per shop, deal and day; when the budget is used up the offer is shown without the label and without a boost. |
 | G3-4 Failed payments | Done | Retry, reminders on set days, extras limited after grace; the till is never blocked. Real gateway not connected (dev charger only). |
 | G1-1, G1-4 Branches | Done | A branch is a shop under a head shop (one level), needs the multi_branch plan feature; owner and general managers (all-branches scope) see every branch, branch staff only their own. |
 | G1-2 Stock transfers | Done (online) | Out movement on send, in on receive, shortfall shown, cancel while in transit, idempotent. Offline upload of transfers is not built: needs the sync path. |

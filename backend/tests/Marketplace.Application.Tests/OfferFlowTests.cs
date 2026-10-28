@@ -70,6 +70,60 @@ public class OfferFlowTests
 
     private OfferHandlers Offers() => new(_store, _stock, _shops, _access, new FakeTimeProvider(Now));
 
+    private sealed class OneSupplier(Supplier supplier) : Marketplace.Application.Suppliers.ISupplierStore
+    {
+        public Task Add(Supplier s, CancellationToken ct) => Task.CompletedTask;
+        public Task<Supplier?> Get(Guid id, CancellationToken ct) => Task.FromResult<Supplier?>(supplier);
+        public Task<List<Supplier>> Pending(CancellationToken ct) => Task.FromResult(new List<Supplier>());
+        public Task<List<SupplierArea>> Areas(Guid id, CancellationToken ct) => Task.FromResult(new List<SupplierArea>());
+        public Task ReplaceAreas(Guid id, List<SupplierArea> a, CancellationToken ct) => Task.CompletedTask;
+        public Task Save(CancellationToken ct) => Task.CompletedTask;
+    }
+
+    private sealed class Paid : Billing.Contracts.ISponsoredPlacements
+    {
+        public bool Allowed { get; set; } = true;
+        public List<(string Area, string Reference)> Charged { get; } = [];
+        public Task<bool> CanSponsor(Guid org, CancellationToken ct) => Task.FromResult(Allowed);
+        public Task<bool> Charge(Guid org, string area, string reference, CancellationToken ct) { Charged.Add((area, reference)); return Task.FromResult(Allowed); }
+    }
+
+    private async Task<List<OfferResponse>> SponsoredOffers(Paid paid)
+    {
+        var product = Product(suggested: 24);
+        _stock.Products.Add(product);
+        Listing("Plain", casePrice: 24000);
+        var promo = Listing("Promo", casePrice: 24000);
+        var terms = new DealTerms(SupplierProductId: promo.SupplierProductId, PercentOff: 20);
+        _store.Deals.Add(Deal.Create(promo.SupplierId, new DealInput("20% off Coke", DealType.Discount, terms, Now.AddDays(-1), Now.AddDays(10), ["jhb"], IsSponsored: true), ["jhb"], Now.AddDays(-2)).Value!);
+        var supplier = Supplier.Apply(new SupplierApplication(_owner, Guid.NewGuid(), "Promo", null, "Sipho", "0821234567", null, null, 1), Now).Value!;
+        var handler = new OfferHandlers(_store, _stock, _shops, _access, new FakeTimeProvider(Now), new OneSupplier(supplier), paid);
+        return (await handler.Handle(new GetOffers(_shop, _owner, product.ProductId), default)).Value!.Offers;
+    }
+
+    [Fact]
+    public async Task Showing_a_sponsored_offer_is_charged_once_per_shop_and_day_and_keeps_its_label()
+    {
+        var paid = new Paid();
+
+        var offers = await SponsoredOffers(paid);
+
+        Assert.Equal("Sponsored", offers.Single(o => o.SupplierName == "Promo").Label);
+        var charge = Assert.Single(paid.Charged);
+        Assert.Equal("jhb", charge.Area);
+        Assert.Contains(_shop.ToString("N"), charge.Reference);
+        Assert.EndsWith("20261026", charge.Reference);
+    }
+
+    [Fact]
+    public async Task A_sponsored_offer_whose_budget_is_used_up_is_shown_as_an_ordinary_offer_without_the_label()
+    {
+        var offers = await SponsoredOffers(new Paid { Allowed = false });
+
+        Assert.All(offers, o => Assert.Null(o.Label));
+        Assert.Equal(800, offers.Single(o => o.SupplierName == "Promo").TrueCostPerUnitCents);   // the deal itself still applies
+    }
+
     private ShopProductInfo Product(string name = "Coke 330ml", string? barcode = Barcode, long price = 1500, int suggested = 48) =>
         new(Guid.NewGuid(), name, barcode, price, 3, 10, null, 2, suggested, ["low"]);
 

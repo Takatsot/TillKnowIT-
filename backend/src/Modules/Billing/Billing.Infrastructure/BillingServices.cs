@@ -22,6 +22,7 @@ public static partial class BillingModule
         services.AddScoped<IEntitlements, Entitlements>();
         services.AddScoped<IUsageMeter, UsageMeter>();
         services.AddScoped<IMessageAllowance, MessageAllowanceService>();
+        services.AddScoped<ISponsoredPlacements, SponsoredPlacementService>();
         services.TryAddSingleton(TimeProvider.System);
         // Plans carry the prices; these are the other numbers (VAT, grace period, reminder days, price of a message above the plan) and come from settings.
         services.TryAddSingleton(sp => sp.GetService<IConfiguration>()?.GetSection("Billing").Get<BillingSettings>() ?? new BillingSettings());

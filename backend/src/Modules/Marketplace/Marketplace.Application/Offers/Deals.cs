@@ -1,5 +1,6 @@
 using Identity.Contracts;
 using Marketplace.Application.Suppliers;
+using Billing.Contracts;
 using Marketplace.Contracts;
 using Marketplace.Domain;
 using TillKnowIT.Dispatching;
@@ -49,7 +50,7 @@ internal static class DealMapping
 
 public sealed record CreateDeal(Guid SupplierId, CreateDealRequest Request) : ICommand<DealResponse>;
 
-internal sealed class CreateDealHandler(ISupplierStore suppliers, ISupplierProductStore products, IDealStore deals, IOrganisationAccess access, TimeProvider clock)
+internal sealed class CreateDealHandler(ISupplierStore suppliers, ISupplierProductStore products, IDealStore deals, IOrganisationAccess access, TimeProvider clock, ISponsoredPlacements? sponsorship = null)
     : ICommandHandler<CreateDeal, DealResponse>
 {
     public async Task<Result<DealResponse>> Handle(CreateDeal c, CancellationToken ct)
@@ -61,6 +62,10 @@ internal sealed class CreateDealHandler(ISupplierStore suppliers, ISupplierProdu
         if (!allowed.IsSuccess) return Result<DealResponse>.Fail(allowed.Error!.Code, allowed.Error.Message);
         if (!supplier.IsTrading) return Result<DealResponse>.Fail("supplier.not_verified", "Only a verified supplier can run deals.");
         if (!DealMapping.TryParseType(r.Type, out var type)) return Result<DealResponse>.Fail("deal.type_invalid", "Type is discount, free_goods or combo.");
+
+        // A sponsored deal is a paid placement: it needs a running sponsored campaign. Without one the supplier can still post the deal, just not as sponsored.
+        if (r.IsSponsored && sponsorship is not null && (supplier.OrganisationId is not { } org || !await sponsorship.CanSponsor(org, ct)))
+            return Result<DealResponse>.Fail("deal.sponsorship_not_paid", "Sponsored deals need a sponsored campaign with budget left on your plan.");
 
         var terms = DealMapping.FromDto(r.Terms);
 
