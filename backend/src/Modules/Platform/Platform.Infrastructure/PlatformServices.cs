@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Platform.Application;
 using Platform.Contracts;
 using Platform.Domain;
@@ -13,6 +14,9 @@ public static partial class PlatformModule
     {
         services.AddScoped<IPackStore, PackStore>();
         services.AddScoped<IShopFeatures, ShopFeatures>();
+        services.AddScoped<IPartnerStore, PartnerStore>();
+        services.AddSingleton<IRateLimiter, InMemoryRateLimiter>();
+        services.TryAddSingleton(TimeProvider.System);
     }
 }
 

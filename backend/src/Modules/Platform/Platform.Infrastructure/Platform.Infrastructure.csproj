@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Platform.Application\Platform.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Outbox\TillKnowIT.Outbox.csproj" />
+    <ProjectReference Include="..\..\ShopCore\ShopCore.Contracts\ShopCore.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

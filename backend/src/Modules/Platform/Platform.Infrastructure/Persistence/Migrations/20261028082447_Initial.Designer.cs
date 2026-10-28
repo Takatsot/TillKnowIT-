@@ -12,7 +12,7 @@ using Platform.Infrastructure.Persistence;
 namespace Platform.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(PlatformDbContext))]
-    [Migration("20261027114911_Initial")]
+    [Migration("20261028082447_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,6 +25,202 @@ namespace Platform.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Platform.Domain.ApiCallLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("ClientId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("client_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("outcome");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("scope");
+
+                    b.Property<Guid?>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_api_call_log");
+
+                    b.HasIndex("ClientId", "CreatedAt")
+                        .HasDatabaseName("ix_api_call_log_client_id_created_at");
+
+                    b.ToTable("api_call_log", "platform");
+                });
+
+            modelBuilder.Entity("Platform.Domain.ApiClient", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("nvarchar(320)")
+                        .HasColumnName("contact_email");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_revoked");
+
+                    b.Property<string>("KeyHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("key_hash");
+
+                    b.Property<string>("KeyPrefix")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("key_prefix");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PreviousKeyHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("previous_key_hash");
+
+                    b.Property<DateTimeOffset?>("PreviousValidUntil")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("previous_valid_until");
+
+                    b.Property<int>("RateLimitPerMinute")
+                        .HasColumnType("int")
+                        .HasColumnName("rate_limit_per_minute");
+
+                    b.Property<string>("Scopes")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("scopes");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_api_clients");
+
+                    b.HasIndex("KeyHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_api_clients_key_hash");
+
+                    b.HasIndex("PreviousKeyHash")
+                        .HasDatabaseName("ix_api_clients_previous_key_hash");
+
+                    b.ToTable("api_clients", "platform");
+                });
+
+            modelBuilder.Entity("Platform.Domain.ApiGrant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("ApprovedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("approved_at");
+
+                    b.Property<Guid>("ApprovedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("approved_by");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("client_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("Scopes")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("scopes");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_api_grants");
+
+                    b.HasIndex("ClientId", "ShopId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_api_grants_client_id_shop_id");
+
+                    b.ToTable("api_grants", "platform");
+                });
 
             modelBuilder.Entity("Platform.Domain.BusinessPack", b =>
                 {

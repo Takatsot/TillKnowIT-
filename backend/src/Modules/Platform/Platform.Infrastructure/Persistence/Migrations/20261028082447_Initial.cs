@@ -17,6 +17,74 @@ namespace Platform.Infrastructure.Persistence.Migrations
                 name: "platform");
 
             migrationBuilder.CreateTable(
+                name: "api_call_log",
+                schema: "platform",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    client_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    scope = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    outcome = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_api_call_log", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "api_clients",
+                schema: "platform",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: false),
+                    contact_email = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: true),
+                    key_prefix = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    key_hash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    previous_key_hash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
+                    previous_valid_until = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    scopes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    rate_limit_per_minute = table.Column<int>(type: "int", nullable: false),
+                    is_revoked = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_api_clients", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "api_grants",
+                schema: "platform",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    client_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    scopes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    approved_by = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    approved_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    revoked_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_api_grants", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "business_packs",
                 schema: "platform",
                 columns: table => new
@@ -190,6 +258,32 @@ namespace Platform.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "ix_api_call_log_client_id_created_at",
+                schema: "platform",
+                table: "api_call_log",
+                columns: new[] { "client_id", "created_at" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_api_clients_key_hash",
+                schema: "platform",
+                table: "api_clients",
+                column: "key_hash",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_api_clients_previous_key_hash",
+                schema: "platform",
+                table: "api_clients",
+                column: "previous_key_hash");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_api_grants_client_id_shop_id",
+                schema: "platform",
+                table: "api_grants",
+                columns: new[] { "client_id", "shop_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "ix_business_packs_code",
                 schema: "platform",
                 table: "business_packs",
@@ -227,6 +321,18 @@ namespace Platform.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "api_call_log",
+                schema: "platform");
+
+            migrationBuilder.DropTable(
+                name: "api_clients",
+                schema: "platform");
+
+            migrationBuilder.DropTable(
+                name: "api_grants",
+                schema: "platform");
+
             migrationBuilder.DropTable(
                 name: "outbox_messages",
                 schema: "platform");

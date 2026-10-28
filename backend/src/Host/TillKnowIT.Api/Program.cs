@@ -71,6 +71,7 @@ api.MapBillingEndpoints();
 api.MapBookingsEndpoints();
 api.MapCustomersEndpoints();
 api.MapPlatformEndpoints();
+api.MapPartnerEndpoints();
 api.MapWalletEndpoints();
 api.MapPaymentsEndpoints();
 api.MapMarketplaceEndpoints();

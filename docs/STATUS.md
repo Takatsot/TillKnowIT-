@@ -139,4 +139,6 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | G4-2 Pay an order with terms | Done | Partner pays the supplier (port), order marked paid, repayments tracked from signed partner callbacks (idempotent), credit comes back as repayments arrive. |
 | G5-1 Insights opt-in | Done | Off by default, owner-only, explanation text shown. |
 | G5-2 Area trend reports | Done (in the monolith) | Insights module with its own schema: daily aggregates from opted-in verified shops only, no shop/person/device on the row, rows with fewer than 10 shops are never stored (code and a database check constraint) or shown; weekly trends with revenue bands. The spec's separate Insights service and warehouse database are NOT built: this runs in the same host and database server for now. Legal/data-ethics review still required before release. |
-| G6 Languages, groups, partner API | Todo | |
+| G6-3 Partner API | Done (v1, in the main API host) | Platform module: partners with hashed keys (shown once), scopes, per-partner rate limit (in memory: a shared counter is needed behind several API servers), key rotation with a 24h overlap, owner approves each partner per shop and can withdraw, every call logged. Read-only endpoints: sales/daily, sales/monthly. The separate TillKnowIT.PartnerApi host and gateway are NOT built. |
+| G6-2 Five more languages | Todo | |
+| G6-1 Stokvel and school group buying at scale | Todo | |
