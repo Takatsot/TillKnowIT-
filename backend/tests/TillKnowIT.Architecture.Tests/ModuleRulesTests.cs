@@ -78,6 +78,22 @@ public class ModuleRulesTests
         Assert.True(offenders.Count == 0, string.Join("; ", offenders));
     }
 
+    /// <summary>
+    /// Phase 5: a lapsed or unpaid plan only ever switches off extras. Selling, syncing a sale, refunds and cash-up never ask Billing anything, so billing being slow,
+    /// down or unpaid cannot stop a till. Plan limits are asked only by the features that are plan features (slips by message, branches, exports).
+    /// </summary>
+    [Theory]
+    [InlineData("ShopCore.Application.Sync")]
+    [InlineData("ShopCore.Application.Selling")]
+    [InlineData("ShopCore.Domain")]
+    public void Selling_and_syncing_a_sale_never_depend_on_billing(string ns)
+    {
+        var assembly = ns.StartsWith("ShopCore.Domain", StringComparison.Ordinal) ? Load("ShopCore", "Domain") : Load("ShopCore", "Application");
+        var result = Types.InAssembly(assembly).That().ResideInNamespaceStartingWith(ns).ShouldNot().HaveDependencyOn("Billing").GetResult();
+
+        Assert.True(result.IsSuccessful, $"{ns} depends on Billing: {string.Join(", ", result.FailingTypeNames ?? [])}");
+    }
+
     private static string FindBackendRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

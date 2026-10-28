@@ -29,6 +29,7 @@ public static class IdentityModule
         services.AddScoped<ITillAccessChecker, TillAccessChecker>();
         services.AddScoped<IShopDirectory, ShopDirectory>();
         services.AddScoped<IPersonDirectory, PersonDirectory>();
+        services.AddScoped<IStaffDirectory, StaffDirectory>();
         services.AddScoped<IDeviceDirectory, DeviceDirectory>();
         services.AddScoped<ISetupStore, SetupStore>();
         services.AddScoped<IMembershipReadStore, MembershipReadStore>();

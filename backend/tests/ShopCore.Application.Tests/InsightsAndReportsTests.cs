@@ -123,6 +123,8 @@ public class InsightsAndReportsTests
 
     private sealed class FakeReports(List<CashUpRow> rows) : IReportReadStore
     {
+        public List<TipRow> TipRows { get; } = [];
+        public Task<List<TipRow>> Tips(Guid shopId, DateTimeOffset from, DateTimeOffset to, CancellationToken ct) => Task.FromResult(TipRows);
         public Task<List<CashUpRow>> CashUps(Guid shopId, DateOnly from, DateOnly to, CancellationToken ct) => Task.FromResult(rows);
     }
 
@@ -183,6 +185,45 @@ public class InsightsAndReportsTests
         Assert.Contains("2026-10-26,1,61.00,12.00", one);
         Assert.Contains("2026-10-26,1,122.00,24.00", Text(all.Value!));   // sales and profit add up (the fake gives both branches the same sale id)
         Assert.Equal("sales-by-day-all-branches-2026-10-31.csv", all.Value!.FileName);
+    }
+
+    private sealed class FakeStaff : Identity.Contracts.IStaffDirectory
+    {
+        public Dictionary<Guid, string> Known { get; } = [];
+        public Task<Dictionary<Guid, string>> Names(Guid shopId, IReadOnlyCollection<Guid> ids, CancellationToken ct) => Task.FromResult(Known.Where(k => ids.Contains(k.Key)).ToDictionary(k => k.Key, k => k.Value));
+    }
+
+    [Fact]
+    public async Task Tips_by_staff_adds_each_persons_tips_with_their_name_the_count_and_the_average_biggest_first()
+    {
+        var anna = Guid.NewGuid();
+        var ben = Guid.NewGuid();
+        var stranger = Guid.NewGuid();
+        var staff = new FakeStaff();
+        staff.Known[anna] = "Anna";
+        staff.Known[ben] = "Ben";
+        var reports = new FakeReports([]);
+        reports.TipRows.AddRange([new(anna, 500), new(anna, 1_000), new(ben, 2_500), new(stranger, 300), new(ben, 0)]);
+        var handler = new RunReportHandler(new FakeSales(Rows()), new FakeStock([]), new FakeCredit([]), reports, new FakeTimeProvider(Now), null, null, staff);
+
+        var csv = Text((await handler.Handle(new RunReport(Guid.NewGuid(), "tips-by-staff", new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 31), "csv"), default)).Value!);
+
+        Assert.Contains("Staff,Tipped sales,Tips,Average tip", csv);
+        Assert.Contains("Ben,1,25.00,25.00", csv);
+        Assert.Contains("Anna,2,15.00,7.50", csv);
+        Assert.Contains(stranger.ToString("N")[..8] + ",1,3.00,3.00", csv);   // not on the staff list: the short id, never blank
+        Assert.True(csv.IndexOf("Ben,", StringComparison.Ordinal) < csv.IndexOf("Anna,", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Tips_by_staff_with_no_tips_is_an_empty_report_not_an_error()
+    {
+        var handler = new RunReportHandler(new FakeSales(Rows()), new FakeStock([]), new FakeCredit([]), new FakeReports([]), new FakeTimeProvider(Now));
+
+        var result = await handler.Handle(new RunReport(Guid.NewGuid(), "tips-by-staff", null, null, "csv"), default);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("tips-by-staff-2026-10-26.csv", result.Value!.FileName);
     }
 
     [Fact]

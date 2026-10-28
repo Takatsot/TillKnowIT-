@@ -11,9 +11,15 @@ namespace ShopCore.Application.Reports;
 
 public sealed record CashUpRow(DateOnly Day, Guid TillDeviceId, long FloatCents, long ExpectedCents, long CountedCents, long DifferenceCents, Guid CashUpId = default);
 
+/// <summary>One sale that was tipped: who served and how much the tip was.</summary>
+public sealed record TipRow(Guid StaffId, long TipCents);
+
 public interface IReportReadStore
 {
     Task<List<CashUpRow>> CashUps(Guid shopId, DateOnly from, DateOnly to, CancellationToken ct);
+
+    /// <summary>Tips on sales that were not cancelled, for the period.</summary>
+    Task<List<TipRow>> Tips(Guid shopId, DateTimeOffset from, DateTimeOffset to, CancellationToken ct);
 }
 
 public static class ReportCodes
@@ -23,8 +29,9 @@ public static class ReportCodes
     public const string StockOnHand = "stock-on-hand";
     public const string CashUps = "cash-ups";
     public const string CreditBook = "credit-book";
+    public const string TipsByStaff = "tips-by-staff";
 
-    public static readonly string[] All = [SalesByDay, SalesByProduct, StockOnHand, CashUps, CreditBook];
+    public static readonly string[] All = [SalesByDay, SalesByProduct, StockOnHand, CashUps, CreditBook, TipsByStaff];
 }
 
 /// <summary>
@@ -35,7 +42,7 @@ public sealed record RunReport(Guid ShopId, string Code, DateOnly? From, DateOnl
 
 internal sealed class RunReportHandler(
     IInsightsReadStore sales, IStockReadStore stock, ICreditReadStore credit, IReportReadStore reports, TimeProvider clock,
-    IBranchDirectory? branches = null, IOrganisationAccess? access = null)
+    IBranchDirectory? branches = null, IOrganisationAccess? access = null, IStaffDirectory? staff = null)
     : IQueryHandler<RunReport, ReportFile>
 {
     public const int MaxDays = 366;
@@ -79,6 +86,10 @@ internal sealed class RunReportHandler(
             case ReportCodes.CashUps:
                 table = ReportBuilders.CashUps(await CashUps(ids, from, to, ct), period);
                 break;
+            case ReportCodes.TipsByStaff:
+                var tips = await Tips(ids, start, end, ct);
+                table = ReportBuilders.TipsByStaff(tips, staff is null ? new Dictionary<Guid, string>() : await staff.Names(query.ShopId, tips.Select(t => t.StaffId).Distinct().ToList(), ct), period);
+                break;
             default:
                 table = ReportBuilders.CreditBook(await Balances(ids, ct), today);
                 break;
@@ -115,6 +126,13 @@ internal sealed class RunReportHandler(
     {
         var all = new List<StockItem>();
         foreach (var id in ids) all.AddRange(await stock.Items(id, now, ct));
+        return all;
+    }
+
+    private async Task<List<TipRow>> Tips(List<Guid> ids, DateTimeOffset from, DateTimeOffset to, CancellationToken ct)
+    {
+        var all = new List<TipRow>();
+        foreach (var id in ids) all.AddRange(await reports.Tips(id, from, to, ct));
         return all;
     }
 
@@ -170,6 +188,18 @@ public static class ReportBuilders
             list.Select(i => (object?[])[i.Name, i.Barcode, i.OnHand, i.LowStockLevel, i.ExpiryDate, StockRules.DaysLeft(i),
                 StockRules.SuggestedOrderQuantity(i), string.Join(" ", StockRules.Flags(i, now, today))]).ToList())
         { Notes = [$"As at {today:yyyy-MM-dd}"] };
+    }
+
+    /// <summary>B3-3: what each staff member was tipped, how many tipped sales, and the average tip.</summary>
+    public static ReportTable TipsByStaff(IEnumerable<TipRow> rows, IReadOnlyDictionary<Guid, string> staffNames, string period)
+    {
+        var list = rows.Where(r => r.TipCents > 0).GroupBy(r => r.StaffId)
+            .Select(g => (Staff: g.Key, Sales: g.Count(), Tips: g.Sum(r => r.TipCents)))
+            .OrderByDescending(x => x.Tips).ThenBy(x => x.Staff).ToList();
+        return new ReportTable("Tips by staff",
+            [new("Staff"), new("Tipped sales", ColumnKind.Integer), new("Tips", ColumnKind.Money), new("Average tip", ColumnKind.Money)],
+            list.Select(x => (object?[])[staffNames.GetValueOrDefault(x.Staff) ?? x.Staff.ToString("N")[..8], x.Sales, x.Tips, (x.Tips + x.Sales / 2) / x.Sales]).ToList())
+        { Notes = [$"Period: {period}", $"Total tips: R {CellText.Rand(list.Sum(x => x.Tips))}"] };
     }
 
     public static ReportTable CashUps(IEnumerable<CashUpRow> rows, string period)

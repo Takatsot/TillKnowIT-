@@ -274,7 +274,7 @@ public static class CommissionReportBuilder
     };
 }
 
-internal sealed class CommissionHandlers(IBookingStore store, IOrganisationAccess access, IShopFeatures features, TimeProvider clock)
+internal sealed class CommissionHandlers(IBookingStore store, IOrganisationAccess access, IShopFeatures features, TimeProvider clock, IStaffDirectory? staff = null)
     : ICommandHandler<SaveCommissionRule, CommissionRuleResponse>, IQueryHandler<ListCommissionRules, List<CommissionRuleResponse>>, IQueryHandler<GetCommissionReport, ReportFile>
 {
     public async Task<Result<CommissionRuleResponse>> Handle(SaveCommissionRule c, CancellationToken ct)
@@ -320,6 +320,6 @@ internal sealed class CommissionHandlers(IBookingStore store, IOrganisationAcces
 
         var completed = await store.CompletedBetween(q.ShopId, BusinessDay.Start(from), BusinessDay.Start(to.AddDays(1)), ct);
         var lines = CommissionReportBuilder.Lines(completed, await store.Rules(q.ShopId, ct));
-        return Result<ReportFile>.Ok(ReportExporter.Export(CommissionReportBuilder.Table(lines, new Dictionary<Guid, string>(), $"{from:yyyy-MM-dd} to {to:yyyy-MM-dd}"), format, $"commission-{from:yyyyMMdd}-{to:yyyyMMdd}"));
+        return Result<ReportFile>.Ok(ReportExporter.Export(CommissionReportBuilder.Table(lines, staff is null ? new Dictionary<Guid, string>() : await staff.Names(q.ShopId, lines.Select(l => l.StaffId).ToList(), ct), $"{from:yyyy-MM-dd} to {to:yyyy-MM-dd}"), format, $"commission-{from:yyyyMMdd}-{to:yyyyMMdd}"));
     }
 }

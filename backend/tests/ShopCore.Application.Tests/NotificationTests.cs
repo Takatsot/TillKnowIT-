@@ -113,6 +113,7 @@ public class NotificationTests
     {
         public List<CashUpRow> Rows { get; } = [];
         public Task<List<CashUpRow>> CashUps(Guid shopId, DateOnly from, DateOnly to, CancellationToken ct) => Task.FromResult(Rows);
+        public Task<List<TipRow>> Tips(Guid shopId, DateTimeOffset from, DateTimeOffset to, CancellationToken ct) => Task.FromResult(new List<TipRow>());
     }
 
     private sealed class FakeDispatcher : IDispatcher

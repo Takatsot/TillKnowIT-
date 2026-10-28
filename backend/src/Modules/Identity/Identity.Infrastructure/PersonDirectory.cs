@@ -12,3 +12,12 @@ internal sealed class PersonDirectory(IdentityDbContext db) : IPersonDirectory
         return p is null ? null : new PersonContact(p.Id, p.DisplayName, p.Phone, p.Email, p.PreferredLanguage);
     }
 }
+
+internal sealed class StaffDirectory(Persistence.IdentityDbContext db) : IStaffDirectory
+{
+    public async Task<Dictionary<Guid, string>> Names(Guid shopId, IReadOnlyCollection<Guid> staffIds, CancellationToken ct) =>
+        await (from m in db.Memberships.AsNoTracking()
+               join p in db.People.AsNoTracking() on m.PersonId equals p.Id
+               where m.OrganisationId == shopId && staffIds.Contains(m.Id)
+               select new { m.Id, p.DisplayName }).ToDictionaryAsync(x => x.Id, x => x.DisplayName, ct);
+}

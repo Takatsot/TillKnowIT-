@@ -7,3 +7,10 @@ public interface IPersonDirectory
 {
     Task<PersonContact?> Get(Guid personId, CancellationToken ct);
 }
+
+/// <summary>Names for staff, for reports. A staff id is the membership id the till unlocks with.</summary>
+public interface IStaffDirectory
+{
+    /// <summary>The display name of each staff member of the shop that could be found. Ids that are not staff of this shop are left out.</summary>
+    Task<Dictionary<Guid, string>> Names(Guid shopId, IReadOnlyCollection<Guid> staffIds, CancellationToken ct);
+}

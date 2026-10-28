@@ -40,7 +40,7 @@ on the build machine. The first real run is the first item on the hand-over list
 | E11-2 Loss alerts | Done | Cancellations per hour and short cash-ups, levels from shop settings with defaults; plus a 48-hour offline-till alert. All sent once (dedupe keys). Push needs the owner app; WhatsApp/SMS/email providers are not connected. |
 | E12-1 Six languages | Partly | Structure and English done; translations need translators. |
 | E13-1 Field agent setup | Partly | The seven-step checklist, step completion, and verify (all steps needed, permission checked) are done on the server. The field agent app itself is not built. |
-| E14-1, E14-2 Founding suppliers | Todo | |
+| E14-1, E14-2 Founding suppliers | Covered by Phase 2 | The supplier catalogue, orders by app, WhatsApp or email, and the usual supplier were built in Phase 2 (M1 to M3); no separate Phase 1 feature remains. |
 
 ## Phase 2: supplier marketplace
 
@@ -54,11 +54,11 @@ on the build machine. The first real run is the first item on the hand-over list
 | M2-3 Deals | Done | Discount, free goods and combo deals with dates and areas the supplier serves; sponsored deals are labelled; browse by area. |
 | M3-1 Reorder options | Done | Ranked options per product and an order list: true cost per unit (VAT, deal, delivery), usual supplier first with last price, cheapest marked, margin at the shop's price, ranking weights in settings. Fairness test: with default settings a sponsored offer never outranks a cheaper non-sponsored one (500 random cases). Ratings are not in the ranking yet (M7). |
 | M3-2 Sharing settings | Done | Off, usual or all; off until the owner chooses. Nothing reads it yet: it gates the demand totals (M7-2). |
-| M3-3 Suggested replacement | Todo | Could. |
+| M3-3 Suggested replacement | Todo | Could. Insights (Phase 5) has category-level area aggregates only; a product-level one with the same 10-shop rule and opt-in would be needed. |
 | M4-1 to M4-4 Ordering | Done | Create, build from order list, send (app, WhatsApp, email), supplier replies per line, delivery, shop receive (count wins), last prices, usual supplier, prefilled stock-in review. Port: real WhatsApp provider |
 | M5-1 to M5-4 Paying suppliers | Done (code) | Pay in app or on delivery (supplier marks cash paid), hold until delivery, release on shop confirmation or after 72h, short deliveries refund the difference, disputes freeze money until an admin resolves, signed webhooks with replay protection, audited states, daily reconciliation to the cent, supplier statement as CSV/Excel/PDF. Port: real payment partner (only a Development fake exists; webhook secret per partner in config). Not atomic across modules: a failed order-status update after money moves is caught by reconciliation. |
 | M6-1 to M6-3 Group buying | Done | Supplier posts a group deal (price, minimum, closing date, area); shops in the area join with a quantity and see only the total and their own quantity; at the deadline it is either one sent order per shop at the bulk price (supplier terms and delivery fee apply) or everyone is told and nobody is charged; supplier can close early once the minimum is met or cancel. Closing is safe to re-run. 500 commitments close well under a minute (tested). |
-| M6-4 Invite-only groups | Todo | Could. |
+| M6-4 Invite-only groups | Done | See G6-1: a group deal can be limited to a buying group. |
 | M7-1 Rate a delivery | Done | On time, complete, 1 to 5, one per order; a supplier average counts in offer ranking only after 3 ratings. |
 | M7-2 Demand totals | Done | Counts per area and product of opted-in shops low on the supplier's items; counts under 3 are never shown; no names, sales or stock levels (tested). Shops that never chose to share are not even queried. Calls each shop in a loop for now: batch it if areas get large. |
 | Marketplace as its own service, Service Bus | Decided not yet | See ADR 0002: same hosts, same boundaries; split when there is a reason. |
@@ -109,7 +109,7 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | B2-6 Open tickets | Done | A till holds a ticket while editing; others see it locked; the hold lapses after 10 minutes; merge, move table, close into a sale, void. |
 | B3-1 Tables | Done | Floor plan replaced by area and name so tables keep their ids; removed tables are retired, never deleted. |
 | B3-2 Kitchen | Done (server) | Orders with per-till order numbers, new, preparing, ready, collected; a list the kitchen screen polls. The kitchen view itself and the 3-second target are front-end and network work. |
-| B3-3 Tips | Done | On top of the bill, by amount or percentage, never more than the bill; in the cash drawer, not in sales figures. Tips report per staff: Todo. |
+| B3-3 Tips | Done | On top of the bill, by amount or percentage, never more than the bill; in the cash drawer, not in sales figures. Tips report per staff: Done (`tips-by-staff`, with staff names). |
 | B4-1 Weight | Done | Price per kg, quantity in grams, tare, half-up rounding; a generic unit divisor in the sale arithmetic, used by insights, reports and slips (0.700 kg). Needs a scale adapter in the front end. |
 | B4-2 Price-embedded barcodes | Done | Rules from the pack settings, EAN-13 check digit, weight or price; ordinary barcodes are left to the normal lookup. |
 | B6-1 Quotes | Done | Total worked out on the server, valid up to 90 days, PDF, one tap to an open ticket, expiry. |
@@ -143,3 +143,35 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | G6-3 Partner API | Done (v1, in the main API host) | Platform module: partners with hashed keys (shown once), scopes, per-partner rate limit (in memory: a shared counter is needed behind several API servers), key rotation with a 24h overlap, owner approves each partner per shop and can withdraw, every call logged. Read-only endpoints: sales/daily, sales/monthly. The separate TillKnowIT.PartnerApi host and gateway are NOT built. |
 | G6-2 Five more languages | Partly | Sepedi, Xitsonga, Tshivenda, isiNdebele and siSwati are registered in the front-end language list (backend already accepted them) and show English until translated. NO translations exist: they must be written and reviewed by first-language speakers. |
 | G6-1 Group buying groups, M6-4 invite-only | Done (backend) | Marketplace: buying groups (stokvel, school, other), admin shop, single-use 7-day invite codes (hashed), members, leave/remove; group deals can be limited to a group (members only, any area, others get not-found); shared history with the admin seeing members' open quantities. No UI yet. |
+
+## Hand-over list
+
+Everything below needs a person, an account, a partner or a decision. None of it can be finished by more code alone.
+
+**To run it**
+
+1. Start Docker and run the API and Worker against SQL Server: confirms migrations apply, seed loads, the outbox claim query works, cascade paths are accepted, and the check constraint on the insight aggregates is accepted. Nothing has ever run against a real database.
+2. Run the PowerSync-on-SQL-Server spike from ADR 0001 before building the local database and selling screen. Stock transfers and sale uploads are online or upload-batch only until this is decided.
+3. Decide OTP sign-in (Entra External ID) so endpoint authentication can replace the `TODO(auth)` marks. Today every endpoint trusts the person id it is given.
+
+**Partners and accounts (all connected only to development fakes today)**
+
+4. Payment partner, stored-value (wallet) partner, WhatsApp, SMS and email providers, VAS supplier.
+5. Billing gateway: the real charger behind `IBillingCharger`. Pricing: the seeded plan prices and the free message bundle are placeholders until the pilot pricing decision.
+6. Finance partner: a registered credit provider, a written agreement (what is shared, for how long, who answers complaints) and their sandbox, behind `IFinancePartner`.
+7. Xero and Sage developer accounts and OAuth apps, for the real `IAccountingExporter` adapters.
+8. Secrets store (Key Vault) for accounting tokens and partner secrets.
+
+**Reviews before release**
+
+9. Legal and data-ethics review of market insights and of pay-later data sharing (POPIA, competition rules), before any shop is asked to opt in.
+10. Penetration test; load test at 10 000 shops and 2 million sales a day; security review of the partner API (rate limits are in memory per server).
+11. First-language speakers to write and review the five new languages (Sepedi, Xitsonga, Tshivenda, isiNdebele, siSwati).
+
+**Still to build**
+
+12. Every screen: the till app has only PIN unlock. Back office (branches, billing, exports, groups), supplier portal, parent app, insights portal.
+13. Real printer, drawer, scale and kitchen-screen adapters once the devices are chosen.
+14. The separate Insights service and warehouse database, and the separate Partner API host and gateway, if the scale needs them (both run inside the main host today).
+15. Offline sync of stock transfers; lay-by deposits and tips in the accounting journal; a shared rate-limit counter; M3-3 suggested replacement; W2-5 automatic weekly top-up.
+

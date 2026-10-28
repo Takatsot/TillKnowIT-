@@ -21,6 +21,14 @@ internal sealed class InsightsReadStore(ShopCoreDbContext db) : IInsightsReadSto
         return rows.Select(r => new SaleLineRow(r.SaleId, r.SoldAt, r.ProductId, r.Name, r.Quantity, r.PriceCents, r.CostCents, r.Cancelled, r.UnitDivisor, r.DiscountCents)).ToList();
     }
 
+    public async Task<List<TipRow>> Tips(Guid shopId, DateTimeOffset from, DateTimeOffset to, CancellationToken ct)
+    {
+        var rows = await db.Sales.AsNoTracking()
+            .Where(s => s.ShopId == shopId && s.SoldAt >= from && s.SoldAt <= to && s.TipCents > 0 && !db.Set<SaleCancellation>().Any(c => c.SaleId == s.Id))
+            .Select(s => new { s.StaffId, s.TipCents }).ToListAsync(ct);
+        return rows.Select(r => new TipRow(r.StaffId, r.TipCents)).ToList();
+    }
+
     public async Task<List<CashUpRow>> CashUps(Guid shopId, DateOnly from, DateOnly to, CancellationToken ct)
     {
         var rows = await db.Set<CashUp>().AsNoTracking()
