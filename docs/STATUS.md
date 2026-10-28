@@ -133,7 +133,8 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | G1-1, G1-4 Branches | Done | A branch is a shop under a head shop (one level), needs the multi_branch plan feature; owner and general managers (all-branches scope) see every branch, branch staff only their own. |
 | G1-2 Stock transfers | Done (online) | Out movement on send, in on receive, shortfall shown, cancel while in transit, idempotent. Offline upload of transfers is not built: needs the sync path. |
 | G1-3 Combined reports | Done | `branch=all` or a branch id on every report; needs report.view on the business. Product reports merge products by name across branches. |
-| G2 Accounting export | Todo | |
+| G2-1 Connect Sage or Xero | Done (ports + dev fakes) | Accounting module (a module of its own rather than inside Messaging, as the spec drew it): OAuth code exchange behind `IAccountingExporter`, only a secrets-store reference kept, account mapping per shop. The real Xero and Sage adapters are NOT written: they need each package's developer account and OAuth app. |
+| G2-2 Daily journal | Done | Balanced journal per finished day (takings by method, sales ex VAT, VAT, cost of sales, stock bought), idempotent per day, retried hourly up to 5 times, owner told once, owner can fix and retry. Tips and lay-by deposits are not posted yet. |
 | G4-1 Pay-later consent | Done | Finance module: consent per named partner, withdrawable (nothing shared once withdrawn), every share logged and shown to the owner. We never lend: the partner decides. Only a dev partner exists; no real provider or agreement yet. |
 | G4-2 Pay an order with terms | Done | Partner pays the supplier (port), order marked paid, repayments tracked from signed partner callbacks (idempotent), credit comes back as repayments arrive. |
 | G5-1 Insights opt-in | Done | Off by default, owner-only, explanation text shown. |

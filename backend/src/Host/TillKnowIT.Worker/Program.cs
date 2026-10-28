@@ -1,3 +1,5 @@
+using Accounting.Infrastructure;
+using Accounting.Infrastructure.Persistence;
 using Insights.Infrastructure;
 using Insights.Infrastructure.Persistence;
 using Finance.Infrastructure;
@@ -57,7 +59,8 @@ builder.Services
     .AddOutboxProcessor<BookingsDbContext>()
     .AddOutboxProcessor<BillingDbContext>()
     .AddOutboxProcessor<FinanceDbContext>()
-    .AddOutboxProcessor<InsightsDbContext>();
+    .AddOutboxProcessor<InsightsDbContext>()
+    .AddOutboxProcessor<AccountingDbContext>();
 
 // Delivers queued messages. Pretend providers (log only) exist in Development; elsewhere a channel with no
 // real provider fails visibly rather than pretending to send.
@@ -70,6 +73,7 @@ builder.Services.AddLaybyExpiry();
 builder.Services.AddAppointmentReminders();
 builder.Services.AddWalletJobs();
 builder.Services.AddBillingJobs();
+builder.Services.AddAccountingExports();
 builder.Services.AddInsightAggregation();
 if (builder.Environment.IsDevelopment())
 {
@@ -79,6 +83,7 @@ if (builder.Environment.IsDevelopment())
     builder.Services.AddDevStoredValuePartner();
     builder.Services.AddDevBillingCharger();
     builder.Services.AddDevFinancePartner();
+    builder.Services.AddDevAccountingExporters();
 }
 
 builder.Build().Run();

@@ -268,6 +268,16 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = new Guid("798e0704-8c27-eeff-3c13-37500c751995"),
+                            Body = "{shop}: we could not send {day} to your accounting package ({error}). Open the app to fix it and try again.",
+                            Channel = "Whatsapp",
+                            Code = "accounting.failed",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("743083d3-4b10-9372-b4c6-9df6894441b6"),
                             Body = "{child} spent {amount} at the tuckshop. Balance: {balance}.",
                             Channel = "Push",

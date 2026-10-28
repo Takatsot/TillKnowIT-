@@ -40,6 +40,9 @@ internal static class MessagingSeed
         ("billing.limited", [MessageChannel.Whatsapp], null, "Hi {name}, your {plan} extras are paused until the payment is made. Your till is not affected."),
         ("billing.limited", [MessageChannel.Email], "Your TillKnowIT extras are paused", "Hi {name}, your {plan} extras are paused until the payment is made. Your till is not affected."),
 
+        // Accounting: told once when a day could not be sent after several tries.
+        ("accounting.failed", [MessageChannel.Whatsapp], null, "{shop}: we could not send {day} to your accounting package ({error}). Open the app to fix it and try again."),
+
         // School wallets: to parents (push first; WhatsApp only where they opted in) and to the tuckshop owner.
         ("wallet.purchase", [MessageChannel.Push], null, "{child} spent {amount} at the tuckshop. Balance: {balance}."),
         ("wallet.topup", [MessageChannel.Push], null, "{amount} was added to {child}'s wallet. Balance: {balance}."),

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messaging.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MessagingDbContext))]
-    [Migration("20261028071716_Initial")]
+    [Migration("20261028081100_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -267,6 +267,16 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Language = "en",
                             Subject = "Your TillKnowIT extras are paused",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("798e0704-8c27-eeff-3c13-37500c751995"),
+                            Body = "{shop}: we could not send {day} to your accounting package ({error}). Open the app to fix it and try again.",
+                            Channel = "Whatsapp",
+                            Code = "accounting.failed",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
                             Version = 1
                         },
                         new
