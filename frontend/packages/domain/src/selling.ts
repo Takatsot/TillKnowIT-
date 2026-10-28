@@ -218,6 +218,8 @@ export interface PricedBasket {
   discountCents: Cents;
   totalCents: Cents;
   discountsByProduct: Map<string, Cents>;
+  /** The promotion that gave each product most of its discount: a sale line can name only one, and the server needs it to accept a discount. */
+  promotionByProduct: Map<string, string>;
   applied: AppliedPromotion[];
 }
 
@@ -231,7 +233,7 @@ const byId = <T extends { id: string }>(a: T, b: T): number => (a.id.toLowerCase
 export function priceBasket(basket: readonly BasketLine[], promotions: readonly PromotionDef[], now: Date): PricedBasket {
   const subtotal = basket.reduce((sum, l) => sum + l.unitPriceCents * l.quantity, 0);
   const running = promotions.filter((p) => isRunning(p, now));
-  if (running.length === 0 || basket.length === 0) return { subtotalCents: subtotal, discountCents: 0, totalCents: subtotal, discountsByProduct: new Map(), applied: [] };
+  if (running.length === 0 || basket.length === 0) return { subtotalCents: subtotal, discountCents: 0, totalCents: subtotal, discountsByProduct: new Map(), promotionByProduct: new Map(), applied: [] };
 
   const free = new Map<string, number>();
   const price = new Map<string, number>();
@@ -240,8 +242,14 @@ export function priceBasket(basket: readonly BasketLine[], promotions: readonly 
     if (!price.has(l.productId)) price.set(l.productId, l.unitPriceCents);
   }
   const discounts = new Map<string, number>();
+  const bySource = new Map<string, Map<string, number>>();
   const applied: AppliedPromotion[] = [];
-  const add = (product: string, cents: number) => discounts.set(product, (discounts.get(product) ?? 0) + cents);
+  const add = (product: string, cents: number, promotionId: string) => {
+    discounts.set(product, (discounts.get(product) ?? 0) + cents);
+    const sources = bySource.get(product) ?? new Map<string, number>();
+    sources.set(promotionId, (sources.get(promotionId) ?? 0) + cents);
+    bySource.set(product, sources);
+  };
   const record = (p: PromotionDef, cents: number, times: number) => {
     const at = applied.findIndex((a) => a.promotionId === p.id);
     if (at >= 0) applied[at] = { ...applied[at]!, discountCents: applied[at]!.discountCents + cents, times: applied[at]!.times + times };
@@ -270,7 +278,7 @@ export function priceBasket(basket: readonly BasketLine[], promotions: readonly 
     weights.forEach((w, k) => {
       const share = k === weights.length - 1 ? bestSaving - given : Math.floor((bestSaving * w.cost) / totalCost);
       given += share;
-      add(w.productId, share);
+      add(w.productId, share, best!.id);
     });
     for (const i of best.items) free.set(i.productId, free.get(i.productId)! - i.quantity);
     record(best, bestSaving, 1);
@@ -294,10 +302,12 @@ export function priceBasket(basket: readonly BasketLine[], promotions: readonly 
       }
     }
     if (!winner) continue;
-    add(product, perUnit * units);
+    add(product, perUnit * units, winner.id);
     record(winner, perUnit * units, units);
   }
 
   const discount = [...discounts.values()].reduce((sum, v) => sum + v, 0);
-  return { subtotalCents: subtotal, discountCents: discount, totalCents: subtotal - discount, discountsByProduct: discounts, applied };
+  const promotionByProduct = new Map<string, string>();
+  for (const [product, sources] of bySource) promotionByProduct.set(product, [...sources.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0]![0]);
+  return { subtotalCents: subtotal, discountCents: discount, totalCents: subtotal - discount, discountsByProduct: discounts, promotionByProduct, applied };
 }
