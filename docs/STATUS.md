@@ -119,7 +119,8 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | B7-1 Customers | Done | Customers module: SA phone normalisation, consent, directory; sale events feed it. |
 | B5 Appointments and commission | Done | Bookings module: services, staff, idempotent booking, clash refused online and flagged when booked offline, reschedule, consent-only WhatsApp reminders (24h, worker), commission rules (most specific wins, half-up) and report. 28 tests. |
 | B7-2 Loyalty | Done | Append-only points ledger, earn on sale, reversed on cancel/refund. 40 tests. |
-| B8-1, B8-2 Printer and cash drawer | Todo | Hardware package (front end). |
+| B8-1, B8-2 Printer and cash drawer | Done against fakes | `packages/hardware`: ports (IPrinter, ICashDrawer, IScale, IKitchenDisplay), ESC/POS encoder (text in code page 858, QR, cut, drawer pulse), slip and kitchen-ticket layouts, stable-weight reading, fakes. NO real device adapter (Web Serial/USB/Bluetooth) is written: it needs the chosen printer models and a test on real hardware. |
+| Till-side rules | Done | `packages/domain/selling.ts` mirrors weight pricing, price-embedded barcodes, modifiers and the promotion engine of the server; `packages/packs` reads the downloaded pack. The till UI screens that use them are NOT built (the till app only has PIN unlock). |
 | B8-3 Message bundles | Done | The shop's plan sets the monthly messages (free plan 50, placeholder); slips and appointment reminders are counted per business (a branch uses the head shop's bundle); owner told at 80% and when used up; on a free plan an exhausted bundle turns the slip into a QR code and reminders pause; a paid plan keeps sending and the extra is billed. |
 
 ## Phase 5
