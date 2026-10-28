@@ -134,6 +134,7 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | G1-2 Stock transfers | Done (online) | Out movement on send, in on receive, shortfall shown, cancel while in transit, idempotent. Offline upload of transfers is not built: needs the sync path. |
 | G1-3 Combined reports | Done | `branch=all` or a branch id on every report; needs report.view on the business. Product reports merge products by name across branches. |
 | G2 Accounting export | Todo | |
-| G4 Pay-later | Todo | |
+| G4-1 Pay-later consent | Done | Finance module: consent per named partner, withdrawable (nothing shared once withdrawn), every share logged and shown to the owner. We never lend: the partner decides. Only a dev partner exists; no real provider or agreement yet. |
+| G4-2 Pay an order with terms | Done | Partner pays the supplier (port), order marked paid, repayments tracked from signed partner callbacks (idempotent), credit comes back as repayments arrive. |
 | G5 Insights | Todo | |
 | G6 Languages, groups, partner API | Todo | |

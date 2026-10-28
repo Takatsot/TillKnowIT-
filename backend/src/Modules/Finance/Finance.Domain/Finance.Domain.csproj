@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.SharedKernel\TillKnowIT.SharedKernel.csproj" />
+    <ProjectReference Include="..\Finance.Contracts\Finance.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

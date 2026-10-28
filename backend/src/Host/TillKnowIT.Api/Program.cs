@@ -1,3 +1,4 @@
+using Finance.Infrastructure;
 using Billing.Infrastructure;
 using Bookings.Infrastructure;
 using Customers.Infrastructure;
@@ -27,6 +28,7 @@ builder.Services
     .AddShopCoreModule(db)
     .AddMarketplaceModule(db)
     .AddMessagingModule(db)
+    .AddFinanceModule(db)
     .AddBillingModule(db)
     .AddBookingsModule(db)
     .AddCustomersModule(db)
@@ -36,7 +38,7 @@ builder.Services
 
 // A fake VAS partner exists in Development only. Elsewhere airtime and electricity report "not available"
 // until the real partner adapter is registered.
-if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner().AddDevPaymentPartner().AddDevStoredValuePartner().AddDevBillingCharger();
+if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner().AddDevPaymentPartner().AddDevStoredValuePartner().AddDevBillingCharger().AddDevFinancePartner();
 
 var app = builder.Build();
 
@@ -58,6 +60,7 @@ api.MapIdentityEndpoints();
 api.MapShopCoreEndpoints();
 api.MapTransferEndpoints();
 api.MapCatalogueEndpoints();
+api.MapFinanceEndpoints();
 api.MapBillingEndpoints();
 api.MapBookingsEndpoints();
 api.MapCustomersEndpoints();
