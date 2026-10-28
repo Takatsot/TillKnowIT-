@@ -135,6 +135,13 @@ public static class MarketplaceEndpoints
         api.MapGet("/suppliers/{id:guid}/group-deals", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListSupplierGroupDeals(id, callerPersonId), ct)));
         api.MapGet("/shops/{shopId:guid}/group-deals", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListGroupDeals(shopId, callerPersonId), ct)));
         api.MapPost("/shops/{shopId:guid}/group-deals/{id:guid}/commitments", async (Guid shopId, Guid id, JoinGroupDealRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new JoinGroupDeal(id, shopId, req), ct)));
+        api.MapPost("/buying-groups", async (CreateBuyingGroupRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new CreateBuyingGroup(req), ct)));
+        api.MapGet("/shops/{shopId:guid}/buying-groups", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListBuyingGroups(shopId, callerPersonId), ct)));
+        api.MapPost("/buying-groups/{id:guid}/invites", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new InviteToGroup(id, callerPersonId), ct)));
+        api.MapPost("/shops/{shopId:guid}/buying-groups/join", async (Guid shopId, AcceptInviteRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new AcceptGroupInvite(shopId, req), ct)));
+        api.MapPost("/shops/{shopId:guid}/buying-groups/{id:guid}/leave", async (Guid shopId, Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new LeaveBuyingGroup(id, shopId, callerPersonId), ct)));
+        api.MapDelete("/buying-groups/{id:guid}/members/{shopId:guid}", async (Guid id, Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new RemoveGroupMember(id, shopId, callerPersonId), ct)));
+        api.MapGet("/shops/{shopId:guid}/buying-groups/{id:guid}/history", async (Guid shopId, Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetGroupHistory(id, shopId, callerPersonId), ct)));
         api.MapPost("/group-deals/{id:guid}/cancel", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new CancelGroupDeal(id, callerPersonId), ct)));
         api.MapPost("/group-deals/{id:guid}/close", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new CloseGroupDealEarly(id, callerPersonId), ct)));
 
@@ -163,7 +170,7 @@ public static class MarketplaceEndpoints
             "permission.denied" => 403,
             var c when c.EndsWith("not_found", StringComparison.Ordinal) => 404,
             "staff.already_member" or "supplier.not_pending" or "supplier.suspended" or "supplier.checklist_incomplete"
-                or "order.already_sent" or "order.cannot_cancel" or "order.not_awaiting_reply" or "order.not_confirmed" or "order.not_delivered" or "order.already_received" or "order.paid_in_app" or "group.closed" or "group.not_open" or "group.minimum_not_met" or "rating.already_rated" or "rating.not_delivered" => 409,
+                or "order.already_sent" or "order.cannot_cancel" or "order.not_awaiting_reply" or "order.not_confirmed" or "order.not_delivered" or "order.already_received" or "order.paid_in_app" or "buying_group.already_member" or "buying_group.full" or "buying_group.admin_cannot_leave" or "invite.used" or "invite.expired" or "group.closed" or "group.not_open" or "group.minimum_not_met" or "rating.already_rated" or "rating.not_delivered" => 409,
             _ => 422,
         });
 }

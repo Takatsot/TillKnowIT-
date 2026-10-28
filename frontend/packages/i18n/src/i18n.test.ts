@@ -14,10 +14,11 @@ describe("translate", () => {
     expect(translate("en", "till.hello")).toBe("Hello, {name}");
   });
 
-  it("knows the six launch languages", () => {
-    expect(languages.map((l) => l.code)).toEqual(["en", "zu", "xh", "st", "tn", "af"]);
+  it("knows the eleven languages, the five Phase 5 ones last", () => {
+    expect(languages.map((l) => l.code)).toEqual(["en", "zu", "xh", "st", "tn", "af", "nso", "ts", "ve", "nr", "ss"]);
     expect(isLanguage("zu")).toBe(true);
     expect(isLanguage("fr")).toBe(false);
+    for (const code of ["nso", "ts", "ve", "nr", "ss"]) expect(translate(code as never, "till.lock")).toBe("Lock till");   // English until translated, never blank
   });
 });
 
@@ -30,7 +31,7 @@ describe("translation coverage", () => {
     for (const { code } of languages) expect(staleKeys(code)).toEqual([]);
   });
 
-  // The definition of done says no untranslated text in any of the six languages.
+  // The definition of done says no untranslated text in any of the eleven languages.
   // Switch this on in CI when translations land: REQUIRE_FULL_TRANSLATION=1
   it.skipIf(!process.env["REQUIRE_FULL_TRANSLATION"])("every language is fully translated", () => {
     for (const { code } of languages) expect(coverage(code).missing, code).toEqual([]);

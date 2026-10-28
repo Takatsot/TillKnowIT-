@@ -9,6 +9,12 @@ export const languages = [
   { code: "st", name: "Sesotho" },
   { code: "tn", name: "Setswana" },
   { code: "af", name: "Afrikaans" },
+  // Phase 5 (G6-2). Names are in the language itself. No translations have been supplied yet: each shows English until first-language speakers add and review them.
+  { code: "nso", name: "Sepedi" },
+  { code: "ts", name: "Xitsonga" },
+  { code: "ve", name: "Tshivenda" },
+  { code: "nr", name: "isiNdebele" },
+  { code: "ss", name: "siSwati" },
 ] as const;
 
 export type LanguageCode = (typeof languages)[number]["code"];
@@ -17,7 +23,7 @@ type Catalogue = Partial<Record<MessageKey, string>>;
 
 // Translations are added by translators, one file per language. Until a key is translated the
 // app shows the English text, so nothing is ever blank. `coverage` reports what is still missing.
-const catalogues: Record<LanguageCode, Catalogue> = { en, zu: {}, xh: {}, st: {}, tn: {}, af: {} };
+const catalogues: Record<LanguageCode, Catalogue> = { en, zu: {}, xh: {}, st: {}, tn: {}, af: {}, nso: {}, ts: {}, ve: {}, nr: {}, ss: {} };
 
 export const isLanguage = (code: string): code is LanguageCode => code in catalogues;
 

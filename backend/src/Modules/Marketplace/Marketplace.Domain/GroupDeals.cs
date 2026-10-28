@@ -4,7 +4,7 @@ namespace Marketplace.Domain;
 
 public enum GroupDealStatus { Open, Reached, Failed, Cancelled }
 
-public sealed record GroupDealInput(Guid SupplierProductId, long BulkPriceCents, int MinTotalCases, DateTimeOffset ClosesAt, string AreaCode);
+public sealed record GroupDealInput(Guid SupplierProductId, long BulkPriceCents, int MinTotalCases, DateTimeOffset ClosesAt, string AreaCode, Guid? BuyingGroupId = null);
 
 /// <summary>
 /// M6-1: a supplier posts a bulk price that holds only if enough shops in an area commit in total by a closing date.
@@ -27,6 +27,10 @@ public sealed class GroupDeal : VersionedEntity
     public DateTimeOffset ClosesAt { get; private set; }
     public string AreaCode { get; private set; } = default!;
     public GroupDealStatus Status { get; private set; }
+
+    /// <summary>Set when the deal is for one buying group only: just its members see it and can join.</summary>
+    public Guid? BuyingGroupId { get; private set; }
+
     public IReadOnlyCollection<GroupCommitment> Commitments => _commitments;
 
     public int TotalCases => _commitments.Sum(c => c.Cases);
@@ -42,7 +46,7 @@ public sealed class GroupDeal : VersionedEntity
         return Result<GroupDeal>.Ok(new GroupDeal
         {
             SupplierId = supplierId, SupplierProductId = i.SupplierProductId, BulkPriceCents = i.BulkPriceCents, MinTotalCases = i.MinTotalCases,
-            ClosesAt = i.ClosesAt, AreaCode = i.AreaCode, Status = GroupDealStatus.Open, CreatedAt = now,
+            ClosesAt = i.ClosesAt, AreaCode = i.AreaCode, Status = GroupDealStatus.Open, CreatedAt = now, BuyingGroupId = i.BuyingGroupId,
         });
     }
 

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Marketplace.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MarketplaceDbContext))]
-    [Migration("20261027102246_Initial")]
+    [Migration("20261028084003_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,6 +25,177 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Marketplace.Domain.BuyingGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AdminPersonId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("admin_person_id");
+
+                    b.Property<Guid>("AdminShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("admin_shop_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_buying_groups");
+
+                    b.HasIndex("AdminShopId")
+                        .HasDatabaseName("ix_buying_groups_admin_shop_id");
+
+                    b.ToTable("buying_groups", "marketplace");
+                });
+
+            modelBuilder.Entity("Marketplace.Domain.BuyingGroupInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("code_hash");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("group_id");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("used_at");
+
+                    b.Property<Guid?>("UsedByShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("used_by_shop_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_buying_group_invites");
+
+                    b.HasIndex("CodeHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_buying_group_invites_code_hash");
+
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_buying_group_invites_group_id");
+
+                    b.ToTable("buying_group_invites", "marketplace");
+                });
+
+            modelBuilder.Entity("Marketplace.Domain.BuyingGroupMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("group_id");
+
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("joined_at");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("shop_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_buying_group_members");
+
+                    b.HasIndex("GroupId", "ShopId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_buying_group_members_group_id_shop_id");
+
+                    b.HasIndex("ShopId", "Status")
+                        .HasDatabaseName("ix_buying_group_members_shop_id_status");
+
+                    b.ToTable("buying_group_members", "marketplace");
+                });
 
             modelBuilder.Entity("Marketplace.Domain.Deal", b =>
                 {
@@ -170,6 +341,10 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("bulk_price_cents");
 
+                    b.Property<Guid?>("BuyingGroupId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("buying_group_id");
+
                     b.Property<DateTimeOffset>("ClosesAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("closes_at");
@@ -215,6 +390,10 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_group_deals");
+
+                    b.HasIndex("BuyingGroupId")
+                        .HasDatabaseName("ix_group_deals_buying_group_id")
+                        .HasFilter("buying_group_id IS NOT NULL");
 
                     b.HasIndex("AreaCode", "Status")
                         .HasDatabaseName("ix_group_deals_area_code_status");

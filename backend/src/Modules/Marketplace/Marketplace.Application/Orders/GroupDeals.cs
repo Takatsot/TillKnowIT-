@@ -17,6 +17,9 @@ public interface IGroupDealStore
     Task<List<GroupDeal>> OpenInArea(string areaCode, CancellationToken ct);
     Task<List<GroupDeal>> ForSupplier(Guid supplierId, CancellationToken ct);
 
+    /// <summary>Every deal made for these buying groups, in any status.</summary>
+    Task<List<GroupDeal>> ForBuyingGroups(IReadOnlyCollection<Guid> groupIds, CancellationToken ct);
+
     /// <summary>Open deals past their closing time, plus reached deals that still have a shop without its order.</summary>
     Task<List<GroupDeal>> NeedingClosure(DateTimeOffset now, int take, CancellationToken ct);
 
@@ -29,14 +32,14 @@ internal static class GroupMapping
     public static GroupDealResponse ToResponse(GroupDeal d, string supplierName, SupplierProduct? product, Guid? forShop) => new(
         d.Id, d.SupplierId, supplierName, d.SupplierProductId, product?.Name ?? "", product?.UnitsPerCase ?? 1, d.BulkPriceCents, d.BulkPriceCents,
         d.MinTotalCases, d.TotalCases, (int)Math.Min(100, d.TotalCases * 100L / d.MinTotalCases), d.ClosesAt, d.AreaCode, d.Status.ToString().ToLowerInvariant(),
-        forShop is { } shop ? d.CasesOf(shop) : null, forShop is null ? d.Commitments.Count : null);
+        forShop is { } shop ? d.CasesOf(shop) : null, forShop is null ? d.Commitments.Count : null, d.BuyingGroupId);
 }
 
 // ---------------------------------------------------------------- M6-1: a supplier posts a group deal
 
 public sealed record PostGroupDeal(Guid SupplierId, PostGroupDealRequest Request) : ICommand<GroupDealResponse>;
 
-internal sealed class PostGroupDealHandler(ISupplierStore suppliers, ISupplierProductStore products, IGroupDealStore groups, IOrganisationAccess access, TimeProvider clock)
+internal sealed class PostGroupDealHandler(ISupplierStore suppliers, ISupplierProductStore products, IGroupDealStore groups, IOrganisationAccess access, TimeProvider clock, IBuyingGroupStore? buying = null)
     : ICommandHandler<PostGroupDeal, GroupDealResponse>
 {
     public async Task<Result<GroupDealResponse>> Handle(PostGroupDeal c, CancellationToken ct)
@@ -51,8 +54,11 @@ internal sealed class PostGroupDealHandler(ISupplierStore suppliers, ISupplierPr
         var product = await products.Get(r.SupplierProductId, ct);
         if (product is null || product.SupplierId != supplier.Id) return Result<GroupDealResponse>.Fail("group.product_unknown", "That product is not in your catalogue.");
 
+        if (r.BuyingGroupId is { } groupId && (buying is null || await buying.Get(groupId, ct) is not { IsActive: true }))
+            return Result<GroupDealResponse>.Fail("buying_group.not_found", "That buying group does not exist.");
+
         var areas = (await suppliers.Areas(supplier.Id, ct)).Select(a => a.MunicipalityCode).ToList();
-        var created = GroupDeal.Create(supplier.Id, new GroupDealInput(product.Id, r.BulkPriceCents, r.MinTotalCases, r.ClosesAt, r.AreaCode), areas, clock.GetUtcNow());
+        var created = GroupDeal.Create(supplier.Id, new GroupDealInput(product.Id, r.BulkPriceCents, r.MinTotalCases, r.ClosesAt, r.AreaCode, r.BuyingGroupId), areas, clock.GetUtcNow());
         if (!created.IsSuccess) return Result<GroupDealResponse>.Fail(created.Error!.Code, created.Error.Message);
 
         await groups.Add(created.Value!, ct);
@@ -102,7 +108,7 @@ internal sealed class ManageGroupDealHandlers(ISupplierStore suppliers, IGroupDe
 
 public sealed record JoinGroupDeal(Guid DealId, Guid ShopId, JoinGroupDealRequest Request) : ICommand<GroupDealResponse>;
 
-internal sealed class JoinGroupDealHandler(IGroupDealStore groups, ISupplierStore suppliers, ISupplierProductStore products, IShopDirectory shops, IOrganisationAccess access, TimeProvider clock)
+internal sealed class JoinGroupDealHandler(IGroupDealStore groups, ISupplierStore suppliers, ISupplierProductStore products, IShopDirectory shops, IOrganisationAccess access, TimeProvider clock, IBuyingGroupStore? buying = null)
     : ICommandHandler<JoinGroupDeal, GroupDealResponse>
 {
     public async Task<Result<GroupDealResponse>> Handle(JoinGroupDeal c, CancellationToken ct)
@@ -111,8 +117,16 @@ internal sealed class JoinGroupDealHandler(IGroupDealStore groups, ISupplierStor
         var deal = await groups.Get(c.DealId, ct);
         if (deal is null) return Result<GroupDealResponse>.Fail("group.not_found", "Group deal not found.");
 
-        var shop = await shops.Get(c.ShopId, ct);
-        if (shop is null || shop.MunicipalityCode != deal.AreaCode) return Result<GroupDealResponse>.Fail("group.not_in_area", "This group deal is for shops in another area.");
+        if (deal.BuyingGroupId is { } groupId)
+        {
+            // An invite-only deal: members of that buying group only, wherever their shops are. Others are told it does not exist.
+            if (buying is null || await buying.Member(groupId, c.ShopId, ct) is not { IsMember: true }) return Result<GroupDealResponse>.Fail("group.not_found", "Group deal not found.");
+        }
+        else
+        {
+            var shop = await shops.Get(c.ShopId, ct);
+            if (shop is null || shop.MunicipalityCode != deal.AreaCode) return Result<GroupDealResponse>.Fail("group.not_in_area", "This group deal is for shops in another area.");
+        }
 
         var committed = deal.Commit(c.ShopId, c.Request.CallerPersonId, c.Request.Cases, clock.GetUtcNow());
         if (!committed.IsSuccess) return Result<GroupDealResponse>.Fail(committed.Error!.Code, committed.Error.Message);
@@ -130,17 +144,22 @@ public sealed record ListGroupDeals(Guid ShopId, Guid CallerPersonId) : IQuery<L
 
 public sealed record ListSupplierGroupDeals(Guid SupplierId, Guid CallerPersonId) : IQuery<List<GroupDealResponse>>;
 
-internal sealed class GroupDealQueries(IGroupDealStore groups, ISupplierStore suppliers, ISupplierProductStore products, IShopDirectory shops, IOrganisationAccess access)
+internal sealed class GroupDealQueries(IGroupDealStore groups, ISupplierStore suppliers, ISupplierProductStore products, IShopDirectory shops, IOrganisationAccess access, IBuyingGroupStore? buying = null)
     : IQueryHandler<ListGroupDeals, List<GroupDealResponse>>, IQueryHandler<ListSupplierGroupDeals, List<GroupDealResponse>>
 {
     public async Task<Result<List<GroupDealResponse>>> Handle(ListGroupDeals q, CancellationToken ct)
     {
         if (!await access.Has(q.CallerPersonId, q.ShopId, "stock.receive", ct)) return Result<List<GroupDealResponse>>.Fail("permission.denied", "You do not have access to this shop.");
         var shop = await shops.Get(q.ShopId, ct);
-        if (shop?.MunicipalityCode is not { } area) return Result<List<GroupDealResponse>>.Ok([]);
+        var visible = shop?.MunicipalityCode is { } area ? (await groups.OpenInArea(area, ct)).Where(d => d.BuyingGroupId is null).ToList() : [];
+        if (buying is not null)
+        {
+            var mine = await buying.GroupIdsOf(q.ShopId, ct);
+            if (mine.Count > 0) visible.AddRange((await groups.ForBuyingGroups(mine, ct)).Where(d => d.Status == GroupDealStatus.Open));
+        }
 
         var list = new List<GroupDealResponse>();
-        foreach (var d in (await groups.OpenInArea(area, ct)).OrderBy(d => d.ClosesAt))
+        foreach (var d in visible.OrderBy(d => d.ClosesAt))
         {
             var supplier = await suppliers.Get(d.SupplierId, ct);
             if (supplier is null || !supplier.IsTrading) continue;

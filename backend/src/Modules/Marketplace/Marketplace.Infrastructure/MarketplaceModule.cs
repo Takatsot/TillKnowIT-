@@ -28,6 +28,7 @@ public static class MarketplaceModule
         services.AddScoped<IShopMarketplaceStore, ShopMarketplaceStore>();
         services.AddScoped<IOrderStore, OrderStore>();
         services.AddScoped<IGroupDealStore, GroupDealStore>();
+        services.AddScoped<IBuyingGroupStore, BuyingGroupStore>();
         services.AddScoped<IRatingStore, RatingStore>();
         services.AddScoped<GroupDealClosing>();
         services.AddScoped<OrderNotifier>();

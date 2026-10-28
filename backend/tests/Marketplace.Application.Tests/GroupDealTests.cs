@@ -100,6 +100,7 @@ public class GroupDealFlowTests
         public List<GroupDeal> Deals { get; } = [];
         public Task Add(GroupDeal d, CancellationToken ct) { Deals.Add(d); return Task.CompletedTask; }
         public Task<GroupDeal?> Get(Guid id, CancellationToken ct) => Task.FromResult(Deals.FirstOrDefault(d => d.Id == id));
+        public Task<List<GroupDeal>> ForBuyingGroups(IReadOnlyCollection<Guid> ids, CancellationToken ct) => Task.FromResult(Deals.Where(d => d.BuyingGroupId != null && ids.Contains(d.BuyingGroupId.Value)).ToList());
         public Task<List<GroupDeal>> OpenInArea(string area, CancellationToken ct) => Task.FromResult(Deals.Where(d => d.AreaCode == area && d.Status == GroupDealStatus.Open).ToList());
         public Task<List<GroupDeal>> ForSupplier(Guid id, CancellationToken ct) => Task.FromResult(Deals.Where(d => d.SupplierId == id).ToList());
         public Task<List<GroupDeal>> NeedingClosure(DateTimeOffset now, int take, CancellationToken ct) => Task.FromResult(Deals.Where(d =>

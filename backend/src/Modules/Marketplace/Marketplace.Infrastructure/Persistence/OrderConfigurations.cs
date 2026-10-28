@@ -58,6 +58,7 @@ internal sealed class GroupDealConfiguration : IEntityTypeConfiguration<GroupDea
         b.Navigation(x => x.Commitments).UsePropertyAccessMode(PropertyAccessMode.Field);
         b.HasIndex(x => new { x.AreaCode, x.Status });
         b.HasIndex(x => new { x.SupplierId, x.Status });
+        b.HasIndex(x => x.BuyingGroupId).HasFilter("buying_group_id IS NOT NULL");
     }
 }
 
@@ -81,5 +82,47 @@ internal sealed class RatingConfiguration : IEntityTypeConfiguration<Rating>
         b.Property(x => x.Comment).HasMaxLength(500);
         b.HasIndex(x => x.OrderId).IsUnique();   // one rating per order
         b.HasIndex(x => x.SupplierId);
+    }
+}
+
+internal sealed class BuyingGroupConfiguration : IEntityTypeConfiguration<BuyingGroup>
+{
+    public void Configure(EntityTypeBuilder<BuyingGroup> b)
+    {
+        b.ToTable("buying_groups");
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
+        b.Property(x => x.Name).HasMaxLength(100).IsRequired();
+        b.Property(x => x.Kind).HasConversion<string>().HasMaxLength(20);
+        b.Property(x => x.Version).IsConcurrencyToken();
+        b.HasIndex(x => x.AdminShopId);
+    }
+}
+
+internal sealed class BuyingGroupMemberConfiguration : IEntityTypeConfiguration<BuyingGroupMember>
+{
+    public void Configure(EntityTypeBuilder<BuyingGroupMember> b)
+    {
+        b.ToTable("buying_group_members");
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
+        b.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+        b.Property(x => x.Version).IsConcurrencyToken();
+        b.Ignore(x => x.IsMember);
+        b.HasIndex(x => new { x.GroupId, x.ShopId }).IsUnique();
+        b.HasIndex(x => new { x.ShopId, x.Status });
+    }
+}
+
+internal sealed class BuyingGroupInviteConfiguration : IEntityTypeConfiguration<BuyingGroupInvite>
+{
+    public void Configure(EntityTypeBuilder<BuyingGroupInvite> b)
+    {
+        b.ToTable("buying_group_invites");
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
+        b.Property(x => x.CodeHash).HasMaxLength(64).IsRequired();
+        b.HasIndex(x => x.CodeHash).IsUnique();
+        b.HasIndex(x => x.GroupId);
     }
 }

@@ -15,6 +15,69 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 name: "marketplace");
 
             migrationBuilder.CreateTable(
+                name: "buying_group_invites",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    group_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    code_hash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    expires_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    used_by_shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    used_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_buying_group_invites", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "buying_group_members",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    group_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    joined_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_buying_group_members", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "buying_groups",
+                schema: "marketplace",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    kind = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    admin_shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    admin_person_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    is_active = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    version = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_buying_groups", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "group_deals",
                 schema: "marketplace",
                 columns: table => new
@@ -27,6 +90,7 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                     closes_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     area_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    buying_group_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -391,6 +455,38 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "ix_buying_group_invites_code_hash",
+                schema: "marketplace",
+                table: "buying_group_invites",
+                column: "code_hash",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_buying_group_invites_group_id",
+                schema: "marketplace",
+                table: "buying_group_invites",
+                column: "group_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_buying_group_members_group_id_shop_id",
+                schema: "marketplace",
+                table: "buying_group_members",
+                columns: new[] { "group_id", "shop_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_buying_group_members_shop_id_status",
+                schema: "marketplace",
+                table: "buying_group_members",
+                columns: new[] { "shop_id", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_buying_groups_admin_shop_id",
+                schema: "marketplace",
+                table: "buying_groups",
+                column: "admin_shop_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_deals_is_cancelled_ends_at",
                 schema: "marketplace",
                 table: "deals",
@@ -414,6 +510,13 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
                 schema: "marketplace",
                 table: "group_deals",
                 columns: new[] { "area_code", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_group_deals_buying_group_id",
+                schema: "marketplace",
+                table: "group_deals",
+                column: "buying_group_id",
+                filter: "buying_group_id IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "ix_group_deals_supplier_id_status",
@@ -544,6 +647,18 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "buying_group_invites",
+                schema: "marketplace");
+
+            migrationBuilder.DropTable(
+                name: "buying_group_members",
+                schema: "marketplace");
+
+            migrationBuilder.DropTable(
+                name: "buying_groups",
+                schema: "marketplace");
+
             migrationBuilder.DropTable(
                 name: "deals",
                 schema: "marketplace");

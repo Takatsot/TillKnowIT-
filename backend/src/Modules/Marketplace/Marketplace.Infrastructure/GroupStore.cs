@@ -24,12 +24,33 @@ internal sealed class GroupDealStore(MarketplaceDbContext db) : IGroupDealStore
     public Task<List<GroupDeal>> ForSupplier(Guid supplierId, CancellationToken ct) =>
         WithCommitments().AsNoTracking().Where(d => d.SupplierId == supplierId).ToListAsync(ct);
 
+    public Task<List<GroupDeal>> ForBuyingGroups(IReadOnlyCollection<Guid> groupIds, CancellationToken ct) =>
+        WithCommitments().AsNoTracking().Where(d => d.BuyingGroupId != null && groupIds.Contains(d.BuyingGroupId.Value)).ToListAsync(ct);
+
     public Task<List<GroupDeal>> NeedingClosure(DateTimeOffset now, int take, CancellationToken ct) =>
         WithCommitments().Where(d =>
                 (d.Status == GroupDealStatus.Open && d.ClosesAt <= now) ||
                 (d.Status == GroupDealStatus.Reached && d.Commitments.Any(c => c.OrderId == null)))
             .OrderBy(d => d.ClosesAt).Take(take).ToListAsync(ct);
 
+    public Task Save(CancellationToken ct) => db.SaveChangesAsync(ct);
+}
+
+internal sealed class BuyingGroupStore(MarketplaceDbContext db) : IBuyingGroupStore
+{
+    public void Add(BuyingGroup group) => db.Set<BuyingGroup>().Add(group);
+    public Task<BuyingGroup?> Get(Guid groupId, CancellationToken ct) => db.Set<BuyingGroup>().FirstOrDefaultAsync(g => g.Id == groupId, ct);
+
+    public Task<List<BuyingGroup>> ForShop(Guid shopId, CancellationToken ct) =>
+        db.Set<BuyingGroup>().AsNoTracking().Where(g => db.Set<BuyingGroupMember>().Any(m => m.GroupId == g.Id && m.ShopId == shopId && m.Status == MemberStatus.Joined)).ToListAsync(ct);
+
+    public void Add(BuyingGroupMember member) => db.Set<BuyingGroupMember>().Add(member);
+    public Task<BuyingGroupMember?> Member(Guid groupId, Guid shopId, CancellationToken ct) => db.Set<BuyingGroupMember>().FirstOrDefaultAsync(m => m.GroupId == groupId && m.ShopId == shopId, ct);
+    public Task<List<BuyingGroupMember>> Members(Guid groupId, CancellationToken ct) => db.Set<BuyingGroupMember>().AsNoTracking().Where(m => m.GroupId == groupId).ToListAsync(ct);
+    public Task<List<Guid>> GroupIdsOf(Guid shopId, CancellationToken ct) => db.Set<BuyingGroupMember>().AsNoTracking().Where(m => m.ShopId == shopId && m.Status == MemberStatus.Joined).Select(m => m.GroupId).ToListAsync(ct);
+
+    public void Add(BuyingGroupInvite invite) => db.Set<BuyingGroupInvite>().Add(invite);
+    public Task<BuyingGroupInvite?> InviteByHash(string hash, CancellationToken ct) => db.Set<BuyingGroupInvite>().FirstOrDefaultAsync(i => i.CodeHash == hash, ct);
     public Task Save(CancellationToken ct) => db.SaveChangesAsync(ct);
 }
 
