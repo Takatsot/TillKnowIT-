@@ -12,3 +12,4 @@ export * from "./vas";
 export * from "./selling";
 export * from "./basket";
 export * from "./outbox";
+export * from "./uuid";
