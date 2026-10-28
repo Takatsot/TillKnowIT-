@@ -65,6 +65,7 @@ public static class ShopCoreModule
         services.AddScoped<INotificationReadStore, NotificationReadStore>();
         services.AddScoped<OwnerMessenger>();
         services.AddScoped<IInsightsReadStore, InsightsReadStore>();
+        services.AddScoped<ITransferStore, TransferStore>();
         services.AddScoped<IReportReadStore, InsightsReadStore>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddDispatching(typeof(UploadBatch).Assembly);

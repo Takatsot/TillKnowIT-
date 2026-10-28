@@ -428,6 +428,28 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "stock_transfers",
+                schema: "shopcore",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    from_shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    to_shop_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    sent_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    closed_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    closed_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    note = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_stock_transfers", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "vas_sales",
                 schema: "shopcore",
                 columns: table => new
@@ -640,6 +662,7 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                     reason_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     supplier_name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     invoice_ref = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    transfer_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -789,6 +812,34 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         principalTable: "sales",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "stock_transfer_lines",
+                schema: "shopcore",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    transfer_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    from_product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    to_product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    quantity = table.Column<int>(type: "int", nullable: false),
+                    received_quantity = table.Column<int>(type: "int", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_stock_transfer_lines", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_stock_transfer_lines_stock_transfers_transfer_id",
+                        column: x => x.transfer_id,
+                        principalSchema: "shopcore",
+                        principalTable: "stock_transfers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1061,6 +1112,31 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 columns: new[] { "shop_id", "product_id" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_stock_movements_transfer_id",
+                schema: "shopcore",
+                table: "stock_movements",
+                column: "transfer_id",
+                filter: "transfer_id IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_stock_transfer_lines_transfer_id",
+                schema: "shopcore",
+                table: "stock_transfer_lines",
+                column: "transfer_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_stock_transfers_from_shop_id_status",
+                schema: "shopcore",
+                table: "stock_transfers",
+                columns: new[] { "from_shop_id", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_stock_transfers_to_shop_id_status",
+                schema: "shopcore",
+                table: "stock_transfers",
+                columns: new[] { "to_shop_id", "status" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_vas_sales_shop_id_created_at",
                 schema: "shopcore",
                 table: "vas_sales",
@@ -1165,6 +1241,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 schema: "shopcore");
 
             migrationBuilder.DropTable(
+                name: "stock_transfer_lines",
+                schema: "shopcore");
+
+            migrationBuilder.DropTable(
                 name: "vas_sales",
                 schema: "shopcore");
 
@@ -1190,6 +1270,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "products",
+                schema: "shopcore");
+
+            migrationBuilder.DropTable(
+                name: "stock_transfers",
                 schema: "shopcore");
 
             migrationBuilder.DropTable(

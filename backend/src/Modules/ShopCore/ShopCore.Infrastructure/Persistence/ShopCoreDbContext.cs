@@ -39,6 +39,7 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
             e.HasOne<Product>().WithMany().HasForeignKey(x => x.ProductId);
             e.HasIndex(x => new { x.ShopId, x.ProductId });
             e.HasIndex(x => x.SaleId).HasFilter("sale_id IS NOT NULL");
+            e.HasIndex(x => x.TransferId).HasFilter("transfer_id IS NOT NULL");
         });
 
         b.Entity<Sale>(e =>
@@ -205,7 +206,7 @@ public sealed class ShopCoreDbContext(DbContextOptions<ShopCoreDbContext> option
         // never erase them. Only a sale's own lines go with the sale.
         b.ApplyConfigurationsFromAssembly(typeof(ShopCoreDbContext).Assembly);
 
-        var ownedByParent = new[] { typeof(SaleLine), typeof(SalePayment), typeof(SaleRefundLine), typeof(ModifierOptionRow), typeof(LaybyPayment), typeof(VoucherEntry) };
+        var ownedByParent = new[] { typeof(SaleLine), typeof(SalePayment), typeof(SaleRefundLine), typeof(ModifierOptionRow), typeof(LaybyPayment), typeof(VoucherEntry), typeof(StockTransferLine) };
         foreach (var fk in b.Model.GetEntityTypes().SelectMany(t => t.GetForeignKeys())
                      .Where(f => f.DeleteBehavior == DeleteBehavior.Cascade && !ownedByParent.Contains(f.DeclaringEntityType.ClrType)))
             fk.DeleteBehavior = DeleteBehavior.Restrict;

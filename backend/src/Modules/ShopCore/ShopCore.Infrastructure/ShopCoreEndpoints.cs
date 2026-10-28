@@ -62,9 +62,9 @@ public static class ShopCoreEndpoints
             return Results.Ok(result.Value);
         });
 
-        api.MapGet("/shops/{shopId:guid}/reports/{code}", async (Guid shopId, string code, DateOnly? from, DateOnly? to, string? format, IDispatcher d, CancellationToken ct) =>
+        api.MapGet("/shops/{shopId:guid}/reports/{code}", async (Guid shopId, string code, DateOnly? from, DateOnly? to, string? format, string? branch, Guid? callerPersonId, IDispatcher d, CancellationToken ct) =>
         {
-            var result = await d.Ask(new RunReport(shopId, code, from, to, format), ct);
+            var result = await d.Ask(new RunReport(shopId, code, from, to, format, branch, callerPersonId), ct);
             return result.IsSuccess
                 ? Results.File(result.Value!.Content, result.Value.ContentType, result.Value.FileName)
                 : Problem(result.Error!.Code, result.Error.Message, StatusCodes.Status422UnprocessableEntity);

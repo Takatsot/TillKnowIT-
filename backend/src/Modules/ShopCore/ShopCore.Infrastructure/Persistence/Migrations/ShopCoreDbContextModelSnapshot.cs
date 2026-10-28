@@ -1829,6 +1829,10 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasColumnName("supplier_name");
 
+                    b.Property<Guid?>("TransferId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("transfer_id");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -1849,10 +1853,128 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_stock_movements_sale_id")
                         .HasFilter("sale_id IS NOT NULL");
 
+                    b.HasIndex("TransferId")
+                        .HasDatabaseName("ix_stock_movements_transfer_id")
+                        .HasFilter("transfer_id IS NOT NULL");
+
                     b.HasIndex("ShopId", "ProductId")
                         .HasDatabaseName("ix_stock_movements_shop_id_product_id");
 
                     b.ToTable("stock_movements", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.StockTransfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ClosedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("closed_at");
+
+                    b.Property<Guid?>("ClosedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("closed_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<Guid>("FromShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("from_shop_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)")
+                        .HasColumnName("note");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("sent_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("ToShopId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("to_shop_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_stock_transfers");
+
+                    b.HasIndex("FromShopId", "Status")
+                        .HasDatabaseName("ix_stock_transfers_from_shop_id_status");
+
+                    b.HasIndex("ToShopId", "Status")
+                        .HasDatabaseName("ix_stock_transfers_to_shop_id_status");
+
+                    b.ToTable("stock_transfers", "shopcore");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.StockTransferLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<Guid>("FromProductId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("from_product_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int")
+                        .HasColumnName("quantity");
+
+                    b.Property<int?>("ReceivedQuantity")
+                        .HasColumnType("int")
+                        .HasColumnName("received_quantity");
+
+                    b.Property<Guid>("ToProductId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("to_product_id");
+
+                    b.Property<Guid>("TransferId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("transfer_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_stock_transfer_lines");
+
+                    b.HasIndex("TransferId")
+                        .HasDatabaseName("ix_stock_transfer_lines_transfer_id");
+
+                    b.ToTable("stock_transfer_lines", "shopcore");
                 });
 
             modelBuilder.Entity("ShopCore.Domain.VasSale", b =>
@@ -2131,6 +2253,16 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_stock_movements_products_product_id");
                 });
 
+            modelBuilder.Entity("ShopCore.Domain.StockTransferLine", b =>
+                {
+                    b.HasOne("ShopCore.Domain.StockTransfer", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("TransferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_stock_transfer_lines_stock_transfers_transfer_id");
+                });
+
             modelBuilder.Entity("ShopCore.Domain.Sale", b =>
                 {
                     b.Navigation("Lines");
@@ -2154,6 +2286,11 @@ namespace ShopCore.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("ShopCore.Domain.Selling.SaleRefund", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("ShopCore.Domain.StockTransfer", b =>
                 {
                     b.Navigation("Lines");
                 });

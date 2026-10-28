@@ -4,6 +4,9 @@ namespace Identity.Domain;
 
 public enum MembershipStatus { Active, Disabled }
 
+/// <summary>G1-4: whether a membership counts at this shop only, or at every branch under it too.</summary>
+public enum MembershipScope { ThisShop, AllBranches }
+
 public sealed class Membership : VersionedEntity
 {
     public const int MaxPinAttempts = 5;
@@ -25,6 +28,15 @@ public sealed class Membership : VersionedEntity
     public string? PinHash { get; private set; }
     public int FailedPinAttempts { get; private set; }
     public DateTimeOffset? LockedUntil { get; private set; }
+
+    public MembershipScope Scope { get; private set; } = MembershipScope.ThisShop;
+
+    public void SetScope(MembershipScope scope)
+    {
+        if (Scope == scope) return;
+        Scope = scope;
+        Touch();
+    }
 
     public bool IsLocked(DateTimeOffset now) => LockedUntil > now;
 

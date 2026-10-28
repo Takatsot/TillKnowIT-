@@ -154,6 +154,51 @@ public class InsightsAndReportsTests
         Assert.Equal(["Milk"], result.Expiring.Select(r => r.Name));
     }
 
+    // ---- branches (G1-3) ----
+
+    private sealed class FakeGroup(params Guid[] shops) : Identity.Contracts.IBranchDirectory, Identity.Contracts.IOrganisationAccess
+    {
+        public HashSet<Guid> Allowed { get; } = [];
+        public Task<Guid> HeadOf(Guid shopId, CancellationToken ct) => Task.FromResult(shops[0]);
+        public Task<List<Identity.Contracts.BranchResponse>> Group(Guid shopId, CancellationToken ct) => Task.FromResult(shops.Select(s => new Identity.Contracts.BranchResponse(s, "S", s == shops[0], "verified", null)).ToList());
+        public Task<bool> Has(Guid personId, Guid organisationId, string permission, CancellationToken ct) => Task.FromResult(Allowed.Contains(personId) && permission == "report.view");
+    }
+
+    private static RunReportHandler GroupReports(FakeGroup group) =>
+        new(new FakeSales(Rows()), new FakeStock([Stock("Bread", 3, 5, 60, Now)]), new FakeCredit([]), new FakeReports([]), new FakeTimeProvider(Now), group, group);
+
+    [Fact]
+    public async Task A_report_for_all_branches_adds_every_branch_together_and_a_single_branch_is_just_that_one()
+    {
+        var head = Guid.NewGuid();
+        var other = Guid.NewGuid();
+        var owner = Guid.NewGuid();
+        var group = new FakeGroup(head, other);
+        group.Allowed.Add(owner);
+        var range = (new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 31));
+
+        var one = Text((await GroupReports(group).Handle(new RunReport(head, "sales-by-day", range.Item1, range.Item2, "csv", other.ToString(), owner), default)).Value!);
+        var all = await GroupReports(group).Handle(new RunReport(head, "sales-by-day", range.Item1, range.Item2, "csv", "all", owner), default);
+
+        Assert.Contains("2026-10-26,1,61.00,12.00", one);
+        Assert.Contains("2026-10-26,1,122.00,24.00", Text(all.Value!));   // sales and profit add up (the fake gives both branches the same sale id)
+        Assert.Equal("sales-by-day-all-branches-2026-10-31.csv", all.Value!.FileName);
+    }
+
+    [Fact]
+    public async Task Business_wide_reports_need_a_caller_who_may_see_reports_and_a_branch_of_this_business()
+    {
+        var head = Guid.NewGuid();
+        var group = new FakeGroup(head, Guid.NewGuid());
+        var owner = Guid.NewGuid();
+        group.Allowed.Add(owner);
+
+        Assert.Equal("permission.denied", (await GroupReports(group).Handle(new RunReport(head, "stock-on-hand", null, null, "csv", "all", null), default)).Error!.Code);
+        Assert.Equal("permission.denied", (await GroupReports(group).Handle(new RunReport(head, "stock-on-hand", null, null, "csv", "all", Guid.NewGuid()), default)).Error!.Code);
+        Assert.Equal("report.branch_unknown", (await GroupReports(group).Handle(new RunReport(head, "stock-on-hand", null, null, "csv", Guid.NewGuid().ToString(), owner), default)).Error!.Code);
+        Assert.Equal("report.branches_unavailable", (await Reports().Handle(new RunReport(head, "stock-on-hand", null, null, "csv", "all", owner), default)).Error!.Code);
+    }
+
     // ---- report handler ----
 
     private static RunReportHandler Reports(List<CashUpRow>? cashUps = null, List<(Guid, string, string?, long?, long)>? credit = null) =>

@@ -8,6 +8,6 @@ namespace Identity.Infrastructure;
 internal sealed class OrganisationAccess(IdentityDbContext db) : IOrganisationAccess
 {
     public Task<bool> Has(Guid personId, Guid organisationId, string permission, CancellationToken ct) =>
-        db.Memberships.AsNoTracking().AnyAsync(m => m.PersonId == personId && m.OrganisationId == organisationId && m.Status == MembershipStatus.Active
+        db.Memberships.AsNoTracking().AnyAsync(m => m.PersonId == personId && (m.OrganisationId == organisationId || (m.Scope == MembershipScope.AllBranches && db.Organisations.Any(o => o.Id == organisationId && o.ParentId == m.OrganisationId))) && m.Status == MembershipStatus.Active
             && db.Roles.Any(r => r.Id == m.RoleId && r.Permissions.Any(p => p.PermissionCode == permission)), ct);
 }

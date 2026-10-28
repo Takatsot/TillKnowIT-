@@ -128,6 +128,12 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("role_id");
 
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("scope");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -189,6 +195,10 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("parent_id");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -212,6 +222,9 @@ namespace Identity.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_organisations");
+
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("ix_organisations_parent_id");
 
                     b.ToTable("organisations", "identity");
                 });

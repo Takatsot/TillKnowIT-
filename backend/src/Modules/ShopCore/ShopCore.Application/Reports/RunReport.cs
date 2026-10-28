@@ -1,3 +1,4 @@
+using Identity.Contracts;
 using ShopCore.Application.Credit;
 using ShopCore.Application.Insights;
 using ShopCore.Application.Stock;
@@ -26,11 +27,15 @@ public static class ReportCodes
     public static readonly string[] All = [SalesByDay, SalesByProduct, StockOnHand, CashUps, CreditBook];
 }
 
-/// <summary>E8-3: download a report as CSV, Excel or PDF. From and To are business days, both included.</summary>
-public sealed record RunReport(Guid ShopId, string Code, DateOnly? From, DateOnly? To, string? Format) : IQuery<ReportFile>;
+/// <summary>
+/// E8-3: download a report as CSV, Excel or PDF. From and To are business days, both included.
+/// G1-3: Branch is "all" for the whole business or one branch's id; the caller must then be someone who may see reports for the business.
+/// </summary>
+public sealed record RunReport(Guid ShopId, string Code, DateOnly? From, DateOnly? To, string? Format, string? Branch = null, Guid? CallerPersonId = null) : IQuery<ReportFile>;
 
 internal sealed class RunReportHandler(
-    IInsightsReadStore sales, IStockReadStore stock, ICreditReadStore credit, IReportReadStore reports, TimeProvider clock)
+    IInsightsReadStore sales, IStockReadStore stock, ICreditReadStore credit, IReportReadStore reports, TimeProvider clock,
+    IBranchDirectory? branches = null, IOrganisationAccess? access = null)
     : IQueryHandler<RunReport, ReportFile>
 {
     public const int MaxDays = 366;
@@ -41,6 +46,11 @@ internal sealed class RunReportHandler(
             return Result<ReportFile>.Fail("report.unknown", $"Unknown report. Choose one of: {string.Join(", ", ReportCodes.All)}.");
         if (!ReportFormats.TryParse(query.Format, out var format))
             return Result<ReportFile>.Fail("report.format_invalid", "Format must be csv, xlsx or pdf.");
+
+        var shops = await ShopsFor(query, ct);
+        if (!shops.IsSuccess) return Result<ReportFile>.Fail(shops.Error!.Code, shops.Error.Message);
+        var ids = shops.Value!;
+        var combined = ids.Count > 1;
 
         var now = clock.GetUtcNow();
         var today = BusinessDay.Of(now);
@@ -58,23 +68,68 @@ internal sealed class RunReportHandler(
         switch (query.Code)
         {
             case ReportCodes.SalesByDay:
-                table = ReportBuilders.SalesByDay(await sales.SaleLines(query.ShopId, start, end, ct), from, to, period);
+                table = ReportBuilders.SalesByDay(await Lines(ids, start, end, ct), from, to, period);
                 break;
             case ReportCodes.SalesByProduct:
-                table = ReportBuilders.SalesByProduct(await sales.SaleLines(query.ShopId, start, end, ct), start, end, period);
+                table = ReportBuilders.SalesByProduct(Same(await Lines(ids, start, end, ct), combined), start, end, period);
                 break;
             case ReportCodes.StockOnHand:
-                table = ReportBuilders.StockOnHand(await stock.Items(query.ShopId, now, ct), now, today);
+                table = ReportBuilders.StockOnHand(await Items(ids, now, ct), now, today);
                 break;
             case ReportCodes.CashUps:
-                table = ReportBuilders.CashUps(await reports.CashUps(query.ShopId, from, to, ct), period);
+                table = ReportBuilders.CashUps(await CashUps(ids, from, to, ct), period);
                 break;
             default:
-                table = ReportBuilders.CreditBook(await credit.Balances(query.ShopId, ct), today);
+                table = ReportBuilders.CreditBook(await Balances(ids, ct), today);
                 break;
         }
 
-        return Result<ReportFile>.Ok(ReportExporter.Export(table, format, $"{query.Code}-{to:yyyy-MM-dd}"));
+        return Result<ReportFile>.Ok(ReportExporter.Export(table, format, $"{query.Code}{(combined ? "-all-branches" : "")}-{to:yyyy-MM-dd}"));
+    }
+
+    /// <summary>No branch asked for means just this shop. "all" is the whole business; a branch id is that branch. Either needs someone allowed to see the business's reports.</summary>
+    private async Task<Result<List<Guid>>> ShopsFor(RunReport q, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(q.Branch)) return Result<List<Guid>>.Ok([q.ShopId]);
+        if (branches is null || access is null) return Result<List<Guid>>.Fail("report.branches_unavailable", "Branch reports are not available.");
+        var group = await branches.Group(q.ShopId, ct);
+        var head = await branches.HeadOf(q.ShopId, ct);
+        if (q.CallerPersonId is not { } caller || !await access.Has(caller, head, "report.view", ct)) return Result<List<Guid>>.Fail("permission.denied", "You are not allowed to see reports for the other branches.");
+        if (q.Branch.Equals("all", StringComparison.OrdinalIgnoreCase)) return Result<List<Guid>>.Ok(group.Select(b => b.ShopId).ToList());
+        if (Guid.TryParse(q.Branch, out var one) && group.Any(b => b.ShopId == one)) return Result<List<Guid>>.Ok([one]);
+        return Result<List<Guid>>.Fail("report.branch_unknown", "That branch is not part of this business.");
+    }
+
+    private async Task<List<SaleLineRow>> Lines(List<Guid> ids, DateTimeOffset from, DateTimeOffset to, CancellationToken ct)
+    {
+        var all = new List<SaleLineRow>();
+        foreach (var id in ids) all.AddRange(await sales.SaleLines(id, from, to, ct));
+        return all;
+    }
+
+    /// <summary>Every branch has its own product records, so a business-wide product report counts products with the same name as one.</summary>
+    private static IEnumerable<SaleLineRow> Same(List<SaleLineRow> rows, bool combined) =>
+        combined ? rows.Select(r => r with { ProductId = DeterministicGuid.From("report.product:" + r.Name.Trim().ToLowerInvariant()) }).ToList() : rows;
+
+    private async Task<List<StockItem>> Items(List<Guid> ids, DateTimeOffset now, CancellationToken ct)
+    {
+        var all = new List<StockItem>();
+        foreach (var id in ids) all.AddRange(await stock.Items(id, now, ct));
+        return all;
+    }
+
+    private async Task<List<CashUpRow>> CashUps(List<Guid> ids, DateOnly from, DateOnly to, CancellationToken ct)
+    {
+        var all = new List<CashUpRow>();
+        foreach (var id in ids) all.AddRange(await reports.CashUps(id, from, to, ct));
+        return all.OrderBy(r => r.Day).ToList();
+    }
+
+    private async Task<List<(Guid Id, string Name, string? Phone, long? LimitCents, long BalanceCents)>> Balances(List<Guid> ids, CancellationToken ct)
+    {
+        var all = new List<(Guid Id, string Name, string? Phone, long? LimitCents, long BalanceCents)>();
+        foreach (var id in ids) all.AddRange(await credit.Balances(id, ct));
+        return all;
     }
 }
 

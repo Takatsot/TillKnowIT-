@@ -2,11 +2,11 @@ using TillKnowIT.SharedKernel;
 
 namespace ShopCore.Domain;
 
-public enum StockMovementType { Receive, Sale, Cancel, Count, WriteOff, Return }
+public enum StockMovementType { Receive, Sale, Cancel, Count, WriteOff, Return, TransferOut, TransferIn }
 
 public sealed record StockMovementInput(
     Guid Id, Guid ShopId, Guid ProductId, StockMovementType Type, int Quantity, Guid StaffId, Guid DeviceId,
-    DateTimeOffset CreatedAt, Guid? SaleId, long? UnitCostCents, string? ReasonCode, string? SupplierName, string? InvoiceRef);
+    DateTimeOffset CreatedAt, Guid? SaleId, long? UnitCostCents, string? ReasonCode, string? SupplierName, string? InvoiceRef, Guid? TransferId = null);
 
 /// <summary>Append only. Stock on hand is the sum of quantities per product.</summary>
 public sealed class StockMovement : Entity
@@ -24,8 +24,8 @@ public sealed class StockMovement : Entity
 
         var signOk = i.Type switch
         {
-            StockMovementType.Receive or StockMovementType.Cancel or StockMovementType.Return => i.Quantity > 0,
-            StockMovementType.Sale or StockMovementType.WriteOff => i.Quantity < 0,
+            StockMovementType.Receive or StockMovementType.Cancel or StockMovementType.Return or StockMovementType.TransferIn => i.Quantity > 0,
+            StockMovementType.Sale or StockMovementType.WriteOff or StockMovementType.TransferOut => i.Quantity < 0,
             _ => true,
         };
         if (!signOk)
@@ -35,6 +35,8 @@ public sealed class StockMovement : Entity
             return Result<StockMovement>.Fail("stock.reason_required", "Counts and write-offs need a reason.");
         if (i.Type is StockMovementType.Sale or StockMovementType.Cancel or StockMovementType.Return && i.SaleId is null)
             return Result<StockMovement>.Fail("stock.sale_required", "Sale and cancel movements must point at their sale.");
+        if (i.Type is StockMovementType.TransferOut or StockMovementType.TransferIn && i.TransferId is null)
+            return Result<StockMovement>.Fail("stock.transfer_required", "Transfer movements must point at their transfer.");
         if (i.UnitCostCents < 0)
             return Result<StockMovement>.Fail("stock.cost_invalid", "Cost cannot be negative.");
         if ((i.SupplierName?.Length ?? 0) > 200 || (i.InvoiceRef?.Length ?? 0) > 100 || (i.ReasonCode?.Length ?? 0) > 50)
@@ -51,6 +53,7 @@ public sealed class StockMovement : Entity
             ReasonCode = i.ReasonCode?.Trim(),
             SupplierName = i.SupplierName,
             InvoiceRef = i.InvoiceRef,
+            TransferId = i.TransferId,
         };
         movement.StampFromDevice(i.Id, i.CreatedAt, i.StaffId, i.DeviceId);
         return Result<StockMovement>.Ok(movement);
@@ -69,6 +72,9 @@ public sealed class StockMovement : Entity
     public string? ReasonCode { get; private set; }
     public string? SupplierName { get; private set; }
     public string? InvoiceRef { get; private set; }
+
+    /// <summary>G1-2: set on the two movements of a stock transfer between branches.</summary>
+    public Guid? TransferId { get; private set; }
 }
 
 public static class StockCalculator

@@ -31,6 +31,7 @@ internal sealed class OrganisationConfiguration : IEntityTypeConfiguration<Organ
         b.Property(x => x.Name).HasMaxLength(200).IsRequired();
         b.Property(x => x.MunicipalityCode).HasMaxLength(20);
         b.Property(x => x.Version).IsConcurrencyToken();
+        b.HasIndex(x => x.ParentId);
     }
 }
 
@@ -42,6 +43,7 @@ internal sealed class MembershipConfiguration : IEntityTypeConfiguration<Members
         b.HasKey(x => x.Id);
         b.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         b.Property(x => x.PinHash).HasMaxLength(200);
+        b.Property(x => x.Scope).HasConversion<string>().HasMaxLength(20);
         b.Property(x => x.Version).IsConcurrencyToken();
         b.HasOne<Person>().WithMany().HasForeignKey(x => x.PersonId);
         b.HasOne<Organisation>().WithMany().HasForeignKey(x => x.OrganisationId);

@@ -22,6 +22,7 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    parent_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     municipality_code = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
@@ -164,6 +165,7 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     pin_hash = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     failed_pin_attempts = table.Column<int>(type: "int", nullable: false),
                     locked_until = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    scope = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -331,6 +333,12 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 schema: "identity",
                 table: "memberships",
                 column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_organisations_parent_id",
+                schema: "identity",
+                table: "organisations",
+                column: "parent_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_outbox_messages_occurred_at",

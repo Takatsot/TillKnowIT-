@@ -25,6 +25,22 @@ public static class IdentityEndpoints
                 : Problem(result);
         });
 
+        api.MapPost("/organisations/{shopId:guid}/branches", async (Guid shopId, AddBranchRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new AddBranch(shopId, req), ct);
+            return result.IsSuccess ? Results.Created($"/api/v1/organisations/{shopId}/branches", result.Value) : Problem(result);
+        });
+        api.MapGet("/organisations/{shopId:guid}/branches", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new ListBranches(shopId, callerPersonId), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
+        });
+        api.MapPost("/organisations/{shopId:guid}/all-branches-access", async (Guid shopId, GrantAllBranchesRequest req, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new GrantAllBranches(shopId, req), ct);
+            return result.IsSuccess ? Results.NoContent() : Problem(result);
+        });
+
         api.MapPost("/shops/{shopId:guid}/staff", async (Guid shopId, AddStaffRequest req, IDispatcher d, CancellationToken ct) =>
         {
             var result = await d.Send(new AddStaff(shopId, req.Name, req.Phone, req.RoleCode, req.Pin), ct);
@@ -109,7 +125,7 @@ public static class IdentityEndpoints
             "staff.pin_rejected" => StatusCodes.Status401Unauthorized,
             "staff.locked" => StatusCodes.Status423Locked,
             "staff.already_member" or "shop.suspended" or "setup.incomplete" => StatusCodes.Status409Conflict,
-            "permission.denied" => StatusCodes.Status403Forbidden,
+            "permission.denied" or "plan.feature_not_included" => StatusCodes.Status403Forbidden,
             var c when c.EndsWith("not_found", StringComparison.Ordinal) => StatusCodes.Status404NotFound,
             _ => StatusCodes.Status422UnprocessableEntity,
         };
