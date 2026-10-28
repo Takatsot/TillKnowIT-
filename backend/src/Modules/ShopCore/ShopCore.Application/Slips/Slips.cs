@@ -1,5 +1,6 @@
 using Identity.Contracts;
 using Messaging.Contracts;
+using Billing.Contracts;
 using ShopCore.Contracts;
 using ShopCore.Domain;
 using TillKnowIT.Dispatching;
@@ -24,7 +25,8 @@ public interface ISlipStore
 public sealed record RequestSlip(Guid SaleId, RequestSlipRequest Request) : ICommand<SlipResponse>;
 
 internal sealed class RequestSlipHandler(
-    ISlipStore store, ITillAccessChecker access, IShopDirectory shops, IDestinationChecker destinations, SlipOptions options, TimeProvider clock)
+    ISlipStore store, ITillAccessChecker access, IShopDirectory shops, IDestinationChecker destinations, SlipOptions options, TimeProvider clock,
+    IMessageAllowance? allowance = null, IUsageMeter? meter = null, IBranchDirectory? branches = null)
     : ICommandHandler<RequestSlip, SlipResponse>
 {
     public async Task<Result<SlipResponse>> Handle(RequestSlip command, CancellationToken ct)
@@ -39,6 +41,14 @@ internal sealed class RequestSlipHandler(
         // The sale must belong to this shop, so one shop cannot send slips for another's sales.
         var sale = await store.GetSale(command.SaleId, ct);
         if (sale is null || sale.ShopId != r.ShopId) return Result<SlipResponse>.Fail("sale.not_found", "Sale not found.");
+
+        // B8-3: a free plan has a monthly bundle of messages. When it is used up the slip is shown as a QR code instead, so the till is never stuck and the customer still gets a slip.
+        string? note = null;
+        if (channel != SlipChannel.Qr && allowance is not null && (await allowance.Check(r.ShopId, ct)).Exhausted)
+        {
+            channel = SlipChannel.Qr;
+            note = "Your message bundle for this month is used up, so this slip is shown as a QR code.";
+        }
 
         string? destination = null;
         if (channel != SlipChannel.Qr)
@@ -58,7 +68,9 @@ internal sealed class RequestSlipHandler(
         var slip = SlipRequest.Request(r.ShopId, sale.SaleId, r.StaffId, r.DeviceId, channel, destination, string.IsNullOrWhiteSpace(r.Language) ? "en" : r.Language!, values, clock.GetUtcNow());
         await store.Add(slip, ct);
         await store.Save(ct);
-        return Result<SlipResponse>.Ok(new SlipResponse(channel == SlipChannel.Qr ? "shown" : "queued", url));
+        if (channel != SlipChannel.Qr && meter is not null && branches is not null)
+            await meter.Record(await branches.HeadOf(r.ShopId, ct), PlanFeatures.Messages, 1, $"slip:{slip.Id:N}", clock.GetUtcNow(), ct);
+        return Result<SlipResponse>.Ok(new SlipResponse(channel == SlipChannel.Qr ? "shown" : "queued", url, note));
     }
 }
 

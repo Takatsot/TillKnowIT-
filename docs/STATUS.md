@@ -120,7 +120,7 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | B5 Appointments and commission | Done | Bookings module: services, staff, idempotent booking, clash refused online and flagged when booked offline, reschedule, consent-only WhatsApp reminders (24h, worker), commission rules (most specific wins, half-up) and report. 28 tests. |
 | B7-2 Loyalty | Done | Append-only points ledger, earn on sale, reversed on cancel/refund. 40 tests. |
 | B8-1, B8-2 Printer and cash drawer | Todo | Hardware package (front end). |
-| B8-3 Message bundles | Todo | Messaging. |
+| B8-3 Message bundles | Done | The shop's plan sets the monthly messages (free plan 50, placeholder); slips and appointment reminders are counted per business (a branch uses the head shop's bundle); owner told at 80% and when used up; on a free plan an exhausted bundle turns the slip into a QR code and reminders pause; a paid plan keeps sending and the extra is billed. |
 
 ## Phase 5
 

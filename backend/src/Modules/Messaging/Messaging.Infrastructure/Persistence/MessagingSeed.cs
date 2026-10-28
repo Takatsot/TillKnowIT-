@@ -40,6 +40,10 @@ internal static class MessagingSeed
         ("billing.limited", [MessageChannel.Whatsapp], null, "Hi {name}, your {plan} extras are paused until the payment is made. Your till is not affected."),
         ("billing.limited", [MessageChannel.Email], "Your TillKnowIT extras are paused", "Hi {name}, your {plan} extras are paused until the payment is made. Your till is not affected."),
 
+        // Message bundle: told once at 80% and once when it is all used.
+        ("bundle.warning", [MessageChannel.Whatsapp], null, "{shop}: you have used {used} of your {limit} messages this month. Slips can still be shown as a QR code."),
+        ("bundle.exhausted", [MessageChannel.Whatsapp], null, "{shop}: your {limit} messages for this month are used up. Slips are shown as a QR code until next month, or upgrade your plan."),
+
         // Accounting: told once when a day could not be sent after several tries.
         ("accounting.failed", [MessageChannel.Whatsapp], null, "{shop}: we could not send {day} to your accounting package ({error}). Open the app to fix it and try again."),
 

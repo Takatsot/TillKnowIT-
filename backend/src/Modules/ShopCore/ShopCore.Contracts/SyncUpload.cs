@@ -126,7 +126,8 @@ public sealed record DueComplianceReminder(Guid ShopId, Guid DocumentId, string 
 public sealed record RequestSlipRequest(Guid ShopId, Guid DeviceId, Guid StaffId, string Channel, string? Destination, string? Language);
 
 /// <summary>Status is "shown" (QR) or "queued". Url is the slip link: draw it as the QR code, or it is what the message contains.</summary>
-public sealed record SlipResponse(string Status, string Url);
+/// <summary>Note is set when the slip was shown as a QR code instead of sent, because the shop's message bundle is used up.</summary>
+public sealed record SlipResponse(string Status, string Url, string? Note = null);
 
 public sealed record SlipLineView(string Name, int Quantity, long PriceCents, int UnitDivisor = 1, long DiscountCents = 0);
 

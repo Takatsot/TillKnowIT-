@@ -176,6 +176,7 @@ public class BillingFlowTests
         public Task<int> InvoiceCount(CancellationToken ct) => Task.FromResult(Invoices.Count);
         public void Add(UsageRecord usage) => UsageRows.Add(usage);
         public Task<UsageRecord?> UsageByReference(Guid org, string reference, CancellationToken ct) => Task.FromResult(UsageRows.FirstOrDefault(u => u.OrganisationId == org && u.Reference == reference));
+        public Task<long> UsageTotal(Guid org, string metric, DateTimeOffset from, CancellationToken ct) => Task.FromResult(UsageRows.Where(u => u.OrganisationId == org && u.Metric == metric && u.OccurredAt >= from).Sum(u => u.Quantity));
         public Task<List<UsageRecord>> UnbilledUsage(Guid org, DateTimeOffset before, CancellationToken ct) => Task.FromResult(UsageRows.Where(u => u.OrganisationId == org && u.InvoiceId == null && u.OccurredAt < before).ToList());
         public Task<List<Guid>> OrganisationsWithUnbilledPricedUsage(DateTimeOffset before, int take, CancellationToken ct) =>
             Task.FromResult(UsageRows.Where(u => u.InvoiceId == null && u.UnitCents != null && u.OccurredAt < before).Select(u => u.OrganisationId).Distinct().ToList());
@@ -507,5 +508,93 @@ public class BillingFlowTests
         Assert.Equal("permission.denied", (await Campaigns.Handle(new GetCampaignUsage(id, Guid.NewGuid()), default)).Error!.Code);
         Assert.Single((await Campaigns.Handle(new ListCampaigns(_org, _owner), default)).Value!);
         Assert.Equal("campaign.not_found", (await Campaigns.Handle(new PauseCampaign(Guid.NewGuid(), _owner, true), default)).Error!.Code);
+    }
+
+    // ---- message bundle (B8-3) ----
+
+    private sealed class OwnerShops : IShopDirectory
+    {
+        public Task<ShopInfo?> Get(Guid shopId, CancellationToken ct) => Task.FromResult<ShopInfo?>(new(shopId, "Thandi Spaza", "verified", Guid.NewGuid(), "+27821234567", null, "en"));
+        public Task<List<Guid>> VerifiedShopIds(CancellationToken ct) => Task.FromResult(new List<Guid>());
+    }
+
+    private sealed class SelfHead : IBranchDirectory
+    {
+        public Task<Guid> HeadOf(Guid shopId, CancellationToken ct) => Task.FromResult(shopId);
+        public Task<List<BranchResponse>> Group(Guid shopId, CancellationToken ct) => Task.FromResult(new List<BranchResponse>());
+    }
+
+    private UsageMeter Meter => new(_store, Entitlement, new OwnerShops(), _messages);
+    private MessageAllowanceService Allowance => new(_store, new SelfHead(), Entitlement, _clock);
+
+    private async Task Send(int count, string tag = "m")
+    {
+        for (var i = 0; i < count; i++) await Meter.Record(_org, "messages", 1, $"{tag}{i}", _clock.GetUtcNow(), default);
+    }
+
+    [Fact]
+    public async Task A_free_plan_has_a_hard_bundle_that_warns_at_eighty_percent_and_runs_out()
+    {
+        await Subscribe("shop_free");   // 50 messages a month
+
+        await Send(39);
+        Assert.Equal((39L, 50L, false, false), Tuple(await Allowance.Check(_org, default)));
+        await Send(1, "x");
+        Assert.Equal((40L, 50L, true, false), Tuple(await Allowance.Check(_org, default)));
+        await Send(10, "y");
+        Assert.Equal((50L, 50L, true, true), Tuple(await Allowance.Check(_org, default)));
+    }
+
+    private static (long, long?, bool, bool) Tuple(MessageAllowance a) => (a.Used, a.Limit, a.Warn, a.Exhausted);
+
+    [Fact]
+    public async Task The_owner_is_told_once_at_eighty_percent_and_once_when_it_runs_out_never_again_that_month()
+    {
+        await Subscribe("shop_free");
+
+        await Send(45);
+        await Send(10, "z");
+
+        Assert.Equal(["bundle.warning", "bundle.exhausted"], _messages.Sent.Where(m => m.TemplateCode.StartsWith("bundle")).Select(m => m.TemplateCode));
+        Assert.Equal("40", _messages.Sent.First(m => m.TemplateCode == "bundle.warning").Values["used"]);
+    }
+
+    [Fact]
+    public async Task A_paid_plan_never_runs_out_because_the_extra_messages_are_billed_instead()
+    {
+        await Subscribe("shop_pro");   // 500 included
+
+        await Send(520);
+
+        var allowance = await Allowance.Check(_org, default);
+        Assert.Equal((520L, 500L, true, false), Tuple(allowance));
+    }
+
+    [Fact]
+    public async Task Next_month_the_bundle_starts_again()
+    {
+        await Subscribe("shop_free");
+        await Send(50);
+        Assert.True((await Allowance.Check(_org, default)).Exhausted);
+
+        _clock.Advance(TimeSpan.FromDays(31));
+
+        Assert.False((await Allowance.Check(_org, default)).Exhausted);
+        Assert.Equal(0, (await Allowance.Check(_org, default)).Used);
+    }
+
+    [Fact]
+    public async Task A_business_with_no_limit_on_its_plan_is_never_exhausted()
+    {
+        var allowance = await new MessageAllowanceService(_store, new SelfHead(), new Plans0(), _clock).Check(_org, default);
+
+        Assert.Equal((false, false), (allowance.Warn, allowance.Exhausted));
+        Assert.Null(allowance.Limit);
+    }
+
+    private sealed class Plans0 : IEntitlements
+    {
+        public Task<bool> Has(Guid o, string audience, string feature, CancellationToken ct) => Task.FromResult(false);
+        public Task<long?> LimitFor(Guid o, string audience, string feature, CancellationToken ct) => Task.FromResult<long?>(null);
     }
 }

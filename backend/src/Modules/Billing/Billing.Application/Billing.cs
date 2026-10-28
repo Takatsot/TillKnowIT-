@@ -33,6 +33,7 @@ public interface IBillingStore
 
     void Add(UsageRecord usage);
     Task<UsageRecord?> UsageByReference(Guid organisationId, string reference, CancellationToken ct);
+    Task<long> UsageTotal(Guid organisationId, string metric, DateTimeOffset from, CancellationToken ct);
     Task<List<UsageRecord>> UnbilledUsage(Guid organisationId, DateTimeOffset before, CancellationToken ct);
     Task<List<Guid>> OrganisationsWithUnbilledPricedUsage(DateTimeOffset before, int take, CancellationToken ct);
 
@@ -305,7 +306,7 @@ internal sealed class SubscriptionHandlers(IBillingStore store, IOrganisationAcc
 
 // ---------------------------------------------------------------- usage and entitlements
 
-public sealed class UsageMeter(IBillingStore store) : IUsageMeter
+public sealed class UsageMeter(IBillingStore store, IEntitlements? entitlements = null, IShopDirectory? shops = null, IMessageQueue? queue = null) : IUsageMeter
 {
     public async Task<Result> Record(Guid organisationId, string metric, long quantity, string reference, DateTimeOffset occurredAt, CancellationToken ct)
     {
@@ -314,7 +315,45 @@ public sealed class UsageMeter(IBillingStore store) : IUsageMeter
         if (!usage.IsSuccess) return Result.Fail(usage.Error!.Code, usage.Error.Message);
         store.Add(usage.Value!);
         await store.Save(ct);
+        if (metric == PlanFeatures.Messages) await WarnIfNearlyUsed(organisationId, quantity, occurredAt, ct);
         return Result.Ok();
+    }
+
+    /// <summary>Tells the owner once when 80% of the month's messages are used, and once when they are all used. The till is never told to stop.</summary>
+    private async Task WarnIfNearlyUsed(Guid organisationId, long added, DateTimeOffset at, CancellationToken ct)
+    {
+        if (entitlements is null || shops is null || queue is null) return;
+        var limit = await entitlements.LimitFor(organisationId, Audience.Shop, PlanFeatures.Messages, ct);
+        if (limit is not > 0) return;
+        var used = await store.UsageTotal(organisationId, PlanFeatures.Messages, MessageAllowanceService.MonthStart(at), ct);
+        var before = used - added;
+        var level = used >= limit ? 100 : used * 100 >= limit * 80 ? 80 : 0;
+        var levelBefore = before >= limit ? 100 : before * 100 >= limit * 80 ? 80 : 0;
+        if (level == 0 || level == levelBefore) return;
+
+        var shop = await shops.Get(organisationId, ct);
+        if (shop?.OwnerPhone is not { Length: > 0 } phone) return;
+        await queue.Queue(new QueueMessageRequest(level == 100 ? "bundle.exhausted" : "bundle.warning", shop.OwnerLanguage, "whatsapp", phone,
+            new() { ["shop"] = shop.Name, ["used"] = used.ToString(), ["limit"] = limit.Value.ToString() }, organisationId, $"bundle{level}:{organisationId:N}:{at:yyyyMM}"), ct);
+    }
+}
+
+public sealed class MessageAllowanceService(IBillingStore store, IBranchDirectory branches, IEntitlements entitlements, TimeProvider clock) : IMessageAllowance
+{
+    public static DateTimeOffset MonthStart(DateTimeOffset at)
+    {
+        var day = BusinessDay.Of(at);
+        return BusinessDay.Start(new DateOnly(day.Year, day.Month, 1));
+    }
+
+    public async Task<MessageAllowance> Check(Guid shopId, CancellationToken ct)
+    {
+        var org = await branches.HeadOf(shopId, ct);
+        var limit = await entitlements.LimitFor(org, Audience.Shop, PlanFeatures.Messages, ct);
+        var used = await store.UsageTotal(org, PlanFeatures.Messages, MonthStart(clock.GetUtcNow()), ct);
+        if (limit is not { } cap) return new(used, null, false, false);
+        var paid = await store.SubscriptionOf(org, ct) is { GivesPaidFeatures: true, PriceCents: > 0 };
+        return new(used, cap, used * 100 >= cap * 80, !paid && used >= cap);
     }
 }
 

@@ -21,6 +21,7 @@ public static partial class BillingModule
         services.AddScoped<Invoicing>();
         services.AddScoped<IEntitlements, Entitlements>();
         services.AddScoped<IUsageMeter, UsageMeter>();
+        services.AddScoped<IMessageAllowance, MessageAllowanceService>();
         services.TryAddSingleton(TimeProvider.System);
         // Plans carry the prices; these are the other numbers (VAT, grace period, reminder days, price of a message above the plan) and come from settings.
         services.TryAddSingleton(sp => sp.GetService<IConfiguration>()?.GetSection("Billing").Get<BillingSettings>() ?? new BillingSettings());
@@ -86,6 +87,8 @@ internal sealed class BillingStore(BillingDbContext db) : IBillingStore
 
     public void Add(UsageRecord usage) => db.Set<UsageRecord>().Add(usage);
     public Task<UsageRecord?> UsageByReference(Guid organisationId, string reference, CancellationToken ct) => db.Set<UsageRecord>().AsNoTracking().FirstOrDefaultAsync(u => u.OrganisationId == organisationId && u.Reference == reference, ct);
+    public async Task<long> UsageTotal(Guid organisationId, string metric, DateTimeOffset from, CancellationToken ct) =>
+        await db.Set<UsageRecord>().AsNoTracking().Where(u => u.OrganisationId == organisationId && u.Metric == metric && u.OccurredAt >= from).SumAsync(u => (long?)u.Quantity, ct) ?? 0;
     public Task<List<UsageRecord>> UnbilledUsage(Guid organisationId, DateTimeOffset before, CancellationToken ct) => db.Set<UsageRecord>().Where(u => u.OrganisationId == organisationId && u.InvoiceId == null && u.OccurredAt < before).ToListAsync(ct);
     public Task<List<Guid>> OrganisationsWithUnbilledPricedUsage(DateTimeOffset before, int take, CancellationToken ct) =>
         db.Set<UsageRecord>().Where(u => u.InvoiceId == null && u.UnitCents != null && u.OccurredAt < before).Select(u => u.OrganisationId).Distinct().Take(take).ToListAsync(ct);

@@ -224,7 +224,7 @@ public sealed record SendAppointmentReminders : ICommand<int>;
 /// a customer who is only a name and a number is never texted. WhatsApp first: if the shop's slip and reminder bundle is used up, the reminder is skipped
 /// and tried again on the next round.
 /// </summary>
-internal sealed class ReminderHandler(IBookingStore store, ICustomerDirectory customers, IMessageQueue queue, TimeProvider clock) : ICommandHandler<SendAppointmentReminders, int>
+internal sealed class ReminderHandler(IBookingStore store, ICustomerDirectory customers, IMessageQueue queue, TimeProvider clock, Billing.Contracts.IMessageAllowance? allowance = null, Billing.Contracts.IUsageMeter? meter = null, Identity.Contracts.IBranchDirectory? branches = null) : ICommandHandler<SendAppointmentReminders, int>
 {
     public static readonly TimeSpan LeadTime = TimeSpan.FromHours(24);
 
@@ -238,11 +238,14 @@ internal sealed class ReminderHandler(IBookingStore store, ICustomerDirectory cu
             var customer = await customers.Get(a.ShopId, customerId, ct);
             if (customer is not { MessageConsent: true }) continue;
 
+            if (allowance is not null && (await allowance.Check(a.ShopId, ct)).Exhausted) continue;   // bundle used up: no reminder goes out, and it is tried again next month's round only if still due
+
             var local = a.StartsAt.ToOffset(BusinessDay.Offset);
             var result = await queue.Queue(new QueueMessageRequest("appointment.reminder", "en", "whatsapp", customer.Phone,
                 new() { ["name"] = customer.Name, ["service"] = a.ServiceName, ["date"] = local.ToString("dddd d MMMM"), ["time"] = local.ToString("HH:mm") }, a.ShopId, $"appointment:{a.Id:N}:reminder"), ct);
             if (!result.IsSuccess) continue;   // for instance a used-up bundle: the next round tries again
 
+            if (meter is not null && branches is not null) await meter.Record(await branches.HeadOf(a.ShopId, ct), Billing.Contracts.PlanFeatures.Messages, 1, $"reminder:{a.Id:N}", now, ct);
             a.NoteReminderSent(now);
             sent++;
         }

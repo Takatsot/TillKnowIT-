@@ -128,6 +128,19 @@ public class SlipTests
 
     private RequestSlipHandler Handler() => new(_store, _access, new FakeShops(), new FakeDestinations(), _options, new FakeTimeProvider(Now));
 
+    private sealed class FakeBundle : Billing.Contracts.IMessageAllowance, Billing.Contracts.IUsageMeter, IBranchDirectory
+    {
+        public bool Exhausted { get; set; }
+        public List<(Guid Org, string Metric, string Reference)> Metered { get; } = [];
+        public Task<Billing.Contracts.MessageAllowance> Check(Guid shopId, CancellationToken ct) => Task.FromResult(new Billing.Contracts.MessageAllowance(50, 50, true, Exhausted));
+        public Task<Result> Record(Guid org, string metric, long quantity, string reference, DateTimeOffset at, CancellationToken ct) { Metered.Add((org, metric, reference)); return Task.FromResult(Result.Ok()); }
+        public Task<Guid> HeadOf(Guid shopId, CancellationToken ct) => Task.FromResult(Head);
+        public Task<List<BranchResponse>> Group(Guid shopId, CancellationToken ct) => Task.FromResult(new List<BranchResponse>());
+        public Guid Head { get; } = Guid.NewGuid();
+    }
+
+    private RequestSlipHandler WithBundle(FakeBundle bundle) => new(_store, _access, new FakeShops(), new FakeDestinations(), _options, new FakeTimeProvider(Now), bundle, bundle, bundle);
+
     private RequestSlip Ask(string channel, string? destination = "0821234567", Guid? shop = null) =>
         new(_sale.SaleId, new RequestSlipRequest(shop ?? _shop, Guid.NewGuid(), Guid.NewGuid(), channel, destination, "zu"));
 
@@ -161,6 +174,32 @@ public class SlipTests
         Assert.Equal("Mama's Spaza", e.Values["shop"]);
         Assert.Equal("R36.00", e.Values["total"]);
         Assert.Equal(result.Value.Url, e.Values["url"]);
+    }
+
+    [Fact]
+    public async Task A_message_slip_is_counted_against_the_businesss_bundle_and_a_qr_slip_is_not()
+    {
+        var bundle = new FakeBundle();
+
+        await WithBundle(bundle).Handle(Ask("qr", null), default);
+        await WithBundle(bundle).Handle(Ask("whatsapp"), default);
+
+        var counted = Assert.Single(bundle.Metered);
+        Assert.Equal((bundle.Head, "messages"), (counted.Org, counted.Metric));   // counted against the head shop's bundle
+    }
+
+    [Fact]
+    public async Task When_the_bundle_is_used_up_the_slip_falls_back_to_a_qr_code_and_nothing_is_sent_or_counted()
+    {
+        var bundle = new FakeBundle { Exhausted = true };
+
+        var result = await WithBundle(bundle).Handle(Ask("whatsapp"), default);
+
+        Assert.Equal("shown", result.Value!.Status);
+        Assert.Contains("QR code", result.Value.Note);
+        Assert.Empty(Assert.Single(_store.Requests).DomainEvents);   // no message was queued
+        Assert.Empty(bundle.Metered);
+        Assert.True((await WithBundle(bundle).Handle(Ask("sms", destination: "123"), default)).IsSuccess);   // a QR slip does not need a valid number
     }
 
     [Fact]

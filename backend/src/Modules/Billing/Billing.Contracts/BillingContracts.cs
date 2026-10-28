@@ -55,3 +55,14 @@ public static class PlanFeatures
     public const string Sponsored = "sponsored";
     public const string SupplierAnalytics = "supplier_analytics";
 }
+
+/// <summary>
+/// B8-3: how much of the shop's message bundle has been used this month. Warn is set from 80% used. Exhausted only happens on a free plan: a paid plan keeps sending and the extra messages are billed.
+/// </summary>
+public sealed record MessageAllowance(long Used, long? Limit, bool Warn, bool Exhausted);
+
+public interface IMessageAllowance
+{
+    /// <summary>For the business behind the shop (a branch uses its head shop's bundle).</summary>
+    Task<MessageAllowance> Check(Guid shopId, CancellationToken ct);
+}

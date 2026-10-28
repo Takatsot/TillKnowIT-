@@ -268,6 +268,26 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = new Guid("4a31e132-4865-7bc9-eabe-ebb510c7e759"),
+                            Body = "{shop}: you have used {used} of your {limit} messages this month. Slips can still be shown as a QR code.",
+                            Channel = "Whatsapp",
+                            Code = "bundle.warning",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("541ec247-dbc4-af63-966f-448139ff8713"),
+                            Body = "{shop}: your {limit} messages for this month are used up. Slips are shown as a QR code until next month, or upgrade your plan.",
+                            Channel = "Whatsapp",
+                            Code = "bundle.exhausted",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("798e0704-8c27-eeff-3c13-37500c751995"),
                             Body = "{shop}: we could not send {day} to your accounting package ({error}). Open the app to fix it and try again.",
                             Channel = "Whatsapp",
