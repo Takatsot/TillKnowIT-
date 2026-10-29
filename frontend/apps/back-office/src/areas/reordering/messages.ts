@@ -138,7 +138,11 @@ const en = {
   sharingSave: "Save sharing",
   sharingSaved: "Sharing was saved.",
   usualHeading: "Usual suppliers",
-  usualHint: "Choose a usual supplier from an offer on the order list: use Make usual supplier. Suppliers you receive an order from become usual automatically.",
+  usualHint: "These are the suppliers you buy from. To add one, use Make usual supplier on an offer in the order list; suppliers you receive an order from are added automatically.",
+  usualLoading: "Loading your usual suppliers.",
+  usualEmpty: "You have no usual suppliers yet.",
+  usualLastOrder: "last order {date}",
+  usualNeverOrdered: "no order yet",
 } as const;
 
 export type ReorderingKey = keyof typeof en;

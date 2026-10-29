@@ -26,6 +26,7 @@ function fake(given: Record<string, unknown>) {
     get: vi.fn(async (path: string) => answer("GET", path)),
     post: vi.fn(async (path: string) => answer("POST", path)),
     put: vi.fn(async (path: string) => answer("PUT", path)),
+    patch: vi.fn(async (path: string) => answer("PATCH", path)),
     upload: vi.fn(async (path: string) => answer("UPLOAD", path)),
   };
 }
@@ -162,6 +163,62 @@ describe("SchoolsWallet", () => {
     await user.click(screen.getByRole("button", { name: "Import holders" }));
 
     expect((await screen.findByRole("alert")).textContent).toBe("The file needs a first name column and a surname column.");
+  });
+
+  it("adds one learner, shows the link code once, and reloads the list", async () => {
+    const api = fake({
+      "GET /admin/schools": ok([school]), "/schools/sc1/holders": ok([]),
+      "POST /schools/sc1/holders": ok({ holder: { id: "h9", schoolId: "sc1", type: "learner", firstName: "Lerato", lastName: "Mokoena", grade: "5", className: "5A", status: "active", walletId: "w9", hasPhoto: false }, linkCode: "WXYZ-9876" }),
+    });
+    mount(api);
+    const user = userEvent.setup();
+    await openSchool(user);
+    await user.click(screen.getByRole("tab", { name: "Holders" }));
+    await screen.findByText("This school has no holders yet.");
+
+    await user.type(screen.getByLabelText("First name"), " Lerato ");
+    await user.type(screen.getByLabelText("Surname"), "Mokoena");
+    await user.type(screen.getByLabelText("Grade"), "5");
+    await user.type(screen.getByLabelText("Class"), "5A");
+    await user.click(screen.getByRole("button", { name: "Add person" }));
+
+    expect(await screen.findByText("WXYZ-9876")).toBeTruthy();
+    expect(screen.getByText(/Lerato Mokoena was added/)).toBeTruthy();
+    expect(api.post).toHaveBeenCalledWith("/schools/sc1/holders", { callerPersonId: "p1", firstName: "Lerato", lastName: "Mokoena", grade: "5", className: "5A", type: "learner" });
+    expect(api.get.mock.calls.filter((c) => c[0] === "/schools/sc1/holders")).toHaveLength(2);
+  });
+
+  it("shows the server refusal when the person is already on the list", async () => {
+    const api = fake({ "GET /admin/schools": ok([school]), "/schools/sc1/holders": ok([]), "POST /schools/sc1/holders": fail("holder.duplicate", "Someone with the same name, grade and class is already on the list.") });
+    mount(api);
+    const user = userEvent.setup();
+    await openSchool(user);
+    await user.click(screen.getByRole("tab", { name: "Holders" }));
+    await user.type(await screen.findByLabelText("First name"), "Thabo");
+    await user.type(screen.getByLabelText("Surname"), "Dlamini");
+    await user.click(screen.getByRole("button", { name: "Add person" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain("already on the list");
+    expect(screen.queryByText(/shown once/)).toBeNull();
+  });
+
+  it("edits one person with PATCH and reloads the list", async () => {
+    const holder = { id: "h1", schoolId: "sc1", type: "learner", firstName: "Thabo", lastName: "Dlamini", grade: "4", className: "4B", status: "active", walletId: "w1", hasPhoto: false };
+    const api = fake({ "GET /admin/schools": ok([school]), "/schools/sc1/holders": ok([holder]), "PATCH /holders/h1": ok({ ...holder, grade: "5" }) });
+    mount(api);
+    const user = userEvent.setup();
+    await openSchool(user);
+    await user.click(screen.getByRole("tab", { name: "Holders" }));
+    await user.click(await screen.findByRole("button", { name: "Edit Thabo Dlamini" }));
+
+    const grade = screen.getAllByLabelText("Grade").at(-1)!;
+    await user.clear(grade);
+    await user.type(grade, "5");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith("/holders/h1", { callerPersonId: "p1", firstName: "Thabo", lastName: "Dlamini", grade: "5", className: "4B" }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull());
+    expect(api.get.mock.calls.filter((c) => c[0] === "/schools/sc1/holders")).toHaveLength(2);
   });
 
   it("saves breaks and adds a menu item", async () => {

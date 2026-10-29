@@ -7,6 +7,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SaleBridge } from "./feature";
 import { MemoryKeyValueStore } from "./localData";
+import { pendingReleases, sendPendingReleases } from "./pendingReleases";
 import { pendingSerials } from "./pendingSerials";
 import { SellScreen } from "./SellScreen";
 import { saveStaff, type StaffRecord } from "./staffStore";
@@ -36,13 +37,14 @@ async function setup(over: Setup = {}) {
   await saveStaff(kv, [staff, ...(over.managers === false ? [] : [{ id: "boss-1", name: "Sipho", role: "manager" as const, pinHash: await hashPin("4321") }])]);
   const outbox = new MemoryOutbox();
   const user = userEvent.setup();
-  render(
+  const screenFor = (online: boolean) => (
     <SellScreen
       staff={staff} language="en" catalogue={[bread, phone]} promotions={[]} barcodeRules={null} outbox={outbox} clock={() => now} features={new Features(pack)}
-      api={over.api as Api | undefined} device={{ shopId: SHOP, deviceId: DEVICE }} online={over.online ?? true} kv={kv} onBridge={over.onBridge} onSerialsQueued={over.onSerialsQueued}
-    />,
+      api={over.api as Api | undefined} device={{ shopId: SHOP, deviceId: DEVICE }} online={online} kv={kv} onBridge={over.onBridge} onSerialsQueued={over.onSerialsQueued}
+    />
   );
-  return { outbox, user, kv };
+  const view = render(screenFor(over.online ?? true));
+  return { outbox, user, kv, rerenderOnline: (online: boolean) => view.rerender(screenFor(online)) };
 }
 
 type User = ReturnType<typeof userEvent.setup>;
@@ -180,7 +182,7 @@ describe("vouchers, points and the wallet in a split payment", () => {
     expect((post.mock.calls[0]![1] as { saleId: string }).saleId).toBe(sale!.id);
   });
 
-  it("uses points as a voucher part with the redemption's reference, after checking what they are worth", async () => {
+  it('uses points as their own points part with the redemption reference, after checking what they are worth', async () => {
     const get = vi.fn(async () => ok({ customerId: "c1", points: 120, valueCents: 1200, minRedeemPoints: 50, recent: [] }));
     const post = vi.fn(async (_path: string, _body?: unknown) => ok({ redemptionReference: "pr-server-1", points: 50, valueCents: 500, balanceAfter: 70 }));
     let bridge: SaleBridge | null = null;
@@ -202,7 +204,7 @@ describe("vouchers, points and the wallet in a split payment", () => {
 
     await waitFor(async () => expect((await queuedSales(outbox)).length).toBe(1));
     const [sale] = await queuedSales(outbox);
-    expect(sale).toMatchObject({ customerId: "c1", payments: [{ methodCode: "voucher", amountCents: 500, reference: "pr-server-1" }, { methodCode: "cash", amountCents: 1300 }] });
+    expect(sale).toMatchObject({ customerId: "c1", payments: [{ methodCode: "points", amountCents: 500, reference: "pr-server-1" }, { methodCode: "cash", amountCents: 1300 }] });
   });
 
   it("will not take points worth more than what is left, nor without a customer, and takes nothing", async () => {
@@ -261,6 +263,126 @@ describe("vouchers, points and the wallet in a split payment", () => {
     expect(screen.getByText("Vouchers, points and wallets need the internet. Connect the till to use them.")).toBeTruthy();
     for (const name of ["Use voucher", "Use points", "Pay from wallet"]) expect((screen.getByRole("button", { name }) as HTMLButtonElement).disabled).toBe(true);
     expect(post).not.toHaveBeenCalled();
+  });
+
+  describe("giving back what was taken when the sale does not go ahead", () => {
+    const voucherOk = { id: "v1", codeLast4: "1234", balanceCents: 500, expiresOn: null, isVoid: false, isExpired: false };
+    const walletOk = { purchaseId: "pur-9", holderId: "h1", holderName: "Sipho", grade: null, className: null, hasPhoto: false, amountCents: 1000, balanceCents: 0, repeated: false };
+    const backTwice = async (user: User) => {
+      await user.click(screen.getByRole("button", { name: "Back" }));
+      await user.click(screen.getByRole("button", { name: "Back" }));
+    };
+
+    async function takeVoucher(user: User) {
+      await user.click(screen.getByRole("button", { name: "Use voucher" }));
+      await user.type(screen.getByRole("textbox", { name: "Voucher code" }), "ABCD-1234");
+      await user.click(screen.getByRole("button", { name: "Take from voucher" }));
+      await screen.findByText(/Taken and locked in/);
+    }
+
+    it("releases the voucher when the cashier leaves the pay step, and says so", async () => {
+      const post = vi.fn(async (_path: string, _body?: unknown) => ok(voucherOk));
+      const { user, kv } = await setup({ flags, api: { post } });
+      await toSplit(user);
+      await takeVoucher(user);
+
+      await backTwice(user);
+
+      expect(await screen.findByText("The voucher amount was given back.")).toBeTruthy();
+      const release = post.mock.calls.find((c) => c[0] === `/shops/${SHOP}/vouchers/release`)!;
+      const redeem = post.mock.calls[0]![1] as { reference: string };
+      expect(release[1]).toEqual({ deviceId: DEVICE, staffId: staff.id, code: "ABCD-1234", reference: redeem.reference });
+      expect(await pendingReleases(kv)).toEqual([]);
+    });
+
+    it("releases the voucher, the wallet payment and the points (with their reference) together, so a voucher and points share a sale", async () => {
+      const get = vi.fn(async () => ok({ customerId: "c1", points: 120, valueCents: 1200, minRedeemPoints: 50, recent: [] }));
+      const post = vi.fn(async (path: string, _body?: unknown) => ok(path.endsWith("/redeem") && path.includes("customers") ? { redemptionReference: "pr-9", points: 50, valueCents: 500, balanceAfter: 70 } : path.includes("wallet") ? walletOk : voucherOk));
+      let bridge: SaleBridge | null = null;
+      const { user } = await setup({ flags, api: { get, post }, onBridge: (b) => { bridge = b ?? bridge; } });
+      await scanBread(user);
+      act(() => bridge!.setCustomer("c1", "Anele"));
+      await user.click(screen.getByRole("button", { name: /^Pay/ }));
+      await user.click(screen.getByRole("button", { name: "Split payment" }));
+      await user.click(screen.getByRole("button", { name: "Use points" }));
+      await user.type(screen.getByRole("textbox", { name: "Points to use" }), "50");
+      await user.click(screen.getByRole("button", { name: "Take points" }));
+      await screen.findByText("Taken and locked in: reference pr-9");
+      await user.click(screen.getByRole("button", { name: "Pay from wallet" }));
+      await user.type(screen.getByRole("textbox", { name: "Wallet QR code or card number" }), "qr");
+      await user.clear(screen.getByRole("textbox", { name: "Amount to take" }));
+      await user.type(screen.getByRole("textbox", { name: "Amount to take" }), "10");
+      await user.click(screen.getByRole("button", { name: "Take from wallet" }));
+      await screen.findByText(/Took R\s?10,00/);
+      await user.click(screen.getByRole("button", { name: "Use voucher" }));
+      await user.type(screen.getByRole("textbox", { name: "Voucher code" }), "ABCD");
+      await user.clear(screen.getByRole("textbox", { name: "Amount to take" }));
+      await user.type(screen.getByRole("textbox", { name: "Amount to take" }), "3");
+      await user.click(screen.getByRole("button", { name: "Take from voucher" }));
+      await waitFor(() => expect(screen.getAllByText(/Taken and locked in/).length).toBe(3));
+
+      await backTwice(user);
+
+      await waitFor(() => expect(post.mock.calls.filter((c) => c[0].includes("release") || c[0].includes("void")).length).toBe(3));
+      expect(post).toHaveBeenCalledWith(`/shops/${SHOP}/customers/c1/points/release`, { deviceId: DEVICE, staffId: staff.id, reference: "pr-9" });
+      expect(post).toHaveBeenCalledWith(`/shops/${SHOP}/wallet-payments/pur-9/void`, { deviceId: DEVICE, staffId: staff.id });
+      expect(post.mock.calls.some((c) => c[0] === `/shops/${SHOP}/vouchers/release`)).toBe(true);
+    });
+
+    it("keeps a note when the till is offline, and gives it back once it is online", async () => {
+      const post = vi.fn(async (_path: string, _body?: unknown) => ok(voucherOk));
+      const { user, kv, outbox, rerenderOnline } = await setup({ flags, api: { post } });
+      await toSplit(user);
+      await takeVoucher(user);
+      rerenderOnline(false);
+
+      await backTwice(user);
+
+      expect(await screen.findByText(/will be given back as soon as the till is online/)).toBeTruthy();
+      expect(post.mock.calls.some((c) => c[0].endsWith("/release"))).toBe(false);
+      expect(await pendingReleases(kv)).toHaveLength(1);
+
+      const caller = { shopId: SHOP, deviceId: DEVICE, staffId: staff.id };
+      const r = await sendPendingReleases({ kv, api: { post } as unknown as Api, outbox, caller });
+      expect(r).toEqual({ given: 1, waiting: 0, failed: [] });
+      expect(await pendingReleases(kv)).toEqual([]);
+    });
+
+    it("keeps the note when the call is lost, and tells the cashier plainly when the server refuses", async () => {
+      let answer: () => unknown = () => fail("network.unreachable", "No connection.");
+      const post = vi.fn(async (path: string, _body?: unknown) => (path.endsWith("/release") ? (answer() as never) : ok(voucherOk)));
+      const { user, kv } = await setup({ flags, api: { post } });
+      await toSplit(user);
+      await takeVoucher(user);
+      await backTwice(user);
+      await screen.findByText(/will be given back as soon as the till is online/);
+      expect(await pendingReleases(kv)).toHaveLength(1);
+
+      answer = () => fail("payment.sale_recorded", "The sale has already reached the server.");
+      await user.click(screen.getByRole("button", { name: /^Pay/ }));
+      await user.click(screen.getByRole("button", { name: "Split payment" }));
+      await takeVoucher(user);
+      await backTwice(user);
+      expect(await screen.findByText(/Could not give back what was taken: The sale has already reached the server\./)).toBeTruthy();
+    });
+
+    it("never releases once the sale is queued, and drops a waiting note whose sale is in the queue", async () => {
+      const post = vi.fn(async (_path: string, _body?: unknown) => ok(voucherOk));
+      const { user, kv, outbox } = await setup({ flags, api: { post } });
+      await toSplit(user);
+      await takeVoucher(user);
+      await user.click(screen.getByRole("button", { name: "Pay" }));
+      await waitFor(async () => expect((await queuedSales(outbox)).length).toBe(1));
+      expect(post.mock.calls.some((c) => c[0].endsWith("/release"))).toBe(false);
+
+      const [sale] = await queuedSales(outbox);
+      await kv.set("releases.pending", [{ kind: "voucher", code: "X", reference: "r", saleId: sale!.id }]);
+      const caller = { shopId: SHOP, deviceId: DEVICE, staffId: staff.id };
+      post.mockClear();
+      expect(await sendPendingReleases({ kv, api: { post } as unknown as Api, outbox, caller })).toEqual({ given: 0, waiting: 0, failed: [] });
+      expect(post).not.toHaveBeenCalled();
+      expect(await pendingReleases(kv)).toEqual([]);
+    });
   });
 
   it("offers each only when the pack has it on", async () => {

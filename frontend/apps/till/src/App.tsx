@@ -12,6 +12,7 @@ import { tillFeatures } from "./features";
 import { IndexedDbOutbox } from "./indexedDbOutbox";
 import { IndexedDbKeyValueStore, type KeyValueStore } from "./localData";
 import { loadPack } from "./packStore";
+import { sendPendingReleases } from "./pendingReleases";
 import { sendPendingSerials } from "./pendingSerials";
 import { PinUnlock } from "./PinUnlock";
 import { RegisterScreen } from "./RegisterScreen";
@@ -141,6 +142,16 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   useEffect(() => {
     if (counts.waiting === 0) void sendSerials();
   }, [counts.waiting, sendSerials, user]);
+
+  // Vouchers, points and wallet payments taken for a sale that was given up are given back as soon as the till is online (a note waits until then).
+  useEffect(() => {
+    const who = user;
+    if (!online || !device || !who) return;
+    void sendPendingReleases({ kv, api, outbox, caller: { shopId: device.shopId, deviceId: device.deviceId, staffId: who.id } }).then((r) => {
+      if (r.failed[0]) setSerialProblem(x("sell.back.refused", { message: r.failed[0].message }));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online, device, kv, api, outbox, user]);
 
   useEffect(() => {
     if (!online) return;

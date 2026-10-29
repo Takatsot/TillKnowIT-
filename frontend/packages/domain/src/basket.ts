@@ -209,8 +209,8 @@ export interface SaleUploadDto {
 export const MAX_PAYMENT_PARTS = 6;
 
 export interface Payment {
-  /** Wallet and voucher can only be a part of a split sale, with the reference of the wallet purchase or the voucher redemption. */
-  method: "cash" | "card" | "qr" | "credit" | "wallet" | "voucher";
+  /** Wallet, voucher and points can only be a part of a split sale, with the reference of the wallet purchase, the voucher redemption or the points redemption. */
+  method: "cash" | "card" | "qr" | "credit" | "wallet" | "voucher" | "points";
   amountCents: Cents;
   /** Cash handed over; the rest is change. */
   tenderedCents?: Cents;
@@ -236,7 +236,7 @@ export function toSaleUpload(basket: Basket, summary: BasketSummary, payments: r
   for (const p of payments) {
     if (!Number.isInteger(p.amountCents) || p.amountCents <= 0) return fail("payment.amount_invalid", "Every payment must be more than zero.");
     if (p.method === "credit" && !p.accountId) return fail("sale.account_required", "A credit sale needs a credit account.");
-    if ((p.method === "wallet" || p.method === "voucher") && !p.reference) return fail("payment.reference_required", `A ${p.method} payment needs its reference.`);
+    if ((p.method === "wallet" || p.method === "voucher" || p.method === "points") && !p.reference) return fail("payment.reference_required", `A ${p.method} payment needs its reference.`);
     if (p.method === "cash") {
       const tendered = p.tenderedCents ?? p.amountCents;
       if (tendered < p.amountCents) return fail("sale.tender_invalid", "Cash tendered and change do not add up.");

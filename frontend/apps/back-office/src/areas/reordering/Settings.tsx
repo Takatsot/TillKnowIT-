@@ -1,13 +1,16 @@
-import { useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
+import { formatDate, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
 import { Button, Card, Inline, Notice, SelectField, Stack } from "@tillknowit/design-system";
 import { useEffect, useState } from "react";
 import { messages } from "./messages";
+
+interface UsualSupplier { supplierId: string; name: string; lastOrderAt: string | null }
 
 export function Settings() {
   const t = useMessages(messages);
   const api = useApi();
   const { shopId, personId } = useSession();
   const sharing = useLoad(() => api.get<{ mode: string }>(`/shops/${shopId}/sharing`, { callerPersonId: personId }), [shopId, personId]);
+  const usualList = useLoad(() => api.get<UsualSupplier[]>(`/shops/${shopId}/usual-suppliers`, { callerPersonId: personId }), [shopId, personId]);
   const [mode, setMode] = useState("off");
   const [saved, setSaved] = useState("");
   useEffect(() => { if (sharing.data) setMode(sharing.data.mode); }, [sharing.data]);
@@ -40,7 +43,17 @@ export function Settings() {
         </form>
       </Card>
       <Card title={t("usualHeading")}>
-        <p>{t("usualHint")}</p>
+        <Stack>
+          <p>{t("usualHint")}</p>
+          {usualList.error && <Notice kind="danger">{usualList.error.message}</Notice>}
+          {usualList.loading ? <p role="status">{t("usualLoading")}</p> : usualList.data && usualList.data.length === 0 ? <p>{t("usualEmpty")}</p> : (
+            <ul aria-label={t("usualHeading")}>
+              {(usualList.data ?? []).map((s) => (
+                <li key={s.supplierId}>{s.name}: {s.lastOrderAt ? t("usualLastOrder", { date: formatDate(s.lastOrderAt) }) : t("usualNeverOrdered")}</li>
+              ))}
+            </ul>
+          )}
+        </Stack>
       </Card>
     </Stack>
   );

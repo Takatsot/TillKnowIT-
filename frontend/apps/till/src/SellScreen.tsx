@@ -16,7 +16,8 @@ import { getPoints, newPointsReference, redeemPoints } from "./features/customer
 import type { Caller } from "./features/till-kit/kit";
 import { newRedemptionReference, redeemVoucher } from "./features/vouchers/voucherApi";
 import { takeWalletPayment, type WalletItem } from "./features/wallet-pay/walletApi";
-import type { KeyValueStore } from "./localData";
+import { MemoryKeyValueStore, type KeyValueStore } from "./localData";
+import { releaseNow, type Release } from "./pendingReleases";
 import { queuePendingSerials } from "./pendingSerials";
 import styles from "./SellScreen.module.css";
 import { loadStaff, type StaffRecord } from "./staffStore";
@@ -54,8 +55,8 @@ interface Props {
 }
 
 type Step = "basket" | "pay" | "cash" | "split" | "credit";
-type SplitMethod = "cash" | "card" | "qr" | "wallet" | "voucher";
-const splitMethods: readonly SplitMethod[] = ["cash", "card", "qr", "wallet", "voucher"];
+type SplitMethod = "cash" | "card" | "qr" | "wallet" | "voucher" | "points";
+const splitMethods: readonly SplitMethod[] = ["cash", "card", "qr", "wallet", "voucher", "points"];
 
 interface SplitPart {
   method: SplitMethod;
@@ -64,6 +65,9 @@ interface SplitPart {
   received: string;
   /** Taken from a voucher, points or a wallet already: the money has left, so the amount and the reference can no longer change. */
   locked?: boolean;
+  /** What is needed to give a locked part back: the voucher code, or the customer whose points were taken. */
+  code?: string;
+  customerId?: string;
 }
 
 type OnlineForm = "voucher" | "points" | "wallet";
@@ -300,11 +304,51 @@ export function SellScreen({
     return problems.join(" ");
   }
 
+  /**
+   * Gives back everything a voucher, points or the wallet took for this sale, because the sale is not going ahead. Online it is done now; otherwise (or if the
+   * connection fails) a note waits on the till and is tried again later. Never called once the sale is in the queue. Returns the plain words to show.
+   */
+  async function giveBack(taken: readonly SplitPart[]): Promise<string> {
+    const saleId = saleIdRef.current;
+    const releases: Array<{ part: SplitPart; release: Release }> = [];
+    for (const p of taken) {
+      if (!p.locked || !saleId) continue;
+      if (p.method === "voucher" && p.code) releases.push({ part: p, release: { kind: "voucher", code: p.code, reference: p.reference, saleId } });
+      else if (p.method === "points" && p.customerId) releases.push({ part: p, release: { kind: "points", customerId: p.customerId, reference: p.reference, saleId } });
+      else if (p.method === "wallet") releases.push({ part: p, release: { kind: "wallet", purchaseId: p.reference, saleId } });
+    }
+    if (releases.length === 0) return "";
+    // The wallet purchase was tied to this sale id; the next attempt starts a new one.
+    if (saleIdRef.current === saleId) saleIdRef.current = null;
+    attemptRefs.current.clear();
+    const store = kv ?? new MemoryKeyValueStore();
+    const words: string[] = [];
+    for (const { part, release } of releases) {
+      const r = await releaseNow({ kv: store, api, caller, online }, release);
+      if (r.outcome === "given_back") words.push(part.method === "wallet" ? x("sell.back.wallet") : part.method === "points" ? x("sell.back.points") : x("sell.back.voucher"));
+      else if (r.outcome === "waiting") words.push(x("sell.back.waiting"));
+      else words.push(x("sell.back.refused", { message: r.message ?? "" }));
+    }
+    return words.join(" ");
+  }
+
+  /** The cashier left the pay step for good: anything taken goes back. */
+  async function dropTaken() {
+    const taken = parts;
+    setParts([]);
+    setOnlineForm(null);
+    const words = await giveBack(taken);
+    if (words) setMessage(words);
+  }
+
   async function finish(payments: Payment[]) {
     const now = clock();
     const saleId = saleIdRef.current ?? newId(now.getTime());
     const sale = toSaleUpload(basket, summary, payments, { saleId, staffId: staff.id }, now);
-    if (!sale.ok) return setMessage(problem(sale.code));
+    if (!sale.ok) {
+      const gave = await giveBack(parts);
+      return setMessage([problem(sale.code), gave].filter(Boolean).join(" "));
+    }
     await queueSale(outbox, sale.value, now);
     saleIdRef.current = null;
     attemptRefs.current.clear();
@@ -391,7 +435,7 @@ export function SellScreen({
         const received = p.received.trim() === "" ? amountCents : parseRandToCents(p.received);
         if (received === null || received < amountCents) return null;
         result.push({ method: "cash", amountCents, tenderedCents: received });
-      } else if (p.method === "wallet" || p.method === "voucher") {
+      } else if (p.method === "wallet" || p.method === "voucher" || p.method === "points") {
         if (p.reference.trim() === "") return null;
         result.push({ method: p.method, amountCents, reference: p.reference.trim() });
       } else result.push({ method: p.method, amountCents });
@@ -402,6 +446,7 @@ export function SellScreen({
 
   function startSplit() {
     setMessage("");
+    void dropTaken();
     setParts([{ method: "cash", amount: "", reference: "", received: "" }]);
     setStep("split");
   }
@@ -462,14 +507,14 @@ export function SellScreen({
   const isBlank = (p: SplitPart) => !p.locked && p.amount.trim() === "" && p.reference.trim() === "" && p.received.trim() === "";
 
   /** Why a voucher or wallet part cannot be added now, or null. A blank part and an unfinished one of the same method make room. */
-  function partBlock(method: "voucher" | "wallet"): string | null {
-    if (parts.some((p) => p.locked && p.method === method)) return method === "voucher" ? x("sell.voucherOnce") : x("sell.walletOnce");
+  function partBlock(method: "voucher" | "points" | "wallet"): string | null {
+    if (parts.some((p) => p.locked && p.method === method)) return method === "voucher" ? x("sell.voucherOnce") : method === "points" ? x("sell.pointsOnce") : x("sell.walletOnce");
     const kept = parts.filter((p) => p.locked || !(isBlank(p) || p.method === method));
     return kept.length >= MAX_PAYMENT_PARTS ? x("sell.splitMax", { count: MAX_PAYMENT_PARTS }) : null;
   }
 
-  function takePart(method: "voucher" | "wallet", cents: number, reference: string) {
-    const part: SplitPart = { method, amount: (cents / 100).toFixed(2), reference, received: "", locked: true };
+  function takePart(method: "voucher" | "points" | "wallet", cents: number, reference: string, extra: { code?: string; customerId?: string } = {}) {
+    const part: SplitPart = { method, amount: (cents / 100).toFixed(2), reference, received: "", locked: true, ...extra };
     setParts((current) => [...current.filter((p) => p.locked || !(isBlank(p) || p.method === method)), part]);
     setOnlineForm(null);
     setOnlineAmount("");
@@ -502,18 +547,18 @@ export function SellScreen({
     attemptRefs.current.delete(key);
     setVoucherCode("");
     setMessage("");
-    takePart("voucher", cents, r.value.reference);
+    takePart("voucher", cents, r.value.reference, { code });
   }
 
   async function takePoints() {
     if (!api || !caller || onlineBusy) return;
     if (!basket.customerId) return setMessage(x("sell.pointsNeedCustomer"));
-    const blocked = partBlock("voucher");
+    const blocked = partBlock("points");
     if (blocked) return setMessage(blocked);
     const n = Number(pointsText);
     if (!Number.isInteger(n) || n <= 0) return setMessage(x("sell.pointsInvalid"));
     setOnlineBusy(true);
-    // Points cannot be put back, so check what they are worth before taking them: a redemption bigger than what is left would leave the sale unable to balance.
+    // Check what they are worth before taking them: a redemption bigger than what is left would leave the sale unable to balance.
     const info = await getPoints(api, caller, basket.customerId);
     if (!info.ok) {
       setOnlineBusy(false);
@@ -535,8 +580,8 @@ export function SellScreen({
     attemptRefs.current.delete(key);
     setPointsText("");
     setMessage("");
-    // Points are paid as a "voucher" part with the redemption's reference (see toSaleUpload).
-    takePart("voucher", r.value.valueCents, r.value.redemptionReference);
+    // Points are their own payment method, with the redemption's reference (see toSaleUpload).
+    takePart("points", r.value.valueCents, r.value.redemptionReference, { customerId: basket.customerId });
   }
 
   /** The sale's lines as the wallet wants them, to check what the child may buy. Weighed and labelled lines go in as one item at their price. */
@@ -626,7 +671,7 @@ export function SellScreen({
             <label className={styles.label}>
               {x("sell.splitMethod", { n: i + 1 })}
               <select className={styles.select} value={p.method} disabled={p.locked} onChange={(e) => changePart(i, { method: e.target.value as SplitMethod })}>
-                {splitMethods.filter((m) => m === p.method || !parts.some((o) => o.method === m)).map((m) => <option key={m} value={m}>{m === "cash" ? t("sell.cash") : m === "card" ? t("sell.card") : m === "qr" ? t("sell.qr") : m === "wallet" ? x("sell.wallet") : x("sell.voucher")}</option>)}
+                {splitMethods.filter((m) => m === p.method || !parts.some((o) => o.method === m)).map((m) => <option key={m} value={m}>{m === "cash" ? t("sell.cash") : m === "card" ? t("sell.card") : m === "qr" ? t("sell.qr") : m === "wallet" ? x("sell.wallet") : m === "points" ? x("sell.points") : x("sell.voucher")}</option>)}
               </select>
             </label>
             <label className={styles.label}>
@@ -639,7 +684,7 @@ export function SellScreen({
                 <input className={styles.input} inputMode="decimal" value={p.received} onChange={(e) => changePart(i, { received: e.target.value })} />
               </label>
             )}
-            {(p.method === "wallet" || p.method === "voucher") && (
+            {(p.method === "wallet" || p.method === "voucher" || p.method === "points") && (
               <label className={styles.label}>
                 {x("sell.splitRef", { n: i + 1 })}
                 <input className={styles.input} value={p.reference} readOnly={p.locked} onChange={(e) => changePart(i, { reference: e.target.value })} />
@@ -730,7 +775,7 @@ export function SellScreen({
           </>
         )}
         <p className={styles.message} role="status">{message}</p>
-        <Button variant="quiet" onClick={() => setStep("basket")}>{t("sell.back")}</Button>
+        <Button variant="quiet" onClick={() => { setStep("basket"); void dropTaken(); }}>{t("sell.back")}</Button>
       </section>
     );
   }
@@ -859,7 +904,7 @@ export function SellScreen({
       </dl>
 
       <div className={styles.row}>
-        <Button variant="quiet" disabled={basket.entries.length === 0} onClick={() => { setBasket(emptyBasket); setMessage(""); setCustomerName(""); setPriceFor(null); saleIdRef.current = null; }}>{t("sell.cancelSale")}</Button>
+        <Button variant="quiet" disabled={basket.entries.length === 0} onClick={() => { const taken = parts; setBasket(emptyBasket); setMessage(""); setCustomerName(""); setPriceFor(null); setParts([]); setOnlineForm(null); void giveBack(taken).then((w) => { if (w) setMessage(w); }); saleIdRef.current = null; }}>{t("sell.cancelSale")}</Button>
         <Button disabled={basket.entries.length === 0} onClick={startPay}>{t("sell.pay")} {rand(summary.dueCents)}</Button>
       </div>
     </section>

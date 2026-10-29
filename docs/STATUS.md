@@ -160,13 +160,16 @@ Six apps, each built from small areas that follow `frontend/SCREENS.md`. All tal
 
 Gaps fixed since the first screens: the server now lists a shop's staff, devices and products, finds a supplier from its organisation, lists schools, wallet reconciliations and a child's cards, shows the accounting connection and finance partners, and has a `school_wallet` pack flag and the shop name in the pack; the back office picks a real till and staff id instead of stand-ins; uploads use the shared client; parents no longer see admin-only actions; the till has price override with a manager PIN, online refunds of split/wallet/voucher/lay-by sales, voucher/points/wallet payments in the sell screen, serial numbers after a sale, and a quote/customer bridge into the sale.
 
+Closed since: sign-in now exists (SMS one-time code, a signed session of 12 hours, every request that names an acting person must carry that person's token; the apps sign in through one shared screen and pick the organisation from the person's memberships). **Switch `Auth:Required` on in staging and production**, and set `Auth:TokenKey`; the till's own calls (device and staff ids, no person) are still trusted by device id and need a device credential later. A voucher, points or wallet payment taken for a sale the cashier then abandons is given back (and retried when the till is offline); points are their own payment method, so a voucher and points can share a sale. The back office lists a shop's usual suppliers; the admin can add and edit single learners.
+
 Still open:
-- Sign-in does not exist: every app uses a typed-in person id (`packages/app-kit/src/session.tsx`).
-- No server route lists a shop's suppliers, a school's single holders, or a child's cards with friendly names; card types show by position.
-- A voucher, points or wallet payment taken in the sell screen cannot be undone if the cashier then abandons the sale (no server route to reverse it). Voucher and points cannot both be used on one sale.
+- The till's server calls are trusted by device and staff id only: a device credential (signed device token) is still to build.
+- Only the SMS code is real sign-in; the SMS provider is a development fake until a real one is connected.
+- No server route removes a usual supplier; card types show by position.
 - Quote "Add to sale" does not mark the quote converted; tables/tickets cannot be loaded into the main sale (the server closes tickets itself).
-- The Xero/Sage sign-in is a pasted code, not a real OAuth flow.
-- Test timeouts were raised because the first render in each file is slow on this machine.
+- The Xero/Sage sign-in is a pasted code, not a real OAuth flow, and the real Xero and Sage adapters are not written.
+- A payment part still on screen when the till is closed is not given back until the cashier returns to it.
+- Test timeouts were raised because the first render in each file is slow on this machine; one till PIN test is timing-sensitive under load.
 
 ## Hand-over list
 
@@ -176,7 +179,7 @@ Everything below needs a person, an account, a partner or a decision. None of it
 
 1. Start Docker and run the API and Worker against SQL Server: confirms migrations apply, seed loads, the outbox claim query works, cascade paths are accepted, and the check constraint on the insight aggregates is accepted. Nothing has ever run against a real database.
 2. Run the PowerSync-on-SQL-Server spike from ADR 0001 before building the local database and selling screen. Stock transfers and sale uploads are online or upload-batch only until this is decided.
-3. Decide OTP sign-in (Entra External ID) so endpoint authentication can replace the `TODO(auth)` marks. Today every endpoint trusts the person id it is given.
+3. Sign-in is built (SMS code). Turn on `Auth:Required` and set `Auth:TokenKey` in every non-development environment, connect a real SMS provider, and decide how tills prove they are the registered device.
 
 **Partners and accounts (all connected only to development fakes today)**
 

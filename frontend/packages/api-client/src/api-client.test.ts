@@ -76,4 +76,21 @@ describe("createApi", () => {
     expect(init.body).toBe(data);
     expect(init.headers).toBeUndefined();
   });
+
+  it("adds the bearer token to json, upload and download requests when there is one", async () => {
+    let token: string | null = "abc";
+    const fetcher = vi.fn(async () => new Response("{}", { status: 200 }));
+    const api = createApi({ fetcher: fetcher as unknown as typeof fetch, getToken: () => token });
+
+    await api.get("/x");
+    await api.post("/x", { a: 1 });
+    await api.upload("/x", new FormData());
+    await api.download("/x");
+    for (const c of fetcher.mock.calls) expect((c as unknown as [string, RequestInit])[1].headers).toMatchObject({ Authorization: "Bearer abc" });
+    expect((fetcher.mock.calls[1] as unknown as [string, RequestInit])[1].headers).toMatchObject({ "Content-Type": "application/json" });
+
+    token = null;
+    await api.get("/y");
+    expect((fetcher.mock.calls[4] as unknown as [string, RequestInit])[1].headers).toBeUndefined();
+  });
 });

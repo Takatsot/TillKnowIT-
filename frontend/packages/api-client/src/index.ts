@@ -9,6 +9,8 @@ export type Query = Record<string, string | number | boolean | Date | null | und
 export interface ApiOptions {
   baseUrl?: string;
   fetcher?: typeof fetch;
+  /** The signed-in person's access token, read on every request. When it returns a token, `Authorization: Bearer <token>` is added. */
+  getToken?: () => string | null | undefined;
 }
 
 export interface Download {
@@ -47,15 +49,22 @@ async function problem(response: Response): Promise<{ code: string; message: str
   }
 }
 
+const headersOrUndefined = (h: Record<string, string>) => (Object.keys(h).length === 0 ? undefined : h);
+
 export function createApi(options: ApiOptions = {}): Api {
   const base = (options.baseUrl ?? "/api/v1").replace(/\/$/, "");
   const fetcher = options.fetcher ?? ((...args: Parameters<typeof fetch>) => fetch(...args));
+
+  function authHeaders(): Record<string, string> {
+    const token = options.getToken?.();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
 
   async function send(method: string, path: string, query?: Query, body?: unknown): Promise<Response | null> {
     try {
       return await fetcher(`${base}${path}${queryString(query)}`, {
         method,
-        headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+        headers: body === undefined ? headersOrUndefined(authHeaders()) : { "Content-Type": "application/json", ...authHeaders() },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
     } catch {
@@ -66,7 +75,7 @@ export function createApi(options: ApiOptions = {}): Api {
   async function form<T>(path: string, data: FormData, query?: Query): Promise<Result<T>> {
     let response: Response;
     try {
-      response = await fetcher(`${base}${path}${queryString(query)}`, { method: "POST", body: data });
+      response = await fetcher(`${base}${path}${queryString(query)}`, { method: "POST", body: data, headers: headersOrUndefined(authHeaders()) });
     } catch {
       return fail("network.unreachable", "We cannot reach the server. Check the connection and try again.");
     }

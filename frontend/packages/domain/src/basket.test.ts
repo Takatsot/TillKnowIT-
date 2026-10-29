@@ -157,6 +157,17 @@ describe("making the sale record", () => {
   it("makes a sale paid by wallet or voucher a split sale of one part and asks for its reference", () => {
     expect(must(pay([{ method: "wallet", amountCents: 5_799, reference: "w-1" }])).paymentMethodCode).toBe("split");
     expect(pay([{ method: "voucher", amountCents: 5_799 }])).toMatchObject({ ok: false, code: "payment.reference_required" });
+    expect(pay([{ method: "points", amountCents: 5_799 }])).toMatchObject({ ok: false, code: "payment.reference_required" });
+  });
+
+  it("sends points as their own method so a voucher and points can be on the same sale", () => {
+    const sale = must(pay([{ method: "voucher", amountCents: 2_000, reference: "vr-1" }, { method: "points", amountCents: 1_000, reference: "pr-1" }, { method: "card", amountCents: 2_799 }]));
+    expect(sale.paymentMethodCode).toBe("split");
+    expect(sale.payments).toEqual([
+      { methodCode: "voucher", amountCents: 2_000, reference: "vr-1", tenderedCents: null },
+      { methodCode: "points", amountCents: 1_000, reference: "pr-1", tenderedCents: null },
+      { methodCode: "card", amountCents: 2_799, reference: null, tenderedCents: null },
+    ]);
   });
 
   it("refuses payments that do not add up or break the rules the server enforces", () => {

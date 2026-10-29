@@ -27,6 +27,11 @@ export interface Holder {
   hasPhoto: boolean;
 }
 
+export interface HolderWithCode {
+  holder: Holder;
+  linkCode: string;
+}
+
 export interface ImportResult {
   created: number;
   duplicates: number;

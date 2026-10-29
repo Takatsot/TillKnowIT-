@@ -166,12 +166,12 @@ describe("split payments", () => {
   it("never offers the same method twice, and cannot add a part when every method is used", async () => {
     const { user } = setup({ flags: ["split_payments"] });
     await toSplit(user);
-    for (let i = 0; i < 4; i++) await user.click(screen.getByRole("button", { name: "Add a part" }));
+    for (let i = 0; i < 5; i++) await user.click(screen.getByRole("button", { name: "Add a part" }));
 
-    expect(screen.getAllByRole("combobox").length).toBe(5);
+    expect(screen.getAllByRole("combobox").length).toBe(6);
     expect((screen.getByRole("button", { name: "Add a part" }) as HTMLButtonElement).disabled).toBe(true);
     const methods = screen.getAllByRole("combobox").map((s) => (s as HTMLSelectElement).value);
-    expect(new Set(methods).size).toBe(5);
+    expect(new Set(methods).size).toBe(6);
     expect(screen.queryByRole("option", { name: "Credit" })).toBeNull();   // credit is never part of a split
   });
 

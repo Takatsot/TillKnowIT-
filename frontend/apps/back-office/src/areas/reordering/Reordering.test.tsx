@@ -33,6 +33,7 @@ function routes(overrides: Record<string, unknown> = {}) {
     if (path === "/shops/s1/purchase-orders") return ok([order]);
     if (path === "/shops/s1/group-deals") return ok([deal]);
     if (path === "/shops/s1/sharing") return ok({ mode: "usual" });
+    if (path === "/shops/s1/usual-suppliers") return ok([{ supplierId: "sup1", name: "Cash and Carry", lastOrderAt: "2026-10-20T08:00:00Z" }, { supplierId: "sup2", name: "Mill Co", lastOrderAt: null }]);
     return fail("test.unexpected", path);
   });
 }
@@ -142,5 +143,30 @@ describe("Reordering", () => {
 
     await waitFor(() => expect(screen.getByText("Sharing was saved.")).toBeTruthy());
     expect(put).toHaveBeenCalledWith("/shops/s1/sharing", { callerPersonId: "p1", mode: "all" });
+  });
+
+  it("lists the usual suppliers with their last order, from the server", async () => {
+    const get = routes();
+    mount({ get: get as never });
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole("button", { name: "Suppliers and sharing" }));
+
+    const list = await screen.findByRole("list", { name: "Usual suppliers" });
+    expect(list.textContent).toContain("Cash and Carry: last order");
+    expect(list.textContent).toContain("Mill Co: no order yet");
+    expect(get).toHaveBeenCalledWith("/shops/s1/usual-suppliers", { callerPersonId: "p1" });
+  });
+
+  it("says so when there are no usual suppliers, and shows the server's refusal", async () => {
+    mount({ get: routes({ "/shops/s1/usual-suppliers": ok([]) }) as never });
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Suppliers and sharing" }));
+    expect(await screen.findByText("You have no usual suppliers yet.")).toBeTruthy();
+    cleanup();
+
+    mount({ get: routes({ "/shops/s1/usual-suppliers": fail("permission.denied", "You do not have access to this shop.") }) as never });
+    await userEvent.setup().click(await screen.findByRole("button", { name: "Suppliers and sharing" }));
+    expect(await screen.findByText("You do not have access to this shop.")).toBeTruthy();
   });
 });

@@ -1,6 +1,7 @@
 import { saveFile, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
 import { Badge, Button, Card, Notice, Stack, Table } from "@tillknowit/design-system";
 import { useState } from "react";
+import { AddHolderCard, EditHolderCard } from "./HolderForms";
 import { messages } from "./messages";
 import type { Holder, HolderUploader, ImportResult, School } from "./types";
 
@@ -15,6 +16,7 @@ export function HoldersTab({ school, upload }: { school: School; upload: HolderU
   const [result, setResult] = useState<ImportResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<Holder | null>(null);
 
   async function send() {
     if (!file) return;
@@ -40,6 +42,8 @@ export function HoldersTab({ school, upload }: { school: School; upload: HolderU
 
   return (
     <Stack>
+      <AddHolderCard school={school} onAdded={list.reload} />
+      {editing && <EditHolderCard key={editing.id} holder={editing} onCancel={() => setEditing(null)} onSaved={() => { setEditing(null); list.reload(); }} />}
       <Card title={t("importHeading")}>
         <form onSubmit={(e) => { e.preventDefault(); void send(); }}>
           <Stack>
@@ -99,6 +103,7 @@ export function HoldersTab({ school, upload }: { school: School; upload: HolderU
               { header: t("colGrade"), cell: (h) => h.grade ?? "" },
               { header: t("colClass"), cell: (h) => h.className ?? "" },
               { header: t("colStatus"), cell: (h) => <Badge>{h.status}</Badge> },
+              { header: t("colActions"), cell: (h) => <Button variant="quiet" aria-label={t("editHolderFor", { name: `${h.firstName} ${h.lastName}` })} onClick={() => setEditing(h)}>{t("editHolder")}</Button> },
             ]}
           />
         )}
