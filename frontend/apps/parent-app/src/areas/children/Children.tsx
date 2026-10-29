@@ -3,10 +3,9 @@ import { Badge, Button, Card, CheckField, Notice, Stack, TextField } from "@till
 import { useState } from "react";
 import { bigStyle, itemStyle, listStyle, mutedStyle } from "../../shared/ChildScope";
 import type { Child } from "../../shared/types";
-import { uploadPhoto, type PhotoUploader } from "../../shared/upload";
 import { CONSENT_VERSION, messages } from "./messages";
 
-export function Children({ upload = uploadPhoto }: { upload?: PhotoUploader }) {
+export function Children() {
   const t = useMessages(messages);
   const api = useApi();
   const { personId } = useSession();
@@ -14,7 +13,6 @@ export function Children({ upload = uploadPhoto }: { upload?: PhotoUploader }) {
   const [code, setCode] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [added, setAdded] = useState("");
-  const [editing, setEditing] = useState("");
 
   const link = useAction(() => api.post<Child>("/guardianships", { parentPersonId: personId, linkCode: code.trim(), consent: agreed, consentVersion: CONSENT_VERSION }));
 
@@ -50,14 +48,13 @@ export function Children({ upload = uploadPhoto }: { upload?: PhotoUploader }) {
                 <p style={bigStyle}>{formatRand(c.balanceCents)}</p>
                 <span>{c.dailyLimitCents === null ? t("noLimit") : `${t("dailyLimit")}: ${formatRand(c.dailyLimitCents)}`}</span>
                 {c.walletStatus !== "active" && <Badge>{t("frozen")}</Badge>}
-                <Button variant="secondary" onClick={() => setEditing(editing === c.holderId ? "" : c.holderId)} aria-expanded={editing === c.holderId}>
-                  {editing === c.holderId ? t("close") : t("edit")}
-                </Button>
-                {editing === c.holderId && <Editor child={c} upload={upload} onDone={list.reload} />}
               </li>
             ))}
           </ul>
         )}
+      </Card>
+      <Card title={t("schoolDoesHeading")}>
+        <p style={mutedStyle}>{t("schoolDoes")}</p>
       </Card>
       <Card title={t("add")}>
         <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
@@ -71,46 +68,6 @@ export function Children({ upload = uploadPhoto }: { upload?: PhotoUploader }) {
           </Stack>
         </form>
       </Card>
-    </Stack>
-  );
-}
-
-function Editor({ child, upload, onDone }: { child: Child; upload: PhotoUploader; onDone: () => void }) {
-  const t = useMessages(messages);
-  const api = useApi();
-  const { personId } = useSession();
-  const [form, setForm] = useState({ firstName: "", lastName: "", grade: "", className: "" });
-  const [file, setFile] = useState<File | null>(null);
-  const [note, setNote] = useState("");
-
-  const blank = (v: string) => (v.trim() === "" ? null : v.trim());
-  const save = useAction(() => api.patch(`/holders/${child.holderId}`, {
-    callerPersonId: personId, firstName: blank(form.firstName), lastName: blank(form.lastName), grade: blank(form.grade), className: blank(form.className),
-  }));
-  const send = useAction(async () => (file ? upload(child.holderId, personId, file) : { ok: false as const, code: "photo.none", message: t("photoNone") }));
-
-  return (
-    <Stack>
-      <form onSubmit={(e) => { e.preventDefault(); setNote(""); void save.run().then((r) => { if (r.ok) { setNote(t("saved")); onDone(); } }); }}>
-        <Stack>
-          <strong>{t("details")}</strong>
-          <p style={mutedStyle}>{t("detailsHelp")}</p>
-          <TextField label={t("firstName")} value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
-          <TextField label={t("lastName")} value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
-          <TextField label={t("grade")} value={form.grade} onChange={(e) => setForm({ ...form, grade: e.target.value })} />
-          <TextField label={t("className")} value={form.className} onChange={(e) => setForm({ ...form, className: e.target.value })} />
-          {save.error && <Notice kind="danger">{save.error.message}</Notice>}
-          <Button type="submit" disabled={save.busy}>{t("save")}</Button>
-        </Stack>
-      </form>
-      <form onSubmit={(e) => { e.preventDefault(); setNote(""); void send.run().then((r) => { if (r.ok) { setNote(t("photoSaved")); onDone(); } }); }}>
-        <Stack>
-          <TextField label={t("photo")} hint={t("photoHelp")} type="file" accept="image/jpeg,image/png" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-          {send.error && <Notice kind="danger">{send.error.message}</Notice>}
-          <Button type="submit" disabled={send.busy}>{t("photoSave")}</Button>
-        </Stack>
-      </form>
-      {note && <Notice kind="success">{note}</Notice>}
     </Stack>
   );
 }

@@ -23,6 +23,7 @@ export interface Pack {
 export const featureFlags = [
   "split_payments", "refunds", "open_tickets", "tables", "kitchen", "tips", "variants", "modifiers", "promotions", "weight", "price_embedded_barcodes",
   "appointments", "commission", "quotes", "layby", "serial_numbers", "customers", "loyalty", "vouchers", "printer", "cash_drawer", "scale", "message_bundles",
+  "school_wallet",
 ] as const;
 
 interface Draft {
@@ -135,7 +136,8 @@ export function Packs() {
                 <Stack>
                   {featureFlags.map((f) => (
                     <div key={f}>
-                      <CheckField label={f} checked={Boolean(draft.on[f])} onChange={(e) => change({ on: { ...draft.on, [f]: e.target.checked } })} />
+                      <CheckField label={f === "school_wallet" ? t("schoolWalletLabel") : f} checked={Boolean(draft.on[f])} onChange={(e) => change({ on: { ...draft.on, [f]: e.target.checked } })} />
+                      {f === "school_wallet" && <p>{t("schoolWalletHint")}</p>}
                       {draft.on[f] && (
                         <TextAreaField
                           label={t("settingsFor", { flag: f })}

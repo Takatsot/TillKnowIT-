@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fail, ok } from "@tillknowit/domain";
 import type { Api } from "@tillknowit/api-client";
+import { withCaller } from "../selling-common/testing";
 import { SessionProvider, type Session } from "@tillknowit/app-kit";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -12,15 +13,15 @@ vi.setConfig({ testTimeout: 30_000 });
 afterEach(cleanup);
 
 const session: Session = { personId: "p1", shopId: "s1", supplierOrganisationId: "", deviceId: "d1", language: "en" };
-const stock = [{ productId: "milk", name: "Milk" }, { productId: "ketchup", name: "Ketchup" }];
+const stock = [{ id: "milk", name: "Milk", barcode: null, categoryCode: "dairy", costCents: 1000, priceCents: 1500, isActive: true }, { id: "ketchup", name: "Ketchup", barcode: null, categoryCode: "sauces", costCents: 1000, priceCents: 1500, isActive: true }];
 const group = { id: "g1", name: "Sauces", required: false, min: 0, max: 2, options: [{ productId: "ketchup", name: "Ketchup", priceCents: 500 }] };
 
 function mount(api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}><ModifiersAndFloor /></SessionProvider>);
+  render(<SessionProvider api={withCaller(api)} initial={session}><ModifiersAndFloor /></SessionProvider>);
 }
 
 type Handler = (path: string, query?: unknown) => unknown;
-const get = (h: Handler) => vi.fn(async (path: string, query?: unknown) => (path.endsWith("/stock") ? ok(stock) : h(path, query))) as never;
+const get = (h: Handler) => vi.fn(async (path: string, query?: unknown) => (path === "/shops/s1/products" ? ok(stock) : h(path, query))) as never;
 
 describe("Modifiers and floor", () => {
   it("lists modifier groups, and says when there are none", async () => {

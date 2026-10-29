@@ -33,28 +33,11 @@ describe("Requests", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("A refund is for when your child leaves the school.");
   });
 
-  it("marks a child as left only after confirming, and shows the server's refusal", async () => {
-    const post = vi.fn(async () => fail("permission.denied", "You do not have access to this school."));
-    mount(<Requests />, { ...children, post: post as never });
-    const user = userEvent.setup({ delay: null });
+  it("has no mark-as-left button and tells the parent to ask the school", async () => {
+    mount(<Requests />, { ...children });
 
-    await user.click(await screen.findByRole("button", { name: "My child has left" }));
-    expect(post).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Yes, they have left" }));
-
-    expect((await screen.findByRole("alert")).textContent).toBe("You do not have access to this school.");
-    expect(post).toHaveBeenCalledWith("/holders/h1/left", undefined, { callerPersonId: "p1" });
-  });
-
-  it("marks a child as left", async () => {
-    const post = vi.fn(async () => ok(undefined));
-    mount(<Requests />, { ...children, post: post as never });
-    const user = userEvent.setup({ delay: null });
-
-    await user.click(await screen.findByRole("button", { name: "My child has left" }));
-    await user.click(screen.getByRole("button", { name: "Yes, they have left" }));
-
-    await waitFor(() => expect(screen.getByText("Thandi Dlamini is marked as having left.", { exact: false })).toBeTruthy());
+    expect(await screen.findByText(/Only the school can mark your child as having left/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "My child has left" })).toBeNull();
   });
 
   it("explains the erasure request, asks to confirm and says when it will be done", async () => {

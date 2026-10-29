@@ -156,7 +156,6 @@ function Calendar({ caller, services }: { caller: TillCaller; services: readonly
     <Stack>
       <Card title={t("calendarHeading", { day })}>
         <Stack>
-          <p>{t("standInNote")}</p>
           <TextField label={t("dayLabel")} type="date" value={day} onChange={(e) => { setNote(""); setDay(e.target.value); }} />
           {list.error && <Notice kind="danger">{list.error.message}</Notice>}
           {act.error && <Notice kind="danger">{act.error.message}</Notice>}
@@ -205,7 +204,8 @@ function BookForm({ caller, day, services, onBooked }: { caller: TillCaller; day
   const api = useApi();
   const { shopId } = useSession();
   const [serviceId, setServiceId] = useState("");
-  const [provider, setProvider] = useState(caller.staffId);
+  const [providerPick, setProvider] = useState<string | null>(null);
+  const provider = providerPick ?? caller.staffId;
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState("");
   const [time, setTime] = useState("09:00");

@@ -8,8 +8,8 @@ const pack = (flags: Array<string | [string, string]>, version = 3): ShopPack =>
 
 describe("features", () => {
   it("knows the flags the server knows", () => {
-    expect(featureFlags).toHaveLength(23);
-    expect(new Set(featureFlags).size).toBe(23);
+    expect(featureFlags).toHaveLength(24);
+    expect(new Set(featureFlags).size).toBe(24);
   });
 
   it("is on only for the features in the pack, and the default pack has none", () => {

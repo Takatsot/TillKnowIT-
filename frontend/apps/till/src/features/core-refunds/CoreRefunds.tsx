@@ -1,9 +1,9 @@
-import { Badge, Button, Notice, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { cancellationRecord, creditCancelRecord, formatRand, newId, queueBuilt, refundRecord } from "@tillknowit/domain";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ManagerApproval, useBusy, useT, wholeNumber, type Translate } from "../../coreKit";
 import type { TillContext } from "../../feature";
-import { recentSales, refundAmount, refundableQuantity, type LoggedSale } from "../../ledger";
+import { addRefunded, logCash, recentSales, refundAmount, refundableQuantity, type LoggedSale } from "../../ledger";
 import { messages, type RefundsKey } from "./messages";
 
 /** What the shop sets as the refund a cashier cannot approve alone, when its pack does not say: R500, like the server. */
@@ -140,7 +140,7 @@ function SaleDetail({ ctx, t, sale, onDone }: { ctx: TillContext; t: Translate<R
       {sale.cancelled ? <Notice kind="info">{t("cancelled")}</Notice> : (
         <>
           <h3>{t("refund.heading")}</h3>
-          {!refundsOn ? <p>{t("refund.off")}</p> : !refundable(sale.paymentMethodCode) ? <Notice kind="warning">{t("refund.online")}</Notice> : !anythingLeft ? <p>{t("refund.nothingLeft")}</p> : asking ? (
+          {!refundsOn ? <p>{t("refund.off")}</p> : !refundable(sale.paymentMethodCode) ? <OnlineRefund ctx={ctx} t={t} sale={sale} threshold={threshold} onDone={onDone} /> : !anythingLeft ? <p>{t("refund.nothingLeft")}</p> : asking ? (
             <Stack>
               <p>{t("refund.needsManager", { amount: formatRand(threshold) })}</p>
               <ManagerApproval
@@ -180,6 +180,105 @@ function SaleDetail({ ctx, t, sale, onDone }: { ctx: TillContext; t: Translate<R
             </>
           )}
         </>
+      )}
+      {message && <Notice kind="danger">{message}</Notice>}
+    </Stack>
+  );
+}
+
+/** What the server's online refund answers (OnlineRefundResponse in ShopCore.Contracts). The voucher code is shown once. */
+interface OnlineRefundAnswer {
+  refundId: string;
+  amountCents: number;
+  methodCode: string;
+  voucher: { id: string; code: string; balanceCents: number; expiresOn: string | null } | null;
+}
+
+const onlineMethods = ["voucher", "cash", "card", "qr"] as const;
+
+/**
+ * A split, wallet, voucher or lay-by sale cannot be refunded through the offline upload (the server refuses it as refund.online_only). This sends the refund to
+ * POST /shops/{shopId}/sales/{saleId}/refunds, which needs a connection and a sale the server already has. Unless told otherwise the money goes back as a gift voucher.
+ */
+function OnlineRefund({ ctx, t, sale, threshold, onDone }: { ctx: TillContext; t: Translate<RefundsKey>; sale: LoggedSale; threshold: number; onDone: (text: string) => Promise<void> }) {
+  const [quantities, setQuantities] = useState<Record<string, string>>({});
+  const [reason, setReason] = useState("");
+  const [method, setMethod] = useState<(typeof onlineMethods)[number]>("voucher");
+  const [asking, setAsking] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  // One id per refund: pressing again after a lost answer is the same refund, never a second one.
+  const refundId = useRef<string | null>(null);
+  const { busy, run } = useBusy();
+
+  const asked = sale.lines.map((l) => ({ productId: l.productId, quantity: wholeNumber(quantities[l.productId] ?? "") ?? 0 }));
+  const tooMany = sale.lines.some((l, i) => (asked[i]?.quantity ?? 0) > refundableQuantity(sale, l));
+  const amount = refundAmount(sale, asked);
+  const needsApproval = amount > threshold;
+  const isCashier = ctx.staff.role === "cashier";
+  const device = ctx.device;
+
+  if (!ctx.online) return <Notice kind="warning">{t("online.offline")}</Notice>;
+  if (!device) return <Notice kind="warning">{t("online.noDevice")}</Notice>;
+  if (!sale.lines.some((l) => refundableQuantity(sale, l) > 0)) return <p>{t("refund.nothingLeft")}</p>;
+
+  async function send(approvedBy: string | null) {
+    if (!device) return;
+    setMessage(null);
+    refundId.current ??= newId();
+    const lines = asked.filter((a) => a.quantity > 0);
+    const r = await ctx.api.post<OnlineRefundAnswer>(`/shops/${device.shopId}/sales/${sale.id}/refunds`, {
+      deviceId: device.deviceId, staffId: ctx.staff.id, id: refundId.current, reason: reason.trim(), methodCode: method, approvedBy, lines,
+    });
+    if (!r.ok) {
+      const key = `online.${r.code.replace(/^refund\./, "")}` as RefundsKey;
+      return setMessage(key in messages.en ? t(key) : r.message);
+    }
+    refundId.current = null;
+    // The till's own books follow, as they do for a refund sent from the queue.
+    if (ctx.kv) {
+      await addRefunded(ctx.kv, sale.id, lines);
+      if (r.value.methodCode === "cash") await logCash(ctx.kv, { at: new Date().toISOString(), cents: -r.value.amountCents, kind: "refund" });
+    }
+    const voucher = r.value.voucher ? ` ${t("online.voucher", { code: r.value.voucher.code })}` : "";
+    await onDone(`${t("online.saved", { amount: formatRand(r.value.amountCents) })}${voucher}`);
+  }
+
+  async function start() {
+    if (asked.every((a) => a.quantity === 0)) return setMessage(t("refund.nothing"));
+    if (tooMany) return setMessage(t("refund.tooMany"));
+    if (reason.trim() === "") return setMessage(t("refund.reasonNeeded"));
+    if (needsApproval && isCashier) return setAsking(true);
+    await run(() => send(needsApproval ? ctx.staff.id : null));
+  }
+
+  return (
+    <Stack>
+      <Notice kind="info">{t("refund.online")}</Notice>
+      {asking ? (
+        <Stack>
+          <p>{t("refund.needsManager", { amount: formatRand(threshold) })}</p>
+          <ManagerApproval
+            kv={ctx.kv} onCancel={() => setAsking(false)}
+            onApproved={(managerId) => { setAsking(false); void run(() => send(managerId)); }}
+            texts={{ who: t("approval.who"), pin: t("approval.pin"), approve: t("approval.approve"), cancel: t("approval.cancel"), wrong: (left) => t("approval.wrong", { left }), locked: t("approval.locked"), nobody: t("approval.nobody") }}
+          />
+        </Stack>
+      ) : (
+        <Stack>
+          {sale.lines.map((l) => {
+            const max = refundableQuantity(sale, l);
+            return max === 0 ? null : (
+              <TextField key={l.productId} label={t("refund.quantity", { name: l.name, max })} inputMode="numeric" value={quantities[l.productId] ?? ""} onChange={(e) => setQuantities({ ...quantities, [l.productId]: e.target.value })} />
+            );
+          })}
+          <TextField label={t("refund.reason")} value={reason} onChange={(e) => setReason(e.target.value)} />
+          <SelectField label={t("online.method")} value={method} onChange={(e) => setMethod(e.target.value as (typeof onlineMethods)[number])}>
+            {onlineMethods.map((m) => <option key={m} value={m}>{t(`online.method.${m}` as RefundsKey)}</option>)}
+          </SelectField>
+          <p>{t("refund.amount", { amount: formatRand(amount) })}</p>
+          {needsApproval && isCashier && <p>{t("refund.needsManager", { amount: formatRand(threshold) })}</p>}
+          <Button disabled={busy} onClick={() => void start()}>{needsApproval && isCashier ? t("refund.approve") : t("online.button")}</Button>
+        </Stack>
       )}
       {message && <Notice kind="danger">{message}</Notice>}
     </Stack>

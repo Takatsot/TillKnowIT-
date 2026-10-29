@@ -43,7 +43,6 @@ const en = {
   trShort: "{n} short",
   trAllArrived: "All arrived",
   trSendHeading: "Send stock to a branch",
-  trStandIn: "Until sign-in exists, a transfer is sent as this device and this person: the device id and person id of the session stand in for the till and the staff member.",
   trDestination: "Send to",
   trChoose: "Choose...",
   trProduct: "Product",

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fail, ok } from "@tillknowit/domain";
 import type { Api } from "@tillknowit/api-client";
+import { withCaller } from "../selling-common/testing";
 import { SessionProvider, type Session } from "@tillknowit/app-kit";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -14,12 +15,14 @@ const session: Session = { personId: "p1", shopId: "s1", supplierOrganisationId:
 const row = { productId: "pr1", name: "Maize meal 5kg", barcode: "600123", onHand: 2, lowStockLevel: 5, expiryDate: null, daysLeft: 3, suggestedOrderQuantity: 12, flags: ["low"] };
 const categories = [{ code: "grocery", names: { en: "Grocery" }, isActive: true }];
 
+const pulled = [{ id: "pr1", name: "Maize meal 5kg", barcode: "600123", categoryCode: "grocery", costCents: 4550, priceCents: 6500, isActive: true }];
+
 function getter(rows: unknown[]) {
-  return vi.fn(async (path: string) => (path === "/lookups/categories" ? ok(categories) : ok(rows)));
+  return vi.fn(async (path: string) => (path === "/lookups/categories" ? ok(categories) : path === "/shops/s1/products" ? ok(pulled) : ok(rows)));
 }
 
 function mount(api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}><ProductsStock /></SessionProvider>);
+  render(<SessionProvider api={withCaller(api)} initial={session}><ProductsStock /></SessionProvider>);
 }
 
 describe("ProductsStock", () => {
@@ -41,7 +44,7 @@ describe("ProductsStock", () => {
     expect(await screen.findByText("No products match this view.")).toBeTruthy();
   });
 
-  it("validates, then creates a product with the device and person as stand-ins", async () => {
+  it("validates, then creates a product with the chosen till and the signed-in staff membership", async () => {
     const post = vi.fn(async () => ok({ id: "x", status: "accepted" }));
     mount({ get: getter([row]) as never, post: post as never });
     const user = userEvent.setup();
@@ -71,12 +74,14 @@ describe("ProductsStock", () => {
     await screen.findByText("Maize meal 5kg");
 
     await user.click(screen.getByRole("button", { name: "Edit Maize meal 5kg" }));
-    await user.selectOptions(screen.getByLabelText("Category"), "grocery");
-    await user.type(screen.getByLabelText("Cost price (R)"), "50");
-    await user.type(screen.getByLabelText("Selling price (R)"), "65");
+    expect((screen.getByLabelText("Category") as HTMLSelectElement).value).toBe("grocery");
+    expect((screen.getByLabelText("Cost price (R)") as HTMLInputElement).value).toBe("45.50");
+    expect((screen.getByLabelText("Selling price (R)") as HTMLInputElement).value).toBe("65.00");
+    expect((screen.getByLabelText("Barcode (optional)") as HTMLInputElement).value).toBe("600123");
     await user.click(screen.getByRole("button", { name: "Save product" }));
 
     expect((await screen.findByRole("alert")).textContent).toBe("Another product already has this barcode.");
+    expect((patch.mock.calls[0] as unknown as [string, { product: Record<string, unknown> }])[1].product).toMatchObject({ costCents: 4550, priceCents: 6500, categoryCode: "grocery" });
     expect((patch.mock.calls[0] as unknown as [string])[0]).toBe("/products/pr1");
   });
 

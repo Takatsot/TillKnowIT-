@@ -1,6 +1,8 @@
 import { formatDate, parseRandToCents, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
 import { Badge, Button, Card, CheckField, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
+import { useProducts } from "../selling-common/products";
+import { useTillCaller } from "../selling-common/TillCaller";
 import { messages, type ProductsStockKey } from "./messages";
 
 export interface StockRow {
@@ -39,6 +41,7 @@ interface Draft {
   expiry: string;
   active: boolean;
 }
+const rands = (cents: number) => (cents / 100).toFixed(2);
 const blank: Draft = { id: null, name: "", barcode: "", category: "", cost: "", price: "", low: "0", expiry: "", active: true };
 
 type Errors = Partial<Record<"name" | "category" | "cost" | "price" | "low", string>>;
@@ -46,7 +49,9 @@ type Errors = Partial<Record<"name" | "category" | "cost" | "price" | "low", str
 export function ProductsStock() {
   const t = useMessages(messages);
   const api = useApi();
-  const { shopId, personId, deviceId, language } = useSession();
+  const { shopId, language } = useSession();
+  const caller = useTillCaller();
+  const products = useProducts();
   const [filter, setFilter] = useState<Filter>("all");
   const stock = useLoad(() => api.get<StockRow[]>(`/shops/${shopId}/stock`, { filter: filter === "all" ? undefined : filter }), [shopId, filter]);
   const categories = useLoad(() => api.get<Lookup[]>("/lookups/categories"), []);
@@ -74,12 +79,13 @@ export function ProductsStock() {
     setDone("");
     const parsed = validate();
     if (!parsed) return;
+    if (!caller.ready) return;
     const id = draft.id ?? crypto.randomUUID();
     const body = {
       shopId,
-      deviceId,
+      deviceId: caller.deviceId,
       product: {
-        id, staffId: personId, catalogueProductId: null, name: draft.name.trim(), barcode: draft.barcode.trim() === "" ? null : draft.barcode.trim(),
+        id, staffId: caller.staffId, catalogueProductId: null, name: draft.name.trim(), barcode: draft.barcode.trim() === "" ? null : draft.barcode.trim(),
         categoryCode: draft.category, costCents: parsed.cost, priceCents: parsed.price, lowStockLevel: Number(draft.low),
         expiryDate: draft.expiry === "" ? null : draft.expiry, isActive: draft.active, updatedAt: new Date().toISOString(),
       },
@@ -96,6 +102,7 @@ export function ProductsStock() {
 
   return (
     <Stack>
+      {caller.card}
       <Card title={t("heading")}>
         <Stack>
           <SelectField label={t("filter")} value={filter} onChange={(e) => setFilter(e.target.value as Filter)}>
@@ -122,7 +129,12 @@ export function ProductsStock() {
                     <Button variant="secondary" aria-label={t("edit", { name: r.name })} onClick={() => {
                       setDone("");
                       setErrors({});
-                      setDraft({ ...blank, id: r.productId, name: r.name, barcode: r.barcode ?? "", low: String(r.lowStockLevel), expiry: r.expiryDate ?? "" });
+                      const full = products.data?.find((p) => p.productId === r.productId);
+                      setDraft({
+                        ...blank, id: r.productId, name: full?.name ?? r.name, barcode: full?.barcode ?? r.barcode ?? "", category: full?.categoryCode ?? "",
+                        cost: full?.costCents === undefined ? "" : rands(full.costCents), price: full?.priceCents === undefined ? "" : rands(full.priceCents),
+                        low: String(r.lowStockLevel), expiry: r.expiryDate ?? "", active: full?.isActive ?? true,
+                      });
                     }}>{t("editButton")}</Button>
                   ),
                 },
@@ -134,7 +146,6 @@ export function ProductsStock() {
       <Card title={draft.id ? t("edit", { name: draft.name }) : t("add")}>
         <form onSubmit={(e) => { e.preventDefault(); void submit(); }} noValidate>
           <Stack>
-            {draft.id && <Notice kind="info">{t("editHint")}</Notice>}
             <Inline>
               <TextField label={t("name")} value={draft.name} error={errors.name} onChange={(e) => set({ name: e.target.value })} required />
               <TextField label={t("barcode")} value={draft.barcode} onChange={(e) => set({ barcode: e.target.value })} />
@@ -150,12 +161,10 @@ export function ProductsStock() {
               <TextField label={t("expiry")} type="date" value={draft.expiry} onChange={(e) => set({ expiry: e.target.value })} />
             </Inline>
             <CheckField label={t("active")} checked={draft.active} onChange={(e) => set({ active: e.target.checked })} />
-            <p>{t("callerHint")}</p>
-            {deviceId === "" && <Notice kind="warning">{t("needsDevice")}</Notice>}
             {save.error && <Notice kind="danger">{save.error.message}</Notice>}
             {done && <Notice kind="success">{done}</Notice>}
             <Inline>
-              <Button type="submit" disabled={save.busy}>{t("save")}</Button>
+              <Button type="submit" disabled={save.busy || !caller.ready}>{t("save")}</Button>
               {draft.id && <Button variant="quiet" onClick={() => { setDraft(blank); setErrors({}); }}>{t("cancelEdit")}</Button>}
             </Inline>
           </Stack>

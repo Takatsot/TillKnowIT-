@@ -104,7 +104,10 @@ function CustomerView({ ctx, caller, t, customer, info, back }: { ctx: TillConte
   return (
     <Card title={t("detail.title", { name: customer.name })}>
       <Stack>
-        <Inline><Button variant="quiet" onClick={back}>{t("detail.back")}</Button></Inline>
+        <Inline>
+          <Button variant="quiet" onClick={back}>{t("detail.back")}</Button>
+          {ctx.sale ? <Button variant="secondary" onClick={() => { ctx.sale?.setCustomer(customer.id, customer.name); ctx.openSell?.(); }}>{t("detail.attach", { name: customer.name })}</Button> : null}
+        </Inline>
         {info ? <Notice kind="success">{info}</Notice> : null}
         <p>{t("detail.phone", { phone: customer.phone })}</p>
         <p>{customer.messageConsent ? (customer.consentAt ? t("detail.consentYes", { date: saDateTime(customer.consentAt).slice(0, 10) || saDate() }) : t("detail.consentYesNoDate")) : t("detail.consentNo")}</p>

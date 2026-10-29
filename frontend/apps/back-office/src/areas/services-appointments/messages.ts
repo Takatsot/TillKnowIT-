@@ -6,7 +6,6 @@ const en = {
   tabCalendar: "Appointments",
   tabCommission: "Commission",
   loading: "Loading...",
-  standInNote: "Booking needs a till and a staff member. They start as this device and the signed-in person (stand-ins); change them in the box above if the server refuses.",
   // services
   servicesHeading: "Services you offer",
   servicesEmpty: "No services yet.",
@@ -26,7 +25,7 @@ const en = {
   serviceMinutes: "Duration in minutes",
   servicePrice: "Price in rand",
   serviceStaff: "Staff ids who do it (separated by commas, empty for anyone)",
-  serviceStaffHint: "The server has no list of staff, so paste the staff ids from the staff screen.",
+  serviceStaffHint: "Paste the staff ids from the Staff and tills screen.",
   serviceActive: "Offered to customers",
   saveService: "Save service",
   stopEditing: "Stop editing",

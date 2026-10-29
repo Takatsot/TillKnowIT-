@@ -97,3 +97,40 @@ describe("quotes feature", () => {
     expect(within(document.body).queryByText("Quote Q-1 was cancelled.")).toBeNull();
   });
 });
+
+describe("quote to the sale on the till", () => {
+  it("adds an open quote's goods to the sale at the quoted prices and shows the Sell tab", async () => {
+    const user = userEvent.setup();
+    const addLine = vi.fn(() => ok(undefined));
+    const openSell = vi.fn();
+    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote(), quote({ id: "q2", number: "Q-2", status: "converted" })])) as never }, sale: { addLine, addProduct: vi.fn(), setCustomer: vi.fn() }, openSell });
+    render(<Quotes ctx={ctx} />);
+
+    await user.click(await screen.findByRole("button", { name: "Add Q-1 to the sale on the till" }));
+
+    expect(addLine).toHaveBeenCalledWith({ productId: "p-bread", name: "Bread", priceCents: 1800, costCents: 1200, quantity: 2 });
+    expect(openSell).toHaveBeenCalled();
+    expect(screen.getByText(/Q-1 was added to the sale/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Add Q-2 to the sale on the till" })).toBeNull();
+  });
+
+  it("says which item could not be added and stays on the quotes tab", async () => {
+    const user = userEvent.setup();
+    const openSell = vi.fn();
+    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote()])) as never }, sale: { addLine: vi.fn(() => fail("sale.screen_missing", "The sell screen is not ready.")), addProduct: vi.fn(), setCustomer: vi.fn() }, openSell });
+    render(<Quotes ctx={ctx} />);
+
+    await user.click(await screen.findByRole("button", { name: "Add Q-1 to the sale on the till" }));
+
+    expect(screen.getByText("Bread could not be added: The sell screen is not ready.")).toBeTruthy();
+    expect(openSell).not.toHaveBeenCalled();
+  });
+
+  it("does not offer it when the till has no sale screen to add to", async () => {
+    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote()])) as never } });
+    render(<Quotes ctx={ctx} />);
+
+    await screen.findByText("Q-1");
+    expect(screen.queryByRole("button", { name: /to the sale on the till/ })).toBeNull();
+  });
+});

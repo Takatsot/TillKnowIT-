@@ -238,6 +238,21 @@ public class PackFlowTests
         Assert.True((await Shops.Handle(new GetShopPack(_shop, _owner), default)).IsSuccess);
         Assert.Equal("permission.denied", (await Shops.Handle(new GetShopPack(_shop, Guid.NewGuid()), default)).Error!.Code);
     }
+
+    [Fact]
+    public async Task The_pack_a_till_downloads_carries_the_shops_name_for_the_slip()
+    {
+        var named = new ShopFeatures(_store, new FakeShops(_shop, "Mama Thandi Spaza"));
+
+        Assert.Equal("Mama Thandi Spaza", (await named.For(_shop, default)).ShopName);
+        Assert.Equal("", (await Features.For(_shop, default)).ShopName);
+    }
+
+    private sealed class FakeShops(Guid shopId, string name) : IShopDirectory
+    {
+        public Task<ShopInfo?> Get(Guid id, CancellationToken ct) => Task.FromResult<ShopInfo?>(id == shopId ? new ShopInfo(id, name, "active", null, null, null, "en") : null);
+        public Task<List<Guid>> VerifiedShopIds(CancellationToken ct) => Task.FromResult(new List<Guid>());
+    }
 }
 
 internal sealed class FakeTimeProvider(DateTimeOffset now) : TimeProvider

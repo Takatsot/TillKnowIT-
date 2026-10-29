@@ -3,17 +3,28 @@ import { CheckField, SelectField } from "@tillknowit/design-system";
 import { useMessages } from "@tillknowit/app-kit";
 import { messages } from "./messages";
 
-/** A product as far as these screens need it: GET /shops/{id}/stock returns more (stock levels); we keep what we use. */
+/** A product as the shop's product list returns it (GET /shops/{id}/products, PulledProduct, including inactive ones); the screens use the ones they need. */
 export interface ProductRef {
   productId: string;
   name: string;
+  barcode?: string | null;
+  categoryCode?: string;
+  costCents?: number;
+  priceCents?: number;
+  isActive?: boolean;
 }
 
-/** The shop's products by name. There is no plain product list route; the stock list is the one that carries ids and names without a till. */
+interface PulledProduct { id: string; name: string; barcode: string | null; categoryCode: string; costCents: number; priceCents: number; isActive: boolean }
+
+/** The shop's products with prices (GET /shops/{id}/products). Includes inactive products. */
 export function useProducts() {
   const api = useApi();
-  const { shopId } = useSession();
-  return useLoad(() => api.get<ProductRef[]>(`/shops/${shopId}/stock`), [shopId]);
+  const { shopId, personId } = useSession();
+  return useLoad(async () => {
+    const r = await api.get<PulledProduct[]>(`/shops/${shopId}/products`, { callerPersonId: personId });
+    if (!r.ok) return r;
+    return { ok: true as const, value: r.value.map((p): ProductRef => ({ productId: p.id, name: p.name, barcode: p.barcode, categoryCode: p.categoryCode, costCents: p.costCents, priceCents: p.priceCents, isActive: p.isActive })) };
+  }, [shopId, personId]);
 }
 
 export function ProductSelect({ label, value, onChange, products }: { label: string; value: string; onChange: (id: string) => void; products: readonly ProductRef[] }) {

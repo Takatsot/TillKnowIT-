@@ -12,8 +12,11 @@ afterEach(cleanup);
 const session: Session = { personId: "p1", shopId: "s1", supplierOrganisationId: "", deviceId: "", language: "en" };
 const failedRun = { id: "r1", provider: "xero", day: "2026-10-25", status: "Failed", attempts: 3, error: "Xero said no.", externalReference: null, givenUp: true };
 
-function fakeGet(mappings: unknown, runs: unknown) {
-  return vi.fn(async (path: string) => (path.endsWith("/mappings") ? mappings : runs) as never);
+const notConnected = fail("accounting.not_connected", "No accounting package is connected.");
+const existing = { id: "c0", provider: "xero", tenantName: "Thandi Trading", connected: true, startsOn: "2026-09-01", connectedAt: "2026-09-01T08:00:00Z" };
+
+function fakeGet(mappings: unknown, runs: unknown, connection: unknown = notConnected) {
+  return vi.fn(async (path: string) => (path.endsWith("/connection") ? connection : path.endsWith("/mappings") ? mappings : runs) as never);
 }
 
 function mount(api: Partial<Api>) {
@@ -33,6 +36,28 @@ describe("Accounting", () => {
 
     await waitFor(() => expect(screen.getByText("Connected to Sage (Thandi Trading).")).toBeTruthy());
     expect(post).toHaveBeenCalledWith("/shops/s1/accounting/connections/sage", { personId: "p1", authorisationCode: "abc123", startsOn: null });
+  });
+
+  it("loads the existing connection on open and can disconnect it", async () => {
+    const del = vi.fn(async () => ok(undefined));
+    const get = fakeGet(ok({ mappings: [], missing: [] }), ok([]), ok(existing));
+    mount({ get: get as never, delete: del as never });
+    const user = userEvent.setup();
+
+    expect(await screen.findByText(/Connected to Xero \(Thandi Trading\)\. Connect again below to replace it\./)).toBeTruthy();
+    expect(get).toHaveBeenCalledWith("/shops/s1/accounting/connection", { personId: "p1" });
+    await user.click(screen.getByRole("button", { name: "Disconnect" }));
+    await waitFor(() => expect(screen.getByText("The accounting package was disconnected.")).toBeTruthy());
+    expect(del).toHaveBeenCalledWith("/shops/s1/accounting/connection", { personId: "p1" });
+    expect(screen.queryByRole("button", { name: "Disconnect" })).toBeNull();
+  });
+
+  it("shows the connect form without an error when nothing is connected yet", async () => {
+    mount({ get: fakeGet(ok({ mappings: [], missing: [] }), ok([])) as never });
+    expect(await screen.findByRole("button", { name: "Connect" })).toBeTruthy();
+    await waitFor(() => expect(screen.queryByText("Checking for an existing connection...")).toBeNull());
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Disconnect" })).toBeNull();
   });
 
   it("shows all nine account keys, what is missing, and saves the filled ones", async () => {

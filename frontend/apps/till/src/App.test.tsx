@@ -162,6 +162,35 @@ describe("App", () => {
     expect(await wiping.kv.get("staff")).toBeUndefined();
   });
 
+  it("sends serial numbers that were waiting once their sale is no longer in the queue", async () => {
+    const posted: string[] = [];
+    const { parts, kv } = services({ [`POST /shops/${SHOP}/sales/sale-1/serials`]: () => { posted.push("sale-1"); return ok(undefined); } });
+    await kv.set("serials.pending", [{ saleId: "sale-1", items: [{ productId: "p-bread", serial: "SN1" }] }]);
+    const user = userEvent.setup();
+    render(<App services={parts} />);
+    await registerThisTill(user);
+    await signIn(user);
+
+    await waitFor(() => expect(posted).toEqual(["sale-1"]), { timeout: 4000 });
+    await waitFor(async () => expect(await kv.get("serials.pending")).toEqual([]));
+  });
+
+  it("prints the shop's name from the downloaded pack on the slip", async () => {
+    const printed: string[] = [];
+    const { parts } = services({ [`GET /shops/${SHOP}/devices/${DEVICE}/business-pack`]: () => ok({ shopId: SHOP, packCode: "cafe", packName: "Cafe", packVersion: 1, slipTemplateCode: "slip.sale", features: [{ flag: "printer" }], shopName: "Mama Thandi Spaza" }) });
+    parts.hardware = { printer: { print: async (bytes: Uint8Array) => { printed.push(new TextDecoder("latin1").decode(bytes)); } } as never };
+    const user = userEvent.setup();
+    render(<App services={parts} />);
+    await registerThisTill(user);
+    await signIn(user);
+
+    await user.type(screen.getByRole("textbox", { name: "Scan or type a barcode or name" }), "6001000000011{Enter}");
+    await user.click(screen.getByRole("button", { name: /^Pay/ }));
+    await user.click(screen.getByRole("button", { name: "Card" }));
+
+    await waitFor(() => expect(printed.join("")).toContain("Mama Thandi Spaza"), { timeout: 4000 });
+  });
+
   it("offers the example data in a development build when the till is not registered", async () => {
     const { parts } = services();
     const user = userEvent.setup();

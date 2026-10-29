@@ -116,6 +116,24 @@ describe("the business pack", () => {
   });
 });
 
+describe("the shop name on the pack", () => {
+  const base = { shopId: UUID, packCode: "cafe", packName: "Cafe", packVersion: 2, slipTemplateCode: "s", features: [] };
+
+  it("keeps the shop name the server sends and leaves it out when there is none", () => {
+    expect(mapPack({ ...base, shopName: "Mama Thandi" }).shopName).toBe("Mama Thandi");
+    expect("shopName" in mapPack({ ...base, shopName: "" })).toBe(false);
+  });
+
+  it("takes the name onto a pack of the same version that was saved without one", () => {
+    const old = mapPack(base);
+    const chosen = chooseIncomingPack(old, mapPack({ ...base, shopName: "Mama Thandi" }));
+
+    expect(chosen.shopName).toBe("Mama Thandi");
+    expect(chosen.packVersion).toBe(2);
+    expect(chooseIncomingPack(chosen, mapPack({ ...base, shopName: "Mama Thandi" }))).toBe(chosen);
+  });
+});
+
 describe("registration", () => {
   it("accepts the two ids as typed, trimmed and in lower case, and says which one is wrong", () => {
     expect(checkRegistration(` ${UUID.toUpperCase()} `, UUID)).toEqual({ ok: true, device: { shopId: UUID, deviceId: UUID } });

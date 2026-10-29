@@ -48,8 +48,8 @@ export interface SaleBridge {
   addLine(line: { productId: string; name: string; priceCents: number; costCents?: number; quantity?: number }): Result<void>;
   /** One more of a catalogue product (or grams, for a product sold by weight), priced and discounted like a scanned item. */
   addProduct(productId: string, quantity?: number): Result<void>;
-  /** Attach the sale to a customer (loyalty), or detach with null. */
-  setCustomer(customerId: string | null): void;
+  /** Attach the sale to a customer (loyalty), or detach with null. The name is only for showing who is attached. */
+  setCustomer(customerId: string | null, name?: string): void;
 }
 
 /**

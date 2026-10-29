@@ -1,8 +1,8 @@
 import { formatRand, useAction, useApi, useLoad, useMessages, useSession, useSetSession } from "@tillknowit/app-kit";
 import { Badge, Button, Card, CheckField, Inline, Notice, Stack, TextField } from "@tillknowit/design-system";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { dayCodes } from "../../shared/days";
-import { readSupplierId, saveSupplierId } from "../../shared/SupplierGate";
+import { readSupplierId, saveSupplierId, useSupplierLookup } from "../../shared/SupplierGate";
 import { messages } from "./messages";
 
 
@@ -40,6 +40,8 @@ export function Application() {
   const setSession = useSetSession();
   const [supplierId, setSupplierId] = useState(readSupplierId);
   const [draftId, setDraftId] = useState("");
+  const lookup = useSupplierLookup();
+  useEffect(() => { if (lookup.state === "found") setSupplierId(lookup.supplier.supplierId); }, [lookup]);
   const [form, setForm] = useState({ name: "", registrationNo: "", contactName: "", phone: "", whatsapp: "", email: "" });
   const [areas, setAreas] = useState<AreaEntry[]>([{ municipalityCode: "", days: [] }]);
   const [done, setDone] = useState("");

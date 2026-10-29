@@ -8,7 +8,7 @@ const en = {
 
   // setup
   setupHeading: "Shop setup",
-  setupHint: "These steps are normally completed by the TillKnowIT field agent. The signed-in person is sent as the agent, which is a stand-in until sign-in exists.",
+  setupHint: "These steps are normally completed by the TillKnowIT field agent. The signed-in person is recorded as the agent.",
   setupEmpty: "There are no setup steps.",
   colStep: "Step",
   colDone: "Done",
@@ -47,7 +47,7 @@ const en = {
   removeFor: "Delete {file}",
   removed: "{file} was deleted.",
   uploadHeading: "Upload a document",
-  uploadHint: "A photo (JPEG or PNG) or a PDF, up to 10 MB. Uploaded with this device and the signed-in person as the closest stand-ins for the till device and staff member the server asks for.",
+  uploadHint: "A photo (JPEG or PNG) or a PDF, up to 10 MB.",
   docType: "Document type",
   docTypeChoose: "Choose a document type",
   docTypeRequired: "Choose what kind of document this is.",
@@ -56,7 +56,6 @@ const en = {
   expiresOn: "Expiry date (optional)",
   upload: "Upload document",
   uploaded: "{file} was uploaded.",
-  needsDevice: "This device is not set up yet, so documents cannot be uploaded from here.",
 } as const;
 
 export type ComplianceSetupKey = keyof typeof en;

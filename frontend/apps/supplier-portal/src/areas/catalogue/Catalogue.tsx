@@ -1,7 +1,7 @@
 import { useMessages } from "@tillknowit/app-kit";
 import { Stack } from "@tillknowit/design-system";
 import { useState } from "react";
-import type { PostForm } from "../../shared/postForm";
+import type { Api } from "@tillknowit/api-client";
 import { SupplierGate } from "../../shared/SupplierGate";
 import { Tabs } from "../../shared/Tabs";
 import { ImportCatalogue } from "./ImportCatalogue";
@@ -11,7 +11,7 @@ import { Areas, Reps, Terms } from "./Settings";
 
 type Tab = "products" | "import" | "areas" | "terms" | "reps";
 
-export function Catalogue({ upload }: { upload?: PostForm } = {}) {
+export function Catalogue({ upload }: { upload?: Api["upload"] } = {}) {
   const t = useMessages(messages);
   const [tab, setTab] = useState<Tab>("products");
   const tabs = [

@@ -19,12 +19,14 @@ const school: School = {
 };
 
 /** A fake Api that answers by path; anything not listed is a test mistake and says so. */
-function fake(routes: Record<string, unknown>) {
-  const answer = (path: string) => (path in routes ? routes[path] : fail("test.unexpected", `No fake answer for ${path}`));
+function fake(given: Record<string, unknown>) {
+  const routes: Record<string, unknown> = { "GET /admin/schools": ok([]), ...given };
+  const answer = (method: string, path: string) => (`${method} ${path}` in routes ? routes[`${method} ${path}`] : path in routes ? routes[path] : fail("test.unexpected", `No fake answer for ${path}`));
   return {
-    get: vi.fn(async (path: string) => answer(path)),
-    post: vi.fn(async (path: string) => answer(path)),
-    put: vi.fn(async (path: string) => answer(path)),
+    get: vi.fn(async (path: string) => answer("GET", path)),
+    post: vi.fn(async (path: string) => answer("POST", path)),
+    put: vi.fn(async (path: string) => answer("PUT", path)),
+    upload: vi.fn(async (path: string) => answer("UPLOAD", path)),
   };
 }
 
@@ -33,7 +35,8 @@ function mount(api: ReturnType<typeof fake>, upload?: HolderUploader) {
 }
 
 async function openSchool(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText("School id"), "sc1");
+  await screen.findByRole("option", { name: "Sunrise Primary" });
+  await user.selectOptions(screen.getByLabelText("School"), "sc1");
   await user.click(screen.getByRole("button", { name: "Open school" }));
   await screen.findByText("Working on Sunrise Primary.");
 }
@@ -50,7 +53,8 @@ describe("SchoolsWallet", () => {
 
   it("registers a school, opens it, verifies it and saves its settings", async () => {
     const api = fake({
-      "/admin/schools": ok(school),
+      "GET /admin/schools": ok([]),
+      "POST /admin/schools": ok(school),
       "/admin/schools/sc1/verify": ok({ ...school, status: "verified" }),
       "/schools/sc1/settings": ok({ ...school, status: "verified", feeBasisPoints: 300, payoutSchedule: "daily", dailyCeilingCents: 15000 }),
     });
@@ -82,13 +86,23 @@ describe("SchoolsWallet", () => {
     });
   });
 
-  it("shows the server's refusal when the school cannot be opened or registered", async () => {
-    mount(fake({ "/schools/sc1": fail("school.not_found", "School not found."), "/admin/schools": fail("school.shop_taken", "That shop already belongs to a school.") }));
+  it("lists every school to pick from and says so when there are none", async () => {
+    mount(fake({ "GET /admin/schools": ok([]) }));
+    expect(await screen.findByText("No schools are registered yet. Register one on the School tab.")).toBeTruthy();
+    cleanup();
+    const api = fake({ "GET /admin/schools": ok([school, { ...school, id: "sc2", name: "Hillcrest High" }]) });
+    mount(api);
     const user = userEvent.setup();
-
-    await user.type(screen.getByLabelText("School id"), "sc1");
+    await user.selectOptions(await screen.findByLabelText("School"), "sc2");
     await user.click(screen.getByRole("button", { name: "Open school" }));
-    expect((await screen.findByRole("alert")).textContent).toBe("School not found.");
+    expect(await screen.findByText("Working on Hillcrest High.")).toBeTruthy();
+    expect(api.get).toHaveBeenCalledWith("/admin/schools", { callerPersonId: "p1" });
+  });
+
+  it("shows the server's refusal when the schools cannot be listed or a school registered", async () => {
+    mount(fake({ "GET /admin/schools": fail("permission.denied", "Only a platform admin can see schools."), "POST /admin/schools": fail("school.shop_taken", "That shop already belongs to a school.") }));
+    const user = userEvent.setup();
+    expect((await screen.findAllByRole("alert")).map((a) => a.textContent)).toContain("Only a platform admin can see schools.");
 
     await user.type(screen.getByLabelText("School name"), "X");
     await user.type(screen.getByLabelText("Tuckshop id"), "shop1");
@@ -97,7 +111,7 @@ describe("SchoolsWallet", () => {
   });
 
   it("adds a school admin", async () => {
-    const api = fake({ "/schools/sc1": ok(school), "/schools/sc1/admins": ok(undefined) });
+    const api = fake({ "GET /admin/schools": ok([school]), "/schools/sc1/admins": ok(undefined) });
     mount(api);
     const user = userEvent.setup();
     await openSchool(user);
@@ -111,7 +125,7 @@ describe("SchoolsWallet", () => {
 
   it("lists holders and imports a file, showing the rejected rows and the link codes once", async () => {
     const holder = { id: "h1", schoolId: "sc1", type: "learner", firstName: "Thabo", lastName: "Dlamini", grade: "4", className: "4B", status: "active", walletId: "w1", hasPhoto: false };
-    const api = fake({ "/schools/sc1": ok(school), "/schools/sc1/holders": ok([holder]) });
+    const api = fake({ "GET /admin/schools": ok([school]), "/schools/sc1/holders": ok([holder]) });
     const upload = vi.fn<HolderUploader>(async () => ok({
       created: 1, duplicates: 0, invalid: 1,
       rows: [{ row: 2, name: "Thabo Dlamini", outcome: "created", detail: null }, { row: 3, name: "", outcome: "invalid", detail: "A first name is needed." }],
@@ -136,7 +150,7 @@ describe("SchoolsWallet", () => {
   });
 
   it("shows the server's message when the import is refused", async () => {
-    const api = fake({ "/schools/sc1": ok(school), "/schools/sc1/holders": ok([]) });
+    const api = fake({ "GET /admin/schools": ok([school]), "/schools/sc1/holders": ok([]) });
     const upload = vi.fn<HolderUploader>(async () => fail("import.columns_missing", "The file needs a first name column and a surname column."));
     mount(api, upload);
     const user = userEvent.setup();
@@ -152,7 +166,7 @@ describe("SchoolsWallet", () => {
 
   it("saves breaks and adds a menu item", async () => {
     const api = fake({
-      "/schools/sc1": ok(school),
+ "GET /admin/schools": ok([school]),
       "/schools/sc1/menu": ok({ breaks: [{ code: "first", name: "First break", cutOff: "09:30" }], items: [] }),
       "/schools/sc1/breaks": ok(undefined),
     });
@@ -180,7 +194,7 @@ describe("SchoolsWallet", () => {
   });
 
   it("records a cash deposit in cents and refuses a bad amount before asking", async () => {
-    const api = fake({ "/schools/sc1": ok(school), "/admin/schools/sc1/cash-deposits": ok(undefined) });
+    const api = fake({ "GET /admin/schools": ok([school]), "/admin/schools/sc1/cash-deposits": ok(undefined) });
     mount(api);
     const user = userEvent.setup();
     await openSchool(user);
@@ -203,7 +217,7 @@ describe("SchoolsWallet", () => {
   it("shows a staff month and settles it", async () => {
     const statement = { month: "2026-10", totalOwedCents: 12000, teachers: [{ holderId: "t1", name: "Mrs Naidoo", owedCents: 12000 }] };
     const api = fake({
-      "/schools/sc1": ok(school),
+ "GET /admin/schools": ok([school]),
       "/schools/sc1/staff-accounts/2026-10": ok(statement),
       "/admin/schools/sc1/staff-accounts/2026-10/settle": ok(statement),
     });
@@ -231,7 +245,7 @@ describe("SchoolsWallet", () => {
     await user.click(screen.getByRole("tab", { name: "Payouts" }));
     await user.click(screen.getByRole("button", { name: "Run payouts" }));
 
-    expect((await screen.findByRole("status")).textContent).toBe("Payouts are on hold: the reconciliation for 2026-10-26 differs by 500 cents");
+    expect(await screen.findByText("Payouts are on hold: the reconciliation for 2026-10-26 differs by 500 cents")).toBeTruthy();
     expect(api.post).toHaveBeenCalledWith("/admin/wallet-payouts/run", undefined, { callerPersonId: "p1", day: "" });
   });
 
@@ -253,33 +267,66 @@ describe("SchoolsWallet", () => {
     expect(api.get).toHaveBeenCalledWith("/shops/shop9/wallet-payouts", { callerPersonId: "p1", from: "", to: "" });
   });
 
-  it("runs a wallet reconciliation and resolves a mismatch with a note", async () => {
+  it("lists reconciliations and resolves an open one with a note", async () => {
     const mismatch = { id: "r1", day: "2026-10-27", partnerTotalCents: 100000, ledgerTotalCents: 99500, differenceCents: 500, status: "mismatch", note: null };
-    const api = fake({ "/admin/wallet-reconciliations": ok(mismatch), "/admin/wallet-reconciliations/r1/resolve": ok({ ...mismatch, status: "resolved", note: "Partner fee found" }) });
+    const matched = { id: "r2", day: "2026-10-26", partnerTotalCents: 5000, ledgerTotalCents: 5000, differenceCents: 0, status: "matched", note: null };
+    const api = fake({
+      "GET /admin/wallet-reconciliations": ok([mismatch, matched]),
+      "/admin/wallet-reconciliations/r1/resolve": ok({ ...mismatch, status: "resolved", note: "Partner fee found" }),
+    });
     mount(api);
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("tab", { name: "Reconciliation" }));
-    await user.click(screen.getByRole("button", { name: "Run reconciliation" }));
     expect(await screen.findByText("Does not match")).toBeTruthy();
+    expect(screen.getByText("Matched")).toBeTruthy();
+    expect(api.get).toHaveBeenCalledWith("/admin/wallet-reconciliations", { callerPersonId: "p1" });
+    expect(screen.getAllByRole("button", { name: "Resolve" })).toHaveLength(1);
 
     await user.click(screen.getByRole("button", { name: "Resolve" }));
     expect((screen.getByRole("button", { name: "Resolve" }) as HTMLButtonElement).disabled).toBe(true);
     await user.type(screen.getByLabelText(/What was found/), "Partner fee found");
     await user.click(screen.getByRole("button", { name: "Resolve" }));
 
-    expect(await screen.findByText(/The reconciliation for 2026-10-27 was resolved\./)).toBeTruthy();
-    expect(screen.getByText("Resolved")).toBeTruthy();
+    expect(await screen.findByText(/The reconciliation for 2026-10-27 was resolved./)).toBeTruthy();
     expect(api.post).toHaveBeenCalledWith("/admin/wallet-reconciliations/r1/resolve", { callerPersonId: "p1", note: "Partner fee found" });
+    expect(api.get.mock.calls.filter((c) => c[0] === "/admin/wallet-reconciliations")).toHaveLength(2);
+  });
+
+  it("runs a reconciliation, and says so when there are none yet", async () => {
+    const run = { id: "r3", day: "2026-10-28", partnerTotalCents: 100, ledgerTotalCents: 100, differenceCents: 0, status: "matched", note: null };
+    const api = fake({ "GET /admin/wallet-reconciliations": ok([]), "POST /admin/wallet-reconciliations": ok(run) });
+    mount(api);
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("tab", { name: "Reconciliation" }));
+    expect(await screen.findByText("No reconciliations have been run yet.")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Run reconciliation" }));
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith("/admin/wallet-reconciliations", undefined, expect.objectContaining({ callerPersonId: "p1" })));
   });
 
   it("shows the server's refusal for reconciliation", async () => {
-    mount(fake({ "/admin/wallet-reconciliations": fail("permission.denied", "You do not have access to this.") }));
+    mount(fake({ "GET /admin/wallet-reconciliations": ok([]), "POST /admin/wallet-reconciliations": fail("permission.denied", "You do not have access to this.") }));
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("tab", { name: "Reconciliation" }));
     await user.click(screen.getByRole("button", { name: "Run reconciliation" }));
 
     expect((await screen.findByRole("alert")).textContent).toBe("You do not have access to this.");
+  });
+
+  it("sends the holders import through Api.upload by default", async () => {
+    const api = fake({ "GET /admin/schools": ok([school]), "/schools/sc1/holders": ok([]), "UPLOAD /schools/sc1/holders/import": ok({ created: 0, duplicates: 0, invalid: 0, rows: [], linkCodes: [] }) });
+    mount(api);
+    const user = userEvent.setup();
+    await openSchool(user);
+    await user.click(screen.getByRole("tab", { name: "Holders" }));
+    await user.upload(await screen.findByLabelText("File"), new File(["x"], "l.csv", { type: "text/csv" }));
+    await user.click(screen.getByRole("button", { name: "Import holders" }));
+
+    await waitFor(() => expect(api.upload).toHaveBeenCalled());
+    const [path, form] = api.upload.mock.calls[0] as unknown as [string, FormData];
+    expect(path).toBe("/schools/sc1/holders/import");
+    expect(form.get("callerPersonId")).toBe("p1");
   });
 });

@@ -60,37 +60,11 @@ describe("Children", () => {
     expect((await screen.findByRole("alert")).textContent).toBe("That code is not valid. Check it against the card from the school.");
   });
 
-  it("updates only the details that were filled in", async () => {
-    const patch = vi.fn(async () => ok({}));
-    mount(<Children />, { get: vi.fn(async () => ok([thandi])) as never, patch: patch as never });
-    const user = userEvent.setup({ delay: null });
-    await user.click(await screen.findByRole("button", { name: "Change details or photo" }));
+  it("tells the parent the school makes changes, and offers no edit or photo upload", async () => {
+    mount(<Children />, { get: vi.fn(async () => ok([thandi])) as never });
 
-    await user.type(screen.getByLabelText("Class"), "5C");
-    await user.click(screen.getByRole("button", { name: "Save" }));
-
-    await waitFor(() => expect(screen.getByText("Details saved.")).toBeTruthy());
-    expect(patch).toHaveBeenCalledWith("/holders/h1", { callerPersonId: "p1", firstName: null, lastName: null, grade: null, className: "5C" });
-  });
-
-  it("uploads a photo and shows the server's refusal", async () => {
-    const upload = vi.fn()
-      .mockResolvedValueOnce(fail("permission.denied", "You do not have access to this school."))
-      .mockResolvedValueOnce(ok(undefined));
-    mount(<Children upload={upload} />, { get: vi.fn(async () => ok([thandi])) as never });
-    const user = userEvent.setup({ delay: null });
-    await user.click(await screen.findByRole("button", { name: "Change details or photo" }));
-
-    await user.click(screen.getByRole("button", { name: "Upload photo" }));
-    expect((await screen.findByRole("alert")).textContent).toBe("Choose a photo first.");
-
-    const file = new File(["x"], "face.png", { type: "image/png" });
-    await user.upload(screen.getByLabelText("Photo"), file);
-    await user.click(screen.getByRole("button", { name: "Upload photo" }));
-    expect((await screen.findByRole("alert")).textContent).toBe("You do not have access to this school.");
-
-    await user.click(screen.getByRole("button", { name: "Upload photo" }));
-    await waitFor(() => expect(screen.getByText("Photo saved.")).toBeTruthy());
-    expect(upload).toHaveBeenCalledWith("h1", "p1", file);
+    expect(await screen.findByText(/are all done by the school/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Change details or photo" })).toBeNull();
+    expect(screen.queryByLabelText("Photo")).toBeNull();
   });
 });

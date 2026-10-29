@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fail, ok } from "@tillknowit/domain";
 import type { Api } from "@tillknowit/api-client";
+import { withCaller } from "../selling-common/testing";
 import { SessionProvider, type Session } from "@tillknowit/app-kit";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -34,7 +35,7 @@ function routes(over: Record<string, unknown> = {}) {
 }
 
 function mount(api: Partial<Api>, upload: DocumentUploader = vi.fn(async () => ok({ id: "new" })), save = vi.fn()) {
-  render(<SessionProvider api={api as Api} initial={session}><ComplianceSetup upload={upload} save={save} /></SessionProvider>);
+  render(<SessionProvider api={withCaller(api)} initial={session}><ComplianceSetup upload={upload} save={save} /></SessionProvider>);
   return { upload, save };
 }
 
@@ -91,6 +92,26 @@ describe("ComplianceSetup", () => {
 
     await waitFor(() => expect(screen.getByText("cert.pdf was uploaded.")).toBeTruthy());
     expect(upload).toHaveBeenCalledWith({ shopId: "s1", deviceId: "d1", staffId: "p1", typeCode: "trading_licence", expiresOn: "2027-01-31", file });
+  });
+
+  it("sends the upload through the api client's upload when no uploader is given", async () => {
+    const apiUpload = vi.fn(async () => ok({ id: "new" }));
+    render(<SessionProvider api={withCaller({ get: routes() as never, upload: apiUpload as never })} initial={session}><ComplianceSetup /></SessionProvider>);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Compliance documents" }));
+    await screen.findByText("licence.pdf");
+
+    await user.selectOptions(screen.getByLabelText("Document type"), "trading_licence");
+    await user.upload(screen.getByLabelText("File"), new File(["%PDF"], "cert.pdf", { type: "application/pdf" }));
+    await user.click(screen.getByRole("button", { name: "Upload document" }));
+
+    await waitFor(() => expect(screen.getByText("cert.pdf was uploaded.")).toBeTruthy());
+    const [path, form] = apiUpload.mock.calls[0] as unknown as [string, FormData];
+    expect(path).toBe("/shops/s1/compliance/documents");
+    expect(form.get("deviceId")).toBe("d1");
+    expect(form.get("staffId")).toBe("p1");
+    expect(form.get("typeCode")).toBe("trading_licence");
+    expect((form.get("file") as File).name).toBe("cert.pdf");
   });
 
   it("shows the server's message when an upload is refused", async () => {

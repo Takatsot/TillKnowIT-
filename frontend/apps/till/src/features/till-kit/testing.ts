@@ -13,7 +13,7 @@ export const STAFF = "0192a3b4-0000-7000-8000-00000000a001";
 export const SHOP = "0192a3b4-0000-7000-8000-00000000b001";
 
 /** A till context for tests: the api is a fake (only the verbs the test gives are there), the pack has the listed flags on. */
-export function makeCtx(over: { api?: Partial<Api>; flags?: Array<string | { flag: string; settingsJson: string }>; hardware?: TillHardware; online?: boolean; device?: TillContext["device"] } = {}) {
+export function makeCtx(over: { sale?: TillContext["sale"]; openSell?: TillContext["openSell"]; api?: Partial<Api>; flags?: Array<string | { flag: string; settingsJson: string }>; hardware?: TillHardware; online?: boolean; device?: TillContext["device"] } = {}) {
   const pack: ShopPack = {
     shopId: SHOP, packCode: "test", packName: "Test", packVersion: 1, slipTemplateCode: "slip.sale",
     features: (over.flags ?? []).map((f) => (typeof f === "string" ? { flag: f } : f)),
@@ -32,6 +32,8 @@ export function makeCtx(over: { api?: Partial<Api>; flags?: Array<string | { fla
     promotions: [],
     hardware: over.hardware ?? {},
     nudgeSync,
+    ...(over.sale ? { sale: over.sale } : {}),
+    ...(over.openSell ? { openSell: over.openSell } : {}),
   };
   return { ctx, outbox, nudgeSync };
 }

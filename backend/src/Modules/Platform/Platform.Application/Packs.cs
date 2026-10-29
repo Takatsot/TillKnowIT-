@@ -23,16 +23,22 @@ internal static class PackMapping
     public static PackResponse ToResponse(BusinessPack p) =>
         new(p.Id, p.Code, p.Name, p.Description, p.SlipTemplateCode, p.Version, p.IsActive, p.Features.Select(f => new FeatureDto(f.Flag, f.SettingsJson)).OrderBy(f => f.Flag).ToList());
 
-    public static ShopPackResponse ToShopPack(Guid shopId, BusinessPack p) =>
-        new(shopId, p.Code, p.Name, p.Version, p.SlipTemplateCode, p.Features.Select(f => new FeatureDto(f.Flag, f.SettingsJson)).OrderBy(f => f.Flag).ToList());
+    public static ShopPackResponse ToShopPack(Guid shopId, string shopName, BusinessPack p) =>
+        new(shopId, p.Code, p.Name, p.Version, p.SlipTemplateCode, p.Features.Select(f => new FeatureDto(f.Flag, f.SettingsJson)).OrderBy(f => f.Flag).ToList(), shopName);
 }
 
 /// <summary>Answers "is this feature on?" for the rest of the system. Cheap enough to call on every request: one pack lookup.</summary>
-public sealed class ShopFeatures(IPackStore store) : IShopFeatures
+public sealed class ShopFeatures(IPackStore store, IShopDirectory? shops = null) : IShopFeatures
 {
     public async Task<bool> IsOn(Guid shopId, string feature, CancellationToken ct) => (await Resolve(shopId, ct)).Has(feature);
 
-    public async Task<ShopPackResponse> For(Guid shopId, CancellationToken ct) => PackMapping.ToShopPack(shopId, await Resolve(shopId, ct));
+    /// <summary>The shop's name comes from Identity (IShopDirectory) so the till can print it on slips; empty when the directory does not know the shop.</summary>
+    public async Task<ShopPackResponse> For(Guid shopId, CancellationToken ct)
+    {
+        var pack = await Resolve(shopId, ct);
+        var info = shops is null ? null : await shops.Get(shopId, ct);
+        return PackMapping.ToShopPack(shopId, info?.Name ?? "", pack);
+    }
 
     private async Task<BusinessPack> Resolve(Guid shopId, CancellationToken ct)
     {
@@ -81,7 +87,7 @@ internal sealed class ShopPackHandlers(IPackStore store, IShopFeatures features,
         else current.Change(pack.Code, c.Request.CallerPersonId, now);
         await store.Add(new ShopPackChange(c.ShopId, from, pack.Code, c.Request.CallerPersonId, now), ct);
         await store.Save(ct);
-        return Result<ShopPackResponse>.Ok(PackMapping.ToShopPack(c.ShopId, pack));
+        return Result<ShopPackResponse>.Ok(await features.For(c.ShopId, ct));
     }
 }
 

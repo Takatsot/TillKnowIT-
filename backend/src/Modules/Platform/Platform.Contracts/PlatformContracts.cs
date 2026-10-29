@@ -10,8 +10,8 @@ public sealed record SavePackRequest(Guid CallerPersonId, string Code, string Na
 
 public sealed record ChoosePackRequest(Guid CallerPersonId, string PackCode);
 
-/// <summary>What a shop is on now, in the form a till downloads: the pack, its version and every feature that is on.</summary>
-public sealed record ShopPackResponse(Guid ShopId, string PackCode, string PackName, int PackVersion, string SlipTemplateCode, List<FeatureDto> Features);
+/// <summary>What a shop is on now, in the form a till downloads: the pack, its version and every feature that is on. ShopName is the shop's own name, for the slip.</summary>
+public sealed record ShopPackResponse(Guid ShopId, string PackCode, string PackName, int PackVersion, string SlipTemplateCode, List<FeatureDto> Features, string ShopName);
 
 /// <summary>
 /// How other modules ask "is this feature on for this shop?" without knowing what a pack is. A shop with no pack chosen is on the default pack.

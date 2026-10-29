@@ -13,8 +13,16 @@ afterEach(cleanup);
 
 const session: Session = { personId: "p1", shopId: "s1", supplierOrganisationId: "", deviceId: "", language: "en" };
 
+/** A fake server that keeps staff and tills, so a refresh after a change shows the change. */
+function server(initial: { staff?: unknown[]; devices?: unknown[] } = {}) {
+  const state = { staff: [...(initial.staff ?? [])] as Record<string, unknown>[], devices: [...(initial.devices ?? [])] as Record<string, unknown>[] };
+  const get = vi.fn(async (path: string) => (path === "/shops/s1/staff" ? ok(state.staff) : path === "/shops/s1/devices" ? ok(state.devices) : ok([])));
+  return { state, get };
+}
+
 function mount(api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}><StaffDevices /></SessionProvider>);
+  const fallback = server();
+  render(<SessionProvider api={{ get: fallback.get, ...api } as Api} initial={session}><StaffDevices /></SessionProvider>);
 }
 
 async function addStaff(user: ReturnType<typeof userEvent.setup>, pin: string) {
@@ -25,24 +33,45 @@ async function addStaff(user: ReturnType<typeof userEvent.setup>, pin: string) {
 }
 
 describe("Staff and tills", () => {
-  it("shows the empty states and says the server has no lists", () => {
-    mount({});
-    expect(screen.getByText("Nobody added in this visit yet.")).toBeTruthy();
-    expect(screen.getByText("No tills registered in this visit yet.")).toBeTruthy();
-    expect(screen.getByText(/server has no list of tills/)).toBeTruthy();
+  it("lists the staff and tills the server has, with their ids", async () => {
+    const { get } = server({
+      staff: [{ staffId: "m7", name: "Thandi", phone: "0821111111", role: "manager", disabled: false }],
+      devices: [{ deviceId: "d7", name: "Counter 2", status: "approved", lastSeenAt: null, wipeRequested: false }],
+    });
+    mount({ get: get as never });
+
+    expect(await screen.findByText("Thandi")).toBeTruthy();
+    expect(screen.getByText("m7")).toBeTruthy();
+    expect(await screen.findByText("Counter 2")).toBeTruthy();
+    expect(screen.getByText("Approved")).toBeTruthy();
+    expect(get).toHaveBeenCalledWith("/shops/s1/staff", { callerPersonId: "p1" });
+    expect(get).toHaveBeenCalledWith("/shops/s1/devices", { callerPersonId: "p1" });
   });
 
-  it("adds staff, keeps them in the list and can change their PIN and disable them", async () => {
-    const post = vi.fn(async () => ok({ membershipId: "m1" }));
-    const patch = vi.fn(async () => ok(undefined));
-    mount({ post: post as never, patch: patch as never });
+  it("shows the empty states", async () => {
+    mount({});
+    expect(await screen.findByText("No staff yet.")).toBeTruthy();
+    expect(screen.getByText("No tills registered yet.")).toBeTruthy();
+  });
+
+  it("adds staff, refreshes the list and can change their PIN and disable them", async () => {
+    const s = server();
+    const post = vi.fn(async () => {
+      s.state.staff.push({ staffId: "m1", name: "Lindiwe", phone: "0821234567", role: "cashier", disabled: false });
+      return ok({ membershipId: "m1" });
+    });
+    const patch = vi.fn(async (_p: string, body: { disabled?: boolean }) => {
+      if (body.disabled !== undefined) s.state.staff[0]!.disabled = body.disabled;
+      return ok(undefined);
+    });
+    mount({ get: s.get as never, post: post as never, patch: patch as never });
     const user = userEvent.setup();
 
     await addStaff(user, "1234");
     expect(await screen.findByText(/Lindiwe was added/)).toBeTruthy();
     expect(post).toHaveBeenCalledWith("/shops/s1/staff", { name: "Lindiwe", phone: "0821234567", roleCode: "cashier", pin: "1234" });
 
-    await user.type(screen.getByLabelText("New PIN for Lindiwe"), "654321");
+    await user.type(await screen.findByLabelText("New PIN for Lindiwe"), "654321");
     await user.click(screen.getByRole("button", { name: "Change PIN for Lindiwe" }));
     await waitFor(() => expect(patch).toHaveBeenCalledWith("/staff/m1", { pin: "654321" }));
 
@@ -66,9 +95,15 @@ describe("Staff and tills", () => {
     expect(await screen.findByText("That person already works here.")).toBeTruthy();
   });
 
-  it("registers a till, shows the ids it needs, approves it and wipes it after confirming", async () => {
-    const post = vi.fn(async (path: string) => (path.endsWith("/devices") ? ok({ deviceId: "d1" }) : ok(undefined)));
-    mount({ post: post as never });
+  it("registers a till, shows its tillknowit.device value, approves it and wipes it after confirming", async () => {
+    const s = server();
+    const post = vi.fn(async (path: string) => {
+      if (path.endsWith("/devices")) { s.state.devices.push({ deviceId: "d1", name: "Counter 1", status: "pending", lastSeenAt: null, wipeRequested: false }); return ok({ deviceId: "d1" }); }
+      if (path === "/devices/d1/approve") s.state.devices[0]!.status = "approved";
+      if (path === "/devices/d1/wipe") s.state.devices[0]!.wipeRequested = true;
+      return ok(undefined);
+    });
+    mount({ get: s.get as never, post: post as never });
     const user = userEvent.setup();
 
     await user.type(screen.getByLabelText("Till name"), "Counter 1");
@@ -76,6 +111,7 @@ describe("Staff and tills", () => {
     expect(await screen.findByText("Set up the till Counter 1")).toBeTruthy();
     expect(screen.getByText('{"shopId":"s1","deviceId":"d1"}')).toBeTruthy();
     expect(post).toHaveBeenCalledWith("/shops/s1/devices", { name: "Counter 1" });
+    expect(await screen.findByText("Waiting for approval")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Approve Counter 1" }));
     await waitFor(() => expect(post).toHaveBeenCalledWith("/devices/d1/approve"));
@@ -86,6 +122,15 @@ describe("Staff and tills", () => {
     await user.click(screen.getByRole("button", { name: "Yes, wipe Counter 1" }));
     await waitFor(() => expect(post).toHaveBeenCalledWith("/devices/d1/wipe"));
     expect(await screen.findByText("Wipe requested")).toBeTruthy();
+  });
+
+  it("shows the setup value for a till chosen from the list", async () => {
+    const { get } = server({ devices: [{ deviceId: "d7", name: "Counter 2", status: "approved", lastSeenAt: null, wipeRequested: false }] });
+    mount({ get: get as never });
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole("button", { name: "Show setup for Counter 2" }));
+    expect(screen.getByText('{"shopId":"s1","deviceId":"d7"}')).toBeTruthy();
   });
 
   it("shows the server's message when registering fails", async () => {

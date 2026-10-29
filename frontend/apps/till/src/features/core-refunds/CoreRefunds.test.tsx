@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { hashPin, newId, queueSale, type OutboxEntry, type RecordOutboxEntry } from "@tillknowit/domain";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { aSale, makeCoreCtx, STAFF } from "../../coreTesting";
+import { fail, hashPin, newId, ok, queueSale, type OutboxEntry, type RecordOutboxEntry } from "@tillknowit/domain";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { aSale, DEVICE, makeCoreCtx, SHOP, STAFF } from "../../coreTesting";
 import { cashUpFigures } from "../../ledger";
 import { saveStaff } from "../../staffStore";
 import { CoreRefunds, approvalThreshold } from "./CoreRefunds";
@@ -135,16 +135,72 @@ describe("Past sales tab", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("no manager on this till");
   });
 
-  it("sends a split, wallet, voucher or lay-by sale online instead of refunding it here", async () => {
-    const { ctx } = makeCoreCtx({ flags: ["refunds"] });
-    await sell(ctx.outbox, { paymentMethodCode: "split", tenderedCents: null, changeCents: null, payments: [{ methodCode: "card", amountCents: 1800, reference: null, tenderedCents: null }, { methodCode: "wallet", amountCents: 1800, reference: "w1", tenderedCents: null }] });
+  const splitSale = { paymentMethodCode: "split", tenderedCents: null, changeCents: null, payments: [{ methodCode: "card", amountCents: 1800, reference: null, tenderedCents: null }, { methodCode: "wallet", amountCents: 1800, reference: "w1", tenderedCents: null }] };
+
+  it("refunds a split, wallet, voucher or lay-by sale through the server, never the offline queue, and shows the voucher code once", async () => {
+    const post = vi.fn(async (_path: string, _body?: unknown) => ok({ refundId: "r1", amountCents: 1800, methodCode: "voucher", voucher: { id: "v1", code: "ABCD-1234", balanceCents: 1800, expiresOn: null } }));
+    const { ctx, outbox, kv } = makeCoreCtx({ flags: ["refunds"], api: { post } });
+    const sale = aSale(splitSale);
+    await queueSale(outbox, sale, new Date());
+    const user = userEvent.setup();
+    render(<CoreRefunds ctx={ctx} />);
+    await user.click(await screen.findByRole("button", { name: /^Open sale/ }));
+
+    expect(screen.getByText(/refunded through the server/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Refund" })).toBeNull();
+    await user.type(screen.getByRole("textbox", { name: /Quantity to take back/ }), "1");
+    await user.type(screen.getByRole("textbox", { name: "Reason for the refund" }), "Wrong size");
+    await user.click(screen.getByRole("button", { name: "Refund online" }));
+
+    expect(await screen.findByText(/Refund of .* made\. Gift voucher code: ABCD-1234/)).toBeTruthy();
+    expect(post).toHaveBeenCalledTimes(1);
+    expect(post.mock.calls[0]![0]).toBe(`/shops/${SHOP}/sales/${sale.id}/refunds`);
+    expect(post.mock.calls[0]![1]).toMatchObject({ deviceId: DEVICE, staffId: STAFF, reason: "Wrong size", methodCode: "voucher", approvedBy: null, lines: [{ productId: "p-bread", quantity: 1 }] });
+    expect(typeof (post.mock.calls[0]![1] as { id: string }).id).toBe("string");
+    expect(records(await outbox.all(), "refund")).toEqual([]);
+    expect(((await kv.get<Array<{ refunded: Record<string, number> }>>("ledger.sales")) ?? [])[0]?.refunded).toEqual({ "p-bread": 1 });
+  });
+
+  it("says the till must be online, and sends nothing, when offline", async () => {
+    const post = vi.fn();
+    const { ctx } = makeCoreCtx({ flags: ["refunds"], api: { post }, online: false });
+    await sell(ctx.outbox, splitSale);
     const user = userEvent.setup();
     render(<CoreRefunds ctx={ctx} />);
 
     await user.click(await screen.findByRole("button", { name: /^Open sale/ }));
 
-    expect(screen.getByText(/has to be refunded online/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Refund" })).toBeNull();
+    expect(screen.getByText("This till is not online. Connect to the internet to refund this sale.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Refund online" })).toBeNull();
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it("shows a refusal in plain words, asks a cashier for a manager above the threshold, and a retry is the same refund", async () => {
+    const post = vi.fn()
+      .mockResolvedValueOnce(fail("refund.sale_unknown", "The sale is not on the server."))
+      .mockResolvedValueOnce(ok({ refundId: "r1", amountCents: 3600, methodCode: "voucher", voucher: null }));
+    const { ctx, kv } = makeCoreCtx({ flags: [{ flag: "refunds", settingsJson: JSON.stringify({ approvalThresholdCents: 1000 }) }], api: { post }, role: "cashier" });
+    await saveStaff(kv, [{ id: "boss-1", name: "Sipho", role: "manager", pinHash: await hashPin("4321") }, { id: STAFF, name: "Thandi", role: "cashier", pinHash: "x" }]);
+    await queueSale(ctx.outbox, aSale(splitSale), new Date());
+    const user = userEvent.setup();
+    render(<CoreRefunds ctx={ctx} />);
+    await user.click(await screen.findByRole("button", { name: /^Open sale/ }));
+    await user.type(screen.getByRole("textbox", { name: /Quantity to take back/ }), "2");
+    await user.type(screen.getByRole("textbox", { name: "Reason for the refund" }), "Faulty");
+
+    await user.click(screen.getByRole("button", { name: "Ask a manager" }));
+    await user.type(screen.getByLabelText("Manager PIN"), "4321");
+    await user.click(screen.getByRole("button", { name: "Approve" }));
+
+    expect(await screen.findByText("This sale has not reached the server yet. Wait for the till to finish sending, then try again.")).toBeTruthy();
+    const firstId = (post.mock.calls[0]![1] as { id: string }).id;
+    expect(post.mock.calls[0]![1]).toMatchObject({ approvedBy: "boss-1" });
+
+    await user.click(screen.getByRole("button", { name: "Ask a manager" }));
+    await user.type(screen.getByLabelText("Manager PIN"), "4321");
+    await user.click(screen.getByRole("button", { name: "Approve" }));
+    await waitFor(() => expect(screen.getByText(/Refund of .* made\./)).toBeTruthy());
+    expect((post.mock.calls[1]![1] as { id: string }).id).toBe(firstId);
   });
 
   it("says refunds are off when the pack does not switch them on", async () => {

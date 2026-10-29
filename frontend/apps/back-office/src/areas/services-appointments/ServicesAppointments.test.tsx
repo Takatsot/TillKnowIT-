@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fail, ok } from "@tillknowit/domain";
 import type { Api } from "@tillknowit/api-client";
+import { withCaller } from "../selling-common/testing";
 import { SessionProvider, type Session } from "@tillknowit/app-kit";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -19,7 +20,7 @@ const appt = {
 };
 
 function mount(api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}><ServicesAppointments /></SessionProvider>);
+  render(<SessionProvider api={withCaller(api)} initial={session}><ServicesAppointments /></SessionProvider>);
 }
 
 const get = (h: Partial<Record<"services" | "appointments" | "rules", unknown>> = {}) => vi.fn(async (path: string, _query?: Record<string, unknown>) => {

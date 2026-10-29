@@ -133,3 +133,21 @@ describe("customers feature", () => {
     expect(screen.queryByText("Loyalty points")).toBeNull();
   });
 });
+
+describe("customer to the sale on the till", () => {
+  it("attaches the customer to the sale being rung up and shows the Sell tab", async () => {
+    const user = userEvent.setup();
+    const setCustomer = vi.fn();
+    const openSell = vi.fn();
+    const { ctx } = makeCtx({ flags: ["customers"], api: { get: vi.fn(async () => ok([anele])) as never }, sale: { addLine: vi.fn(), addProduct: vi.fn(), setCustomer }, openSell });
+    render(<Customers ctx={ctx} />);
+    await user.type(screen.getByRole("textbox", { name: /Find a customer/ }), "082123");
+    await user.click(screen.getByRole("button", { name: "Find" }));
+    await user.click(await screen.findByRole("button", { name: "Open Anele Dlamini" }));
+
+    await user.click(screen.getByRole("button", { name: "Add Anele Dlamini to the sale on the till" }));
+
+    expect(setCustomer).toHaveBeenCalledWith("c1", "Anele Dlamini");
+    expect(openSell).toHaveBeenCalled();
+  });
+});

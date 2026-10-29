@@ -1,4 +1,4 @@
-import { formatDate, formatRand, useAction, useApi, useMessages, useSession } from "@tillknowit/app-kit";
+import { formatDate, formatRand, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
 import { Badge, Button, Card, Inline, Notice, Stack, Table, TextField, TextAreaField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { messages, type SchoolsKey } from "./messages";
@@ -116,7 +116,8 @@ export function ReconciliationTab() {
   const api = useApi();
   const { personId } = useSession();
   const [day, setDay] = useState(() => formatDate(new Date()));
-  const [runs, setRuns] = useState<Reconciliation[]>([]);
+  const list = useLoad(() => api.get<Reconciliation[]>("/admin/wallet-reconciliations", { callerPersonId: personId }), [personId]);
+  const runs = list.data ?? [];
   const [open, setOpen] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [done, setDone] = useState("");
@@ -126,13 +127,13 @@ export function ReconciliationTab() {
   async function submit() {
     setDone("");
     const r = await run.run();
-    if (r.ok) setRuns((rs) => [r.value, ...rs.filter((x) => x.id !== r.value.id)]);
+    if (r.ok) list.reload();
   }
 
   async function finish(id: string) {
     const r = await resolve.run(id);
     if (r.ok) {
-      setRuns((rs) => rs.map((x) => (x.id === id ? r.value : x)));
+      list.reload();
       setDone(t("resolveDone", { day: r.value.day }));
       setOpen(null);
       setNote("");
@@ -153,6 +154,8 @@ export function ReconciliationTab() {
         </form>
         {run.error && <Notice kind="danger">{run.error.message}</Notice>}
         {done && <Notice kind="success">{done}</Notice>}
+        {list.error && <Notice kind="danger">{list.error.message}</Notice>}
+        {!list.error && !list.loading && runs.length === 0 && <Notice kind="info">{t("reconEmpty")}</Notice>}
         {runs.map((r) => (
           <Card key={r.id} title={t("reconResult", { day: r.day })}>
             <Stack>

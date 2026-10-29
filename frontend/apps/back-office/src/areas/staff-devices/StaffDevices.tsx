@@ -1,11 +1,11 @@
 import { isValidPin } from "@tillknowit/domain";
-import { useAction, useApi, useMessages, useSession } from "@tillknowit/app-kit";
+import { formatDateTime, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
 import { Badge, Button, Card, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { messages } from "./messages";
 
-interface StaffRow { id: string; name: string; role: string; disabled: boolean }
-interface DeviceRow { id: string; name: string; status: "pending" | "approved" | "wiping" }
+interface StaffRow { staffId: string; name: string; phone: string; role: string; disabled: boolean }
+interface DeviceRow { deviceId: string; name: string; status: string; lastSeenAt: string | null; wipeRequested: boolean }
 
 export function StaffDevices() {
   return (
@@ -19,8 +19,9 @@ export function StaffDevices() {
 function StaffCard() {
   const t = useMessages(messages);
   const api = useApi();
-  const { shopId } = useSession();
-  const [rows, setRows] = useState<StaffRow[]>([]);
+  const { shopId, personId } = useSession();
+  const list = useLoad(() => (shopId === "" ? Promise.resolve({ ok: true as const, value: [] as StaffRow[] }) : api.get<StaffRow[]>(`/shops/${shopId}/staff`, { callerPersonId: personId })), [shopId, personId]);
+  const rows = list.data ?? [];
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("cashier");
@@ -38,25 +39,25 @@ function StaffCard() {
     setPinError(null);
     const r = await add.run();
     if (r.ok) {
-      setRows((rs) => [...rs, { id: r.value.membershipId, name: name.trim(), role, disabled: false }]);
+      list.reload();
       setNote(t("staffAdded", { name: name.trim(), id: r.value.membershipId }));
       setName(""); setPhone(""); setPin("");
     }
   }
 
   async function changePin(row: StaffRow) {
-    const next = pins[row.id] ?? "";
+    const next = pins[row.staffId] ?? "";
     setNote("");
     if (!isValidPin(next)) { setPinError(t("pinInvalid")); return; }
     setPinError(null);
-    const r = await update.run(row.id, { pin: next });
-    if (r.ok) { setPins((p) => ({ ...p, [row.id]: "" })); setNote(t("pinChanged", { name: row.name })); }
+    const r = await update.run(row.staffId, { pin: next });
+    if (r.ok) { setPins((p) => ({ ...p, [row.staffId]: "" })); setNote(t("pinChanged", { name: row.name })); }
   }
 
   async function toggle(row: StaffRow) {
     setNote("");
-    const r = await update.run(row.id, { disabled: !row.disabled });
-    if (r.ok) setRows((rs) => rs.map((x) => (x.id === row.id ? { ...x, disabled: !row.disabled } : x)));
+    const r = await update.run(row.staffId, { disabled: !row.disabled });
+    if (r.ok) list.reload();
   }
 
   return (
@@ -81,20 +82,21 @@ function StaffCard() {
           </Stack>
         </form>
         {update.error && <Notice kind="danger">{update.error.message}</Notice>}
+        {list.error && <Notice kind="danger">{list.error.message}</Notice>}
         <Table
           rows={rows}
-          rowKey={(r) => r.id}
+          rowKey={(r) => r.staffId}
           empty={t("staffEmpty")}
           columns={[
             { header: t("colName"), cell: (r) => r.name },
             { header: t("colRole"), cell: (r) => (r.role === "manager" ? t("manager") : t("cashier")) },
             { header: t("colStatus"), cell: (r) => <Badge>{r.disabled ? t("disabled") : t("active")}</Badge> },
-            { header: t("colId"), cell: (r) => <code>{r.id}</code> },
+            { header: t("colId"), cell: (r) => <code>{r.staffId}</code> },
             {
               header: t("colActions"),
               cell: (r) => (
                 <Inline>
-                  <TextField label={t("newPin", { name: r.name })} inputMode="numeric" autoComplete="off" value={pins[r.id] ?? ""} onChange={(e) => setPins((p) => ({ ...p, [r.id]: e.target.value }))} />
+                  <TextField label={t("newPin", { name: r.name })} inputMode="numeric" autoComplete="off" value={pins[r.staffId] ?? ""} onChange={(e) => setPins((p) => ({ ...p, [r.staffId]: e.target.value }))} />
                   <Button variant="secondary" disabled={update.busy} onClick={() => void changePin(r)}>{t("changePin", { name: r.name })}</Button>
                   <Button variant="quiet" disabled={update.busy} onClick={() => void toggle(r)}>{r.disabled ? t("enable", { name: r.name }) : t("disable", { name: r.name })}</Button>
                 </Inline>
@@ -110,8 +112,10 @@ function StaffCard() {
 function DevicesCard() {
   const t = useMessages(messages);
   const api = useApi();
-  const { shopId } = useSession();
-  const [rows, setRows] = useState<DeviceRow[]>([]);
+  const { shopId, personId } = useSession();
+  const list = useLoad(() => (shopId === "" ? Promise.resolve({ ok: true as const, value: [] as DeviceRow[] }) : api.get<DeviceRow[]>(`/shops/${shopId}/devices`, { callerPersonId: personId })), [shopId, personId]);
+  const rows = list.data ?? [];
+  const [setupFor, setSetupFor] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
   const [confirming, setConfirming] = useState<string | null>(null);
@@ -123,7 +127,8 @@ function DevicesCard() {
     setNote("");
     const r = await register.run();
     if (r.ok) {
-      setRows((rs) => [...rs, { id: r.value.deviceId, name: name.trim(), status: "pending" }]);
+      setSetupFor(r.value.deviceId);
+      list.reload();
       setNote(t("registered", { name: name.trim() }));
       setName("");
     }
@@ -131,18 +136,19 @@ function DevicesCard() {
 
   async function approve(d: DeviceRow) {
     setNote("");
-    const r = await act.run(`/devices/${d.id}/approve`);
-    if (r.ok) { setRows((rs) => rs.map((x) => (x.id === d.id ? { ...x, status: "approved" } : x))); setNote(t("approvedNote", { name: d.name })); }
+    const r = await act.run(`/devices/${d.deviceId}/approve`);
+    if (r.ok) { list.reload(); setNote(t("approvedNote", { name: d.name })); }
   }
 
   async function wipe(d: DeviceRow) {
     setNote("");
     setConfirming(null);
-    const r = await act.run(`/devices/${d.id}/wipe`);
-    if (r.ok) { setRows((rs) => rs.map((x) => (x.id === d.id ? { ...x, status: "wiping" } : x))); setNote(t("wipeRequested", { name: d.name })); }
+    const r = await act.run(`/devices/${d.deviceId}/wipe`);
+    if (r.ok) { list.reload(); setNote(t("wipeRequested", { name: d.name })); }
   }
 
-  const status = (d: DeviceRow) => (d.status === "pending" ? t("pending") : d.status === "approved" ? t("approved") : t("wiping"));
+  const status = (d: DeviceRow) => (d.wipeRequested ? t("wiping") : d.status === "pending" ? t("pending") : d.status === "approved" ? t("approved") : t("deviceDisabled"));
+  const setupDevice = rows.find((d) => d.deviceId === setupFor);
 
   return (
     <Card title={t("deviceHeading")}>
@@ -159,25 +165,28 @@ function DevicesCard() {
           </Stack>
         </form>
         {act.error && <Notice kind="danger">{act.error.message}</Notice>}
+        {list.error && <Notice kind="danger">{list.error.message}</Notice>}
         <Table
           rows={rows}
-          rowKey={(d) => d.id}
+          rowKey={(d) => d.deviceId}
           empty={t("devicesEmpty")}
           columns={[
             { header: t("colTill"), cell: (d) => d.name },
             { header: t("colTillStatus"), cell: (d) => <Badge>{status(d)}</Badge> },
+            { header: t("colLastSeen"), cell: (d) => (d.lastSeenAt ? formatDateTime(d.lastSeenAt) : t("neverSeen")) },
             {
               header: t("colActions"),
               cell: (d) => (
                 <Inline>
                   {d.status === "pending" && <Button disabled={act.busy} onClick={() => void approve(d)}>{t("approve", { name: d.name })}</Button>}
-                  {confirming === d.id ? (
+                  <Button variant="quiet" onClick={() => setSetupFor(d.deviceId)}>{t("showSetup", { name: d.name })}</Button>
+                  {confirming === d.deviceId ? (
                     <>
                       <Button variant="secondary" disabled={act.busy} onClick={() => void wipe(d)}>{t("confirmWipe", { name: d.name })}</Button>
                       <Button variant="quiet" onClick={() => setConfirming(null)}>{t("keep")}</Button>
                     </>
                   ) : (
-                    <Button variant="quiet" disabled={act.busy || d.status === "wiping"} onClick={() => setConfirming(d.id)}>{t("wipe", { name: d.name })}</Button>
+                    <Button variant="quiet" disabled={act.busy || d.wipeRequested} onClick={() => setConfirming(d.deviceId)}>{t("wipe", { name: d.name })}</Button>
                   )}
                 </Inline>
               ),
@@ -185,13 +194,13 @@ function DevicesCard() {
           ]}
         />
         {confirming && <Notice kind="warning">{t("wipeNote")}</Notice>}
-        {rows.map((d) => (
-          <Card key={d.id} title={t("setupHeading", { name: d.name })}>
+        {setupDevice && [setupDevice].map((d) => (
+          <Card key={d.deviceId} title={t("setupHeading", { name: d.name })}>
             <p>{t("setupHint")}</p>
             <dl>
               <dt>{t("setupShop")}</dt><dd><code>{shopId}</code></dd>
-              <dt>{t("setupDevice")}</dt><dd><code>{d.id}</code></dd>
-              <dt>{t("setupJson")}</dt><dd><code>{JSON.stringify({ shopId, deviceId: d.id })}</code></dd>
+              <dt>{t("setupDevice")}</dt><dd><code>{d.deviceId}</code></dd>
+              <dt>{t("setupJson")}</dt><dd><code>{JSON.stringify({ shopId, deviceId: d.deviceId })}</code></dd>
             </dl>
           </Card>
         ))}

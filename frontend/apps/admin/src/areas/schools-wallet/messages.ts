@@ -6,8 +6,10 @@ const en = {
   busy: "Working...",
   // opening a school
   openHeading: "Open a school",
-  openIntro: "The server has no list of schools, so open one by its id. A school you register here opens by itself.",
-  schoolId: "School id",
+  openIntro: "Pick a school from the list to work on it. A school you register on the School tab opens by itself.",
+  schoolPick: "School",
+  pickSchool: "Choose a school",
+  noSchools: "No schools are registered yet. Register one on the School tab.",
   open: "Open school",
   opened: "Working on {name}.",
   noSchool: "Open or register a school first.",
@@ -150,7 +152,8 @@ const en = {
   noPayouts: "No payouts in this period.",
   // reconciliation
   reconHeading: "Wallet reconciliation",
-  reconIntro: "Compares what the payment partner holds with our ledger for a day. The server has no list of past runs, so only runs made on this screen are shown. Each run is recorded.",
+  reconIntro: "Compares what the payment partner holds with our ledger for a day. Every run is recorded and listed here. Open differences can be resolved with a note.",
+  reconEmpty: "No reconciliations have been run yet.",
   reconRun: "Run reconciliation",
   reconResult: "Reconciliation for {day}",
   partnerTotal: "Partner holds",

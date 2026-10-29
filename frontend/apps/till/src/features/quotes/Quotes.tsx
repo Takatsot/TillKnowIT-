@@ -3,7 +3,7 @@ import { formatRand, newId } from "@tillknowit/domain";
 import { useState } from "react";
 import type { TillContext } from "../../feature";
 import { ErrorNotice, saveFile, suggestRef, TabGate, useAction, useKitT, useLoad, useT, who, type Caller, type Translate } from "../till-kit/kit";
-import { LinesEditor } from "../till-kit/LinesEditor";
+import { costOf, divisorOf, LinesEditor, lineCents } from "../till-kit/LinesEditor";
 import { PayPanel } from "../till-kit/PayPanel";
 import { addDays, saDate } from "../till-kit/time";
 import type { TicketLineDto, TicketResponse } from "../till-kit/types";
@@ -43,6 +43,20 @@ function QuotesBody({ ctx, caller }: { ctx: TillContext; caller: Caller }) {
       setInfo("");
       setScreen({ kind: "converted", quote: q, ticket: r.value });
     }
+  };
+  /** Puts the quote's goods into the sale being rung up on the Sell tab, at the quoted prices, then shows that tab. */
+  const addToSale = (q: Quote) => {
+    const sale = ctx.sale;
+    if (!sale) return;
+    for (const l of q.lines) {
+      // A weighed line goes in as one item at its quoted total, because its quantity is grams.
+      const r = sale.addLine(divisorOf(l) === 1000
+        ? { productId: l.productId, name: l.name, priceCents: lineCents(l), costCents: costOf(ctx.catalogue, l.productId), quantity: 1 }
+        : { productId: l.productId, name: l.name, priceCents: l.priceCents, costCents: costOf(ctx.catalogue, l.productId), quantity: l.quantity });
+      if (!r.ok) return setInfo(t("addToSale.failed", { name: l.name, message: r.message }));
+    }
+    setInfo(t("addToSale.done", { number: q.number }));
+    ctx.openSell?.();
   };
   const cancel = async (q: Quote) => {
     const r = await action.run(() => ctx.api.post<void>(`/shops/${caller.shopId}/quotes/${q.id}/cancel`, who(caller)));
@@ -117,6 +131,7 @@ function QuotesBody({ ctx, caller }: { ctx: TillContext; caller: Caller }) {
                     {q.status === "open" ? (
                       <>
                         <Button aria-label={t("act.convert", { number: q.number })} disabled={action.busy} onClick={() => void convert(q)}>{t("act.convert", { number: q.number })}</Button>
+                        {ctx.sale ? <Button variant="secondary" aria-label={t("act.addToSale", { number: q.number })} onClick={() => addToSale(q)}>{t("act.addToSale", { number: q.number })}</Button> : null}
                         <Button variant="quiet" aria-label={t("act.cancel", { number: q.number })} onClick={() => setSure(q.id)}>{t("act.cancel", { number: q.number })}</Button>
                       </>
                     ) : null}

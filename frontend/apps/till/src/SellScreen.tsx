@@ -1,7 +1,7 @@
 import type { Api } from "@tillknowit/api-client";
 import { Button } from "@tillknowit/design-system";
 import {
-  MAX_PAYMENT_PARTS, addItem, addWeighed, creditSaleRecord, emptyBasket, fail, formatRand, newId, ok, parseRandToCents, queueBuilt, queueSale, quickCashOptions, removeItem, scan, setQuantity, setTip,
+  MAX_PAYMENT_PARTS, addItem, addWeighed, creditSaleRecord, emptyBasket, fail, formatRand, newId, ok, parseRandToCents, queueBuilt, queueSale, quickCashOptions, clearPriceOverride, removeItem, scan, setPriceOverride, setQuantity, setTip,
   summariseBasket, toSaleUpload, wouldExceedLimit,
   type Basket, type BasketEntry, type CatalogueItem, type EmbeddedBarcodeRules, type Outbox, type Payment, type PromotionDef, type Result,
 } from "@tillknowit/domain";
@@ -9,10 +9,17 @@ import { PAPER_COLUMNS, buildSlip, readStableWeight, type SlipData, type WeighOp
 import { translate, type LanguageCode, type MessageKey } from "@tillknowit/i18n";
 import type { Features } from "@tillknowit/packs";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ManagerApproval } from "./coreKit";
 import type { CreditAccount } from "./creditAccounts";
 import type { SaleBridge, TillHardware } from "./feature";
+import { getPoints, newPointsReference, redeemPoints } from "./features/customers/customerApi";
+import type { Caller } from "./features/till-kit/kit";
+import { newRedemptionReference, redeemVoucher } from "./features/vouchers/voucherApi";
+import { takeWalletPayment, type WalletItem } from "./features/wallet-pay/walletApi";
+import type { KeyValueStore } from "./localData";
+import { queuePendingSerials } from "./pendingSerials";
 import styles from "./SellScreen.module.css";
-import type { StaffRecord } from "./staffStore";
+import { loadStaff, type StaffRecord } from "./staffStore";
 import type { DeviceConfig } from "./syncRunner";
 import { hardwareText, tm, type TillKey } from "./tillMessages";
 
@@ -37,6 +44,10 @@ interface Props {
   /** The credit customers this till knows. */
   creditAccounts?: readonly CreditAccount[];
   shopName?: string;
+  /** The till's small database: where the managers who can approve a price come from, and where serial numbers wait for their sale. */
+  kv?: KeyValueStore;
+  /** Called after serial numbers were saved for a sale, so the till can send them as soon as the sale has arrived. */
+  onSerialsQueued?: () => void;
   /** Lets other tabs put things in this sale. Called with the bridge when this screen is showing, and with null when it goes away. */
   onBridge?: (bridge: SaleBridge | null) => void;
   weighOptions?: WeighOptions;
@@ -51,7 +62,11 @@ interface SplitPart {
   amount: string;
   reference: string;
   received: string;
+  /** Taken from a voucher, points or a wallet already: the money has left, so the amount and the reference can no longer change. */
+  locked?: boolean;
 }
+
+type OnlineForm = "voucher" | "points" | "wallet";
 
 interface Receipt {
   saleId: string;
@@ -59,9 +74,13 @@ interface Receipt {
   cash: boolean;
   url: string | null;
   note: string;
+  /** Items just sold that need serial numbers, with how many. Empty once they were saved or skipped. */
+  serials: Array<{ productId: string; name: string; count: number }>;
 }
 
 const MAX_GRAMS_TEXT = /^\d+$/;
+/** The most serial fields shown for one product. The server takes up to 200 numbers at a time. */
+const MAX_SERIAL_FIELDS = 50;
 
 /** A line at an agreed price (a ticket total, a service). It is never discounted and the same product adds into one line, like a price label from a scale. */
 function withFixedLine(basket: Basket, line: { productId: string; name: string; priceCents: number; costCents?: number; quantity?: number }): Result<Basket> {
@@ -81,7 +100,7 @@ function withFixedLine(basket: Basket, line: { productId: string; name: string; 
  * after the sale is saved: if they fail the sale stands and the cashier is told in plain words.
  */
 export function SellScreen({
-  staff, language, catalogue, promotions, barcodeRules, outbox, onSaleQueued, clock = () => new Date(), features, hardware, api, device, online = true, creditAccounts = [], shopName, onBridge, weighOptions,
+  staff, language, catalogue, promotions, barcodeRules, outbox, onSaleQueued, clock = () => new Date(), features, hardware, api, device, online = true, creditAccounts = [], shopName, kv, onSerialsQueued, onBridge, weighOptions,
 }: Props) {
   const t = (key: MessageKey, params?: Record<string, string | number>) => translate(language, key, params);
   const x = (key: TillKey, params?: Record<string, string | number>) => tm(language, key, params);
@@ -100,6 +119,22 @@ export function SellScreen({
   const [customerName, setCustomerName] = useState("");
   const [found, setFound] = useState<Array<{ id: string; name: string; phone: string }>>([]);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
+  // A manager's price override: which line is being changed, what was typed, and the names of the managers who approved (by staff id).
+  const [priceFor, setPriceFor] = useState<{ productId: string; text: string; cents: number | null } | null>(null);
+  const [approvers, setApprovers] = useState<Record<string, string>>({});
+  // Vouchers, points and the school wallet, taken from the split payment panel.
+  const [onlineForm, setOnlineForm] = useState<OnlineForm | null>(null);
+  const [onlineAmount, setOnlineAmount] = useState("");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [pointsText, setPointsText] = useState("");
+  const [walletToken, setWalletToken] = useState("");
+  const [walletKind, setWalletKind] = useState<"qr" | "card">("qr");
+  const [onlineBusy, setOnlineBusy] = useState(false);
+  const [serialText, setSerialText] = useState<Record<string, string>>({});
+  // The id of the sale being rung up. It is made once, because a wallet payment is tied to it, and it becomes the sale's id when the sale is saved.
+  const saleIdRef = useRef<string | null>(null);
+  // References for online redemptions, kept per attempt so pressing again after a lost answer is the same redemption and never takes the money twice.
+  const attemptRefs = useRef(new Map<string, string>());
 
   const setBasket = (next: Basket) => {
     basketRef.current = next;
@@ -138,7 +173,10 @@ export function SellScreen({
         setReceipt(null);
         return ok(undefined);
       },
-      setCustomer: (customerId) => setBasket({ ...basketRef.current, customerId }),
+      setCustomer: (customerId, name) => {
+        setBasket({ ...basketRef.current, customerId });
+        setCustomerName(customerId ? name ?? "" : "");
+      },
     });
     return () => onBridge(null);
   }, [onBridge, catalogue]);
@@ -264,10 +302,14 @@ export function SellScreen({
 
   async function finish(payments: Payment[]) {
     const now = clock();
-    const saleId = newId(now.getTime());
+    const saleId = saleIdRef.current ?? newId(now.getTime());
     const sale = toSaleUpload(basket, summary, payments, { saleId, staffId: staff.id }, now);
     if (!sale.ok) return setMessage(problem(sale.code));
     await queueSale(outbox, sale.value, now);
+    saleIdRef.current = null;
+    attemptRefs.current.clear();
+    // Items that take serial numbers are offered right away; the numbers wait on the till until the sale has reached the server.
+    const serials = kv ? summary.lines.filter((l) => l.unitDivisor === 1 && catalogue.find((c) => c.id === l.productId)?.requiresSerial).map((l) => ({ productId: l.productId, name: l.name, count: Math.min(l.quantity, MAX_SERIAL_FIELDS) })) : [];
 
     // A credit sale also needs its entry in the customer's account; the server does not make it. It is queued just after the sale so the sale arrives first.
     const credit = payments.length === 1 && payments[0]?.method === "credit" ? payments[0] : null;
@@ -291,9 +333,12 @@ export function SellScreen({
     setTipText("");
     setCustomerName("");
     setParts([]);
+    setPriceFor(null);
+    setOnlineForm(null);
+    setSerialText({});
     setMessage("");
     setSaved(base);
-    setReceipt({ saleId, slip, cash, url: null, note: "" });
+    setReceipt({ saleId, slip, cash, url: null, note: "", serials });
     onSaleQueued?.();
 
     const problems = await printAndOpen(slip, cash);
@@ -371,6 +416,166 @@ export function SellScreen({
 
   const changePart = (at: number, change: Partial<SplitPart>) => setParts(parts.map((p, i) => (i === at ? { ...p, ...change } : p)));
 
+  // ---- a manager's price override ----
+
+  const caller: Caller | null = device ? { shopId: device.shopId, deviceId: device.deviceId, staffId: staff.id } : null;
+
+  function askForPrice() {
+    if (!priceFor) return;
+    const entry = basket.entries.find((e) => e.productId === priceFor.productId);
+    const cents = parseRandToCents(priceFor.text);
+    if (!entry || cents === null) return setMessage(x("sell.priceInvalid"));
+    if (cents >= entry.unitPriceCents) return setMessage(x("sell.priceNotLower", { price: rand(entry.unitPriceCents) }));
+    setMessage("");
+    setPriceFor({ ...priceFor, cents });
+  }
+
+  /** The manager's PIN was right (ManagerApproval checked it on the till): the line takes the lower price and carries who approved it. */
+  async function approvePrice(managerId: string) {
+    if (!priceFor || priceFor.cents === null) return;
+    const next = setPriceOverride(basketRef.current, priceFor.productId, priceFor.cents, managerId);
+    setPriceFor(null);
+    if (!next.ok) return setMessage(next.code === "basket.label_line" ? x("sell.priceNoLabel") : problem(next.code));
+    const manager = (await loadStaff(kv)).find((m) => m.id === managerId);
+    setApprovers((a) => ({ ...a, [managerId]: manager?.name ?? "" }));
+    setBasket(next.value);
+    setMessage("");
+  }
+
+  // ---- vouchers, points and the school wallet (online only) ----
+
+  const onlineReady = online && api !== undefined && caller !== null;
+  const voucherOn = features?.isOn("vouchers") ?? false;
+  const pointsOn = features?.isOn("loyalty") ?? false;
+  const walletOn = features?.isOn("school_wallet") ?? false;
+  const currentSaleId = () => (saleIdRef.current ??= newId(clock().getTime()));
+
+  /** The reference of one attempt: the same while the same thing is tried again, so a lost answer never means money taken twice. */
+  function attemptRef(key: string, make: () => string): string {
+    const found = attemptRefs.current.get(key);
+    if (found) return found;
+    const made = make();
+    attemptRefs.current.set(key, made);
+    return made;
+  }
+
+  const isBlank = (p: SplitPart) => !p.locked && p.amount.trim() === "" && p.reference.trim() === "" && p.received.trim() === "";
+
+  /** Why a voucher or wallet part cannot be added now, or null. A blank part and an unfinished one of the same method make room. */
+  function partBlock(method: "voucher" | "wallet"): string | null {
+    if (parts.some((p) => p.locked && p.method === method)) return method === "voucher" ? x("sell.voucherOnce") : x("sell.walletOnce");
+    const kept = parts.filter((p) => p.locked || !(isBlank(p) || p.method === method));
+    return kept.length >= MAX_PAYMENT_PARTS ? x("sell.splitMax", { count: MAX_PAYMENT_PARTS }) : null;
+  }
+
+  function takePart(method: "voucher" | "wallet", cents: number, reference: string) {
+    const part: SplitPart = { method, amount: (cents / 100).toFixed(2), reference, received: "", locked: true };
+    setParts((current) => [...current.filter((p) => p.locked || !(isBlank(p) || p.method === method)), part]);
+    setOnlineForm(null);
+    setOnlineAmount("");
+  }
+
+  function openOnline(form: OnlineForm) {
+    setMessage("");
+    setOnlineForm(onlineForm === form ? null : form);
+    setOnlineAmount(splitLeft > 0 ? (splitLeft / 100).toFixed(2) : "");
+  }
+
+  const wantedAmount = (): number | null => {
+    const cents = parseRandToCents(onlineAmount);
+    return cents !== null && cents > 0 && cents <= splitLeft ? cents : null;
+  };
+
+  async function takeVoucher() {
+    if (!api || !caller || onlineBusy) return;
+    const blocked = partBlock("voucher");
+    if (blocked) return setMessage(blocked);
+    const code = voucherCode.trim();
+    if (code === "") return setMessage(x("sell.voucherCodeNeeded"));
+    const cents = wantedAmount();
+    if (cents === null) return setMessage(x("sell.onlineAmountInvalid"));
+    setOnlineBusy(true);
+    const key = `voucher|${code}|${cents}`;
+    const r = await redeemVoucher(api, caller, { code, amountCents: cents, reference: attemptRef(key, newRedemptionReference), saleId: currentSaleId() });
+    setOnlineBusy(false);
+    if (!r.ok) return setMessage(r.message);
+    attemptRefs.current.delete(key);
+    setVoucherCode("");
+    setMessage("");
+    takePart("voucher", cents, r.value.reference);
+  }
+
+  async function takePoints() {
+    if (!api || !caller || onlineBusy) return;
+    if (!basket.customerId) return setMessage(x("sell.pointsNeedCustomer"));
+    const blocked = partBlock("voucher");
+    if (blocked) return setMessage(blocked);
+    const n = Number(pointsText);
+    if (!Number.isInteger(n) || n <= 0) return setMessage(x("sell.pointsInvalid"));
+    setOnlineBusy(true);
+    // Points cannot be put back, so check what they are worth before taking them: a redemption bigger than what is left would leave the sale unable to balance.
+    const info = await getPoints(api, caller, basket.customerId);
+    if (!info.ok) {
+      setOnlineBusy(false);
+      return setMessage(info.message);
+    }
+    if (n > info.value.points) {
+      setOnlineBusy(false);
+      return setMessage(x("sell.pointsTooMany", { points: info.value.points }));
+    }
+    const worth = info.value.points > 0 ? Math.floor((info.value.valueCents * n) / info.value.points) : 0;
+    if (worth > splitLeft) {
+      setOnlineBusy(false);
+      return setMessage(x("sell.pointsTooMuch", { value: rand(worth), left: rand(Math.max(splitLeft, 0)) }));
+    }
+    const key = `points|${basket.customerId}|${n}`;
+    const r = await redeemPoints(api, caller, basket.customerId, n, attemptRef(key, newPointsReference));
+    setOnlineBusy(false);
+    if (!r.ok) return setMessage(r.message);
+    attemptRefs.current.delete(key);
+    setPointsText("");
+    setMessage("");
+    // Points are paid as a "voucher" part with the redemption's reference (see toSaleUpload).
+    takePart("voucher", r.value.valueCents, r.value.redemptionReference);
+  }
+
+  /** The sale's lines as the wallet wants them, to check what the child may buy. Weighed and labelled lines go in as one item at their price. */
+  const walletItems = (): WalletItem[] =>
+    summary.lines.map((l) => (l.unitDivisor === 1 && l.fixedTotalCents === undefined
+      ? { productId: l.productId, categoryCode: null, name: l.name, quantity: l.quantity, priceCents: l.unitPriceCents }
+      : { productId: l.productId, categoryCode: null, name: l.name, quantity: 1, priceCents: l.totalCents }));
+
+  async function takeWallet() {
+    if (!api || !caller || onlineBusy) return;
+    const blocked = partBlock("wallet");
+    if (blocked) return setMessage(blocked);
+    if (walletToken.trim() === "") return setMessage(x("sell.walletTokenNeeded"));
+    const cents = wantedAmount();
+    if (cents === null) return setMessage(x("sell.onlineAmountInvalid"));
+    setOnlineBusy(true);
+    // The sale's own id is the wallet's request id: asking again for the same sale never charges the wallet twice.
+    const r = await takeWalletPayment(api, caller, { saleId: currentSaleId(), amountCents: cents, items: walletItems(), token: walletToken, kind: walletKind });
+    setOnlineBusy(false);
+    if (!r.ok) return setMessage(r.message);
+    setWalletToken("");
+    takePart("wallet", r.value.amountCents, r.value.purchaseId);
+    setMessage(x("sell.walletTaken", { amount: rand(r.value.amountCents), name: r.value.holderName }));
+  }
+
+  // ---- serial numbers ----
+
+  async function saveSerials() {
+    if (!receipt || !kv) return;
+    const items = receipt.serials
+      .flatMap((s) => Array.from({ length: s.count }, (_, i) => ({ productId: s.productId, serial: (serialText[`${s.productId}#${i}`] ?? "").trim() })))
+      .filter((i) => i.serial !== "");
+    if (items.length === 0) return setReceipt({ ...receipt, note: x("sell.serialsNone") });
+    await queuePendingSerials(kv, receipt.saleId, items);
+    setSerialText({});
+    setReceipt({ ...receipt, serials: [], note: x("sell.serialsSaved") });
+    onSerialsQueued?.();
+  }
+
   // ---- screens ----
 
   if (weighing) {
@@ -420,13 +625,13 @@ export function SellScreen({
           <div key={i} className={styles.part}>
             <label className={styles.label}>
               {x("sell.splitMethod", { n: i + 1 })}
-              <select className={styles.select} value={p.method} onChange={(e) => changePart(i, { method: e.target.value as SplitMethod })}>
+              <select className={styles.select} value={p.method} disabled={p.locked} onChange={(e) => changePart(i, { method: e.target.value as SplitMethod })}>
                 {splitMethods.filter((m) => m === p.method || !parts.some((o) => o.method === m)).map((m) => <option key={m} value={m}>{m === "cash" ? t("sell.cash") : m === "card" ? t("sell.card") : m === "qr" ? t("sell.qr") : m === "wallet" ? x("sell.wallet") : x("sell.voucher")}</option>)}
               </select>
             </label>
             <label className={styles.label}>
               {x("sell.splitAmount", { n: i + 1 })}
-              <input className={styles.input} inputMode="decimal" value={p.amount} onChange={(e) => changePart(i, { amount: e.target.value })} />
+              <input className={styles.input} inputMode="decimal" value={p.amount} readOnly={p.locked} onChange={(e) => changePart(i, { amount: e.target.value })} />
             </label>
             {p.method === "cash" && (
               <label className={styles.label}>
@@ -437,12 +642,50 @@ export function SellScreen({
             {(p.method === "wallet" || p.method === "voucher") && (
               <label className={styles.label}>
                 {x("sell.splitRef", { n: i + 1 })}
-                <input className={styles.input} value={p.reference} onChange={(e) => changePart(i, { reference: e.target.value })} />
+                <input className={styles.input} value={p.reference} readOnly={p.locked} onChange={(e) => changePart(i, { reference: e.target.value })} />
               </label>
             )}
-            {parts.length > 1 && <Button variant="quiet" aria-label={x("sell.splitRemove", { n: i + 1 })} onClick={() => setParts(parts.filter((_, k) => k !== i))}>✕</Button>}
+            {parts.length > 1 && !p.locked && <Button variant="quiet" aria-label={x("sell.splitRemove", { n: i + 1 })} onClick={() => setParts(parts.filter((_, k) => k !== i))}>✕</Button>}
+            {p.locked && <span className={styles.message}>{x("sell.partTaken", { reference: p.reference })}</span>}
           </div>
         ))}
+        {(voucherOn || pointsOn || walletOn) && (
+          <div className={styles.section} role="group" aria-label={x("sell.onlinePay")}>
+            {!online ? <p className={styles.warning}>{x("sell.onlineOffline")}</p> : !onlineReady ? <p className={styles.warning}>{x("sell.onlineNoDevice")}</p> : null}
+            <div className={styles.chips}>
+              {voucherOn && <Button variant="secondary" disabled={!onlineReady} aria-pressed={onlineForm === "voucher"} onClick={() => openOnline("voucher")}>{x("sell.useVoucher")}</Button>}
+              {pointsOn && <Button variant="secondary" disabled={!onlineReady} aria-pressed={onlineForm === "points"} onClick={() => openOnline("points")}>{x("sell.usePoints")}</Button>}
+              {walletOn && <Button variant="secondary" disabled={!onlineReady} aria-pressed={onlineForm === "wallet"} onClick={() => openOnline("wallet")}>{x("sell.useWallet")}</Button>}
+            </div>
+            {onlineReady && onlineForm === "voucher" && (
+              <form className={styles.part} onSubmit={(e) => { e.preventDefault(); void takeVoucher(); }}>
+                <label className={styles.label}>{x("sell.voucherCode")}<input className={styles.input} autoComplete="off" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} /></label>
+                <label className={styles.label}>{x("sell.onlineAmount")}<input className={styles.input} inputMode="decimal" value={onlineAmount} onChange={(e) => setOnlineAmount(e.target.value)} /></label>
+                <Button type="submit" disabled={onlineBusy}>{x("sell.voucherTake")}</Button>
+              </form>
+            )}
+            {onlineReady && onlineForm === "points" && (
+              <form className={styles.part} onSubmit={(e) => { e.preventDefault(); void takePoints(); }}>
+                <label className={styles.label}>{x("sell.pointsCount")}<input className={styles.input} inputMode="numeric" value={pointsText} onChange={(e) => setPointsText(e.target.value)} /></label>
+                <Button type="submit" disabled={onlineBusy}>{x("sell.pointsTake")}</Button>
+              </form>
+            )}
+            {onlineReady && onlineForm === "wallet" && (
+              <form className={styles.part} onSubmit={(e) => { e.preventDefault(); void takeWallet(); }}>
+                <label className={styles.label}>
+                  {x("sell.walletKind")}
+                  <select className={styles.select} value={walletKind} onChange={(e) => setWalletKind(e.target.value as "qr" | "card")}>
+                    <option value="qr">{x("sell.walletQr")}</option>
+                    <option value="card">{x("sell.walletCard")}</option>
+                  </select>
+                </label>
+                <label className={styles.label}>{x("sell.walletToken")}<input className={styles.input} autoComplete="off" value={walletToken} onChange={(e) => setWalletToken(e.target.value)} /></label>
+                <label className={styles.label}>{x("sell.onlineAmount")}<input className={styles.input} inputMode="decimal" value={onlineAmount} onChange={(e) => setOnlineAmount(e.target.value)} /></label>
+                <Button type="submit" disabled={onlineBusy}>{x("sell.walletTake")}</Button>
+              </form>
+            )}
+          </div>
+        )}
         <p className={styles.due}>{splitLeft >= 0 ? x("sell.splitLeft", { amount: rand(splitLeft) }) : x("sell.splitOver", { amount: rand(-splitLeft) })}</p>
         {parts.length >= MAX_PAYMENT_PARTS && <p className={styles.message}>{x("sell.splitMax", { count: MAX_PAYMENT_PARTS })}</p>}
         <div className={styles.row}>
@@ -513,6 +756,21 @@ export function SellScreen({
             <Button variant="secondary" onClick={() => void getQrSlip()}>{x("sell.qrGet")}</Button>
             {receipt.url && printerOn && <Button variant="secondary" onClick={() => void printWithQr()}>{x("sell.qrPrint")}</Button>}
           </div>
+          {receipt.serials.length > 0 && (
+            <div className={styles.section} role="group" aria-label={x("sell.serialsOffer")}>
+              <p>{x("sell.serialsOffer")}</p>
+              {receipt.serials.map((s) => Array.from({ length: s.count }, (_, i) => (
+                <label key={`${s.productId}#${i}`} className={styles.label}>
+                  {x("sell.serialFor", { n: i + 1, name: s.name })}
+                  <input className={styles.input} autoComplete="off" value={serialText[`${s.productId}#${i}`] ?? ""} onChange={(e) => setSerialText({ ...serialText, [`${s.productId}#${i}`]: e.target.value })} />
+                </label>
+              )))}
+              <div className={styles.row}>
+                <Button variant="quiet" onClick={() => { setSerialText({}); setReceipt({ ...receipt, serials: [], note: "" }); }}>{x("sell.serialsNotNow")}</Button>
+                <Button onClick={() => void saveSerials()}>{x("sell.serialsSave")}</Button>
+              </div>
+            </div>
+          )}
           {receipt.note && <p className={styles.message}>{receipt.note}</p>}
         </div>
       )}
@@ -521,7 +779,7 @@ export function SellScreen({
         <ul className={styles.lines}>
           {summary.lines.map((l) => (
             <li key={l.productId} className={styles.line}>
-              <span className={styles.name}>{l.name}</span>
+              <span className={styles.name}>{l.name}{l.priceOverrideBy && <small> {x("sell.priceApprovedBy", { name: approvers[l.priceOverrideBy] || "…" })}</small>}</span>
               <span className={styles.qty}>{l.unitDivisor === 1000 ? `${l.quantity} g` : `× ${l.quantity}`}</span>
               <span className={styles.amount}>{rand(l.totalCents)}</span>
               {l.unitDivisor === 1 && l.fixedTotalCents === undefined && (
@@ -530,10 +788,33 @@ export function SellScreen({
                   <Button variant="quiet" aria-label={`${t("sell.more")}: ${l.name}`} onClick={() => { const r = setQuantity(basket, l.productId, l.quantity + 1); if (r.ok) setBasket(r.value); else setMessage(problem(r.code)); }}>+</Button>
                 </span>
               )}
+              {l.fixedTotalCents === undefined && (l.priceOverrideBy
+                ? <Button variant="quiet" aria-label={`${x("sell.priceRemove")}: ${l.name}`} onClick={() => setBasket(clearPriceOverride(basket, l.productId))}>{x("sell.priceRemove")}</Button>
+                : <Button variant="quiet" aria-label={`${x("sell.priceChange")}: ${l.name}`} onClick={() => { setMessage(""); setPriceFor({ productId: l.productId, text: "", cents: null }); }}>{x("sell.priceChange")}</Button>)}
               <Button variant="quiet" aria-label={`${t("sell.remove")}: ${l.name}`} onClick={() => setBasket(removeItem(basket, l.productId))}>✕</Button>
             </li>
           ))}
         </ul>
+      )}
+
+      {priceFor && (
+        <div className={styles.section} role="group" aria-label={x("sell.priceNew", { name: basket.entries.find((e) => e.productId === priceFor.productId)?.name ?? "" })}>
+          {priceFor.cents === null ? (
+            <form className={styles.row} onSubmit={(e) => { e.preventDefault(); askForPrice(); }}>
+              <input className={styles.input} inputMode="decimal" autoFocus aria-label={x("sell.priceNew", { name: basket.entries.find((e) => e.productId === priceFor.productId)?.name ?? "" })} placeholder={x("sell.priceNew", { name: basket.entries.find((e) => e.productId === priceFor.productId)?.name ?? "" })} value={priceFor.text} onChange={(e) => setPriceFor({ ...priceFor, text: e.target.value })} />
+              <Button type="submit" variant="secondary" disabled={priceFor.text.trim() === ""}>{x("sell.priceAsk")}</Button>
+              <Button variant="quiet" onClick={() => setPriceFor(null)}>{x("sell.priceNotNow")}</Button>
+            </form>
+          ) : (
+            <>
+              <p>{x("sell.priceNeedsManager")}</p>
+              <ManagerApproval
+                kv={kv} onCancel={() => setPriceFor(null)} onApproved={(managerId) => void approvePrice(managerId)}
+                texts={{ who: x("sell.approvalWho"), pin: x("sell.approvalPin"), approve: x("sell.approvalApprove"), cancel: x("sell.priceNotNow"), wrong: (left) => x("sell.approvalWrong", { left }), locked: x("sell.approvalLocked"), nobody: x("sell.approvalNobody") }}
+              />
+            </>
+          )}
+        </div>
       )}
 
       {tipsOn && basket.entries.length > 0 && (
@@ -578,7 +859,7 @@ export function SellScreen({
       </dl>
 
       <div className={styles.row}>
-        <Button variant="quiet" disabled={basket.entries.length === 0} onClick={() => { setBasket(emptyBasket); setMessage(""); setCustomerName(""); }}>{t("sell.cancelSale")}</Button>
+        <Button variant="quiet" disabled={basket.entries.length === 0} onClick={() => { setBasket(emptyBasket); setMessage(""); setCustomerName(""); setPriceFor(null); saleIdRef.current = null; }}>{t("sell.cancelSale")}</Button>
         <Button disabled={basket.entries.length === 0} onClick={startPay}>{t("sell.pay")} {rand(summary.dueCents)}</Button>
       </div>
     </section>

@@ -28,6 +28,8 @@ const en = {
   featuresLegend: "Features this pack switches on",
   settingsFor: "Settings for {flag} (JSON object, optional)",
   settingsHint: "For example the barcode rules for price_embedded_barcodes.",
+  schoolWalletLabel: "School wallet (school_wallet)",
+  schoolWalletHint: "Turn on for shops that are school tuckshops.",
   save: "Save pack",
   create: "Create pack",
   cancel: "Cancel",

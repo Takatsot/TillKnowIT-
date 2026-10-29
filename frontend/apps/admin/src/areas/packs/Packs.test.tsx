@@ -22,8 +22,9 @@ function mount(api: Partial<Api>) {
 }
 
 describe("Packs", () => {
-  it("knows the 23 feature flags", () => {
-    expect(featureFlags).toHaveLength(23);
+  it("knows the 24 feature flags, including school_wallet", () => {
+    expect(featureFlags).toHaveLength(24);
+    expect(featureFlags).toContain("school_wallet");
   });
 
   it("lists packs with version and feature count", async () => {
@@ -67,6 +68,23 @@ describe("Packs", () => {
 
     expect((await screen.findByRole("alert")).textContent).toBe("That pack code is already used.");
     expect(post).toHaveBeenCalledWith("/admin/business-packs", expect.objectContaining({ code: "cafe", name: "Cafe", features: [] }));
+  });
+
+  it("offers the school wallet flag with its hint and sends it when ticked", async () => {
+    const post = vi.fn(async () => ok({ ...spaza, code: "tuckshop", name: "Tuckshop", version: 1 }));
+    mount({ get: vi.fn(async () => ok([])) as never, post: post as never });
+    const user = userEvent.setup();
+    await screen.findByText("There are no business packs yet.");
+
+    await user.click(screen.getByRole("button", { name: "New pack" }));
+    expect(screen.getByText("Turn on for shops that are school tuckshops.")).toBeTruthy();
+    await user.type(screen.getByLabelText(/Pack code/), "tuckshop");
+    await user.type(screen.getByLabelText("Pack name"), "Tuckshop");
+    await user.click(screen.getByLabelText("School wallet (school_wallet)"));
+    await user.click(screen.getByRole("button", { name: "Create pack" }));
+
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    expect(post).toHaveBeenCalledWith("/admin/business-packs", expect.objectContaining({ features: [{ flag: "school_wallet", settingsJson: null }] }));
   });
 
   it("switches a pack off with the active query", async () => {

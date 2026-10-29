@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fail, ok } from "@tillknowit/domain";
 import type { Api } from "@tillknowit/api-client";
+import { withCaller } from "../selling-common/testing";
 import { SessionProvider, type Session } from "@tillknowit/app-kit";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -12,7 +13,7 @@ vi.setConfig({ testTimeout: 30_000 });
 afterEach(cleanup);
 
 const session: Session = { personId: "p1", shopId: "s1", supplierOrganisationId: "", deviceId: "d1", language: "en" };
-const stock = [{ productId: "milk", name: "Milk" }, { productId: "bread", name: "Bread" }];
+const stock = [{ id: "milk", name: "Milk", barcode: null, categoryCode: "dairy", costCents: 1000, priceCents: 1500, isActive: true }, { id: "bread", name: "Bread", barcode: null, categoryCode: "bakery", costCents: 1000, priceCents: 1500, isActive: true }];
 const promo: Promotion = {
   id: "pr1", name: "Friday milk", type: "percent_off", productIds: ["milk"], percent: 10, amountCents: 0, items: [],
   startsAt: "2026-11-01T00:00:00+02:00", endsAt: "2026-11-30T23:59:59+02:00", days: ["fri"], from: "16:00", to: "18:00", isActive: false,
@@ -20,14 +21,14 @@ const promo: Promotion = {
 
 function routes(extra: Record<string, unknown> = {}, list: Promotion[] = [promo]) {
   return vi.fn(async (path: string) => {
-    if (path.endsWith("/stock")) return ok(stock);
+    if (path === "/shops/s1/products") return ok(stock);
     if (path.endsWith("/promotions")) return (extra.promotions as never) ?? ok(list);
     return fail("x", "unexpected " + path);
   });
 }
 
 function mount(api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}><Promotions /></SessionProvider>);
+  render(<SessionProvider api={withCaller(api)} initial={session}><Promotions /></SessionProvider>);
 }
 
 describe("Promotions", () => {

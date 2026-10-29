@@ -8,7 +8,7 @@ import { parseBarcodeRules, type EmbeddedBarcodeRules, type Result } from "@till
 /** The feature flags, named exactly as the server's FeatureFlags. A flag the till does not know about is ignored, never an error: the server may be newer. */
 export const featureFlags = [
   "split_payments", "refunds", "open_tickets", "tables", "kitchen", "tips", "variants", "modifiers", "promotions", "weight", "price_embedded_barcodes",
-  "appointments", "commission", "quotes", "layby", "serial_numbers", "customers", "loyalty", "vouchers", "printer", "cash_drawer", "scale", "message_bundles",
+  "appointments", "commission", "quotes", "layby", "serial_numbers", "customers", "loyalty", "vouchers", "printer", "cash_drawer", "scale", "message_bundles", "school_wallet",
 ] as const;
 
 export type FeatureFlag = (typeof featureFlags)[number];
@@ -26,6 +26,8 @@ export interface ShopPack {
   packVersion: number;
   slipTemplateCode: string;
   features: readonly PackFeature[];
+  /** The shop's own name, printed on slips. Missing in a pack saved before the server sent it. */
+  shopName?: string;
 }
 
 /** The pack of a till that has not downloaded one yet or is offline for good: the simplest till, nothing extra switched on. */

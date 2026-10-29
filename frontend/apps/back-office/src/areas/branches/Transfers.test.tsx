@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fail, ok } from "@tillknowit/domain";
 import type { Api } from "@tillknowit/api-client";
+import { withCaller } from "../selling-common/testing";
 import { SessionProvider, type Session } from "@tillknowit/app-kit";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -23,13 +24,13 @@ const incoming = {
 function fakeGet(transfers: unknown[]) {
   return vi.fn(async (path: string) => {
     if (path.endsWith("/branches")) return ok(branches);
-    if (path.endsWith("/sync/products")) return ok({ products: [{ id: "pr1", name: "Maize meal 10kg", isActive: true }] });
+    if (path === "/shops/s1/products") return ok([{ id: "pr1", name: "Maize meal 10kg", barcode: null, categoryCode: "grocery", costCents: 5000, priceCents: 7000, isActive: true }]);
     return ok(transfers);
   });
 }
 
 function mount(ui: React.ReactElement, api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}>{ui}</SessionProvider>);
+  render(<SessionProvider api={withCaller(api)} initial={session}>{ui}</SessionProvider>);
 }
 
 describe("Transfers", () => {

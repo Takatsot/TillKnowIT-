@@ -12,6 +12,7 @@ import { tillFeatures } from "./features";
 import { IndexedDbOutbox } from "./indexedDbOutbox";
 import { IndexedDbKeyValueStore, type KeyValueStore } from "./localData";
 import { loadPack } from "./packStore";
+import { sendPendingSerials } from "./pendingSerials";
 import { PinUnlock } from "./PinUnlock";
 import { RegisterScreen } from "./RegisterScreen";
 import { SellScreen } from "./SellScreen";
@@ -68,6 +69,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   const [promotions, setPromotions] = useState<PromotionDef[]>([]);
   const [creditAccounts, setCreditAccounts] = useState<CreditAccount[]>([]);
   const [counts, setCounts] = useState({ waiting: 0, refused: 0 });
+  const [serialProblem, setSerialProblem] = useState("");
   const [pull, setPull] = useState<PullStatus>(initialStatus);
   const kv = useMemo(() => services?.kv ?? new IndexedDbKeyValueStore(), [services?.kv]);
   const outbox = useMemo(() => new BookkeepingOutbox(services?.outbox ?? new IndexedDbOutbox(), kv), [services?.outbox, kv]);
@@ -128,6 +130,18 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
     return () => handle.stop();
   }, [device, api, kv, outbox, send, reload]);
 
+  // Serial numbers typed after a sale wait on the till until the sale has reached the server; this sends them as soon as it has.
+  const sendSerials = useCallback(async () => {
+    const who = userRef.current;
+    if (!online || !device || !who) return;
+    const result = await sendPendingSerials({ kv, api, outbox, caller: { shopId: device.shopId, deviceId: device.deviceId, staffId: who.id } });
+    if (result.failed[0]) setSerialProblem(x("sell.serialsFailed", { message: result.failed[0].message }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online, device, kv, api, outbox, language]);
+  useEffect(() => {
+    if (counts.waiting === 0) void sendSerials();
+  }, [counts.waiting, sendSerials, user]);
+
   useEffect(() => {
     if (!online) return;
     sync.current?.nudge();
@@ -153,7 +167,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   const saleBridge = useMemo<SaleBridge>(() => ({
     addLine: (line) => bridge.current?.addLine(line) ?? fail("sale.screen_missing", "The sell screen is not ready."),
     addProduct: (id, quantity) => bridge.current?.addProduct(id, quantity) ?? fail("sale.screen_missing", "The sell screen is not ready."),
-    setCustomer: (id) => bridge.current?.setCustomer(id),
+    setCustomer: (id, name) => bridge.current?.setCustomer(id, name),
   }), []);
   const onBridge = useCallback((b: SaleBridge | null) => { bridge.current = b; }, []);
 
@@ -165,6 +179,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
     : pull.deviceStatus === "pending" ? <Notice kind="warning">{x("banner.pending")}</Notice>
     : pull.deviceStatus === "disabled" ? <Notice kind="danger">{x("banner.disabled")}</Notice>
     : pull.lastError ? <Notice kind="warning">{x("banner.error", { message: pull.lastError })}</Notice>
+    : serialProblem ? <Notice kind="warning">{serialProblem}</Notice>
     : null;
 
   return (
@@ -201,7 +216,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
             {(() => {
               const ctx: TillContext = {
                 staff: user, language, features, api, device, online, outbox, catalogue, promotions, hardware, nudgeSync: () => sync.current?.nudge(),
-                kv, sale: saleBridge, openSell: () => setTab("sell"),
+                kv, shopName: pack.shopName, sale: saleBridge, openSell: () => setTab("sell"),
               };
               const visible = tillFeatures.filter((f) => (f.flag === undefined || features.isOn(f.flag)) && (f.roles === undefined || f.roles.includes(user.role)));
               const current = visible.find((f) => f.id === tab);
@@ -225,6 +240,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
                       barcodeRules={(() => { const r = features.barcodeRules(); return r.ok ? r.value : null; })()}
                       outbox={outbox} onSaleQueued={() => sync.current?.nudge()}
                       features={features} hardware={hardware} api={api} device={device} online={online} creditAccounts={creditAccounts} onBridge={onBridge}
+                      shopName={pack.shopName} kv={kv} onSerialsQueued={() => { sync.current?.nudge(); void sendSerials(); }}
                     />
                   </div>
                 </>

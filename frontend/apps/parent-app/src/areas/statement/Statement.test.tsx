@@ -13,9 +13,15 @@ const lines = [
   { at: "2026-10-27T09:30:00Z", kind: "purchase", description: "Tuckshop purchase", amountCents: -1500, balanceAfterCents: 8500 },
 ];
 
-function api(extra: Record<string, unknown> = {}, statement: unknown = ok(lines)) {
+const cards = [
+  { id: "tk1", holderId: "h1", type: "nfc", status: "active" },
+  { id: "tk2", holderId: "h1", type: "nfc", status: "blocked" },
+];
+
+function api(extra: Record<string, unknown> = {}, statement: unknown = ok(lines), tokens: unknown = ok(cards)) {
   const get = vi.fn(async (path: string) => {
     if (path === "/me/children") return ok([thandi]);
+    if (path === "/holders/h1/tokens") return tokens;
     if (path === "/wallets/w1/qr") return ok({ token: "abc.def", expiresAt: new Date(Date.now() + 60_000).toISOString() });
     return statement;
   });
@@ -81,30 +87,42 @@ describe("Statement", () => {
     expect(post).toHaveBeenCalledWith("/holders/h1/block-cards", undefined, { callerPersonId: "p1" });
   });
 
-  it("adds a card and blocks it again", async () => {
-    const post = vi.fn(async (path: string) => (path.endsWith("/tokens") ? ok({ id: "tk1", holderId: "h1", type: "nfc", status: "active" }) : ok(undefined)));
-    mount(<Statement />, api({ post }));
+  it("lists the child's cards and blocks a lost one from the list", async () => {
+    const post = vi.fn(async () => ok(undefined));
+    const m = api({ post });
+    mount(<Statement />, m);
     const user = userEvent.setup({ delay: null });
-    await screen.findByText("Tuckshop purchase");
 
-    await user.type(screen.getByLabelText("Number on the card"), "04A1B2C3");
-    await user.click(screen.getByRole("button", { name: "Add card" }));
-    await user.click(await screen.findByRole("button", { name: "Block this card" }));
+    expect(await screen.findByText("Card 1 (tap card)")).toBeTruthy();
+    expect(screen.getByText("Card 2 (tap card)")).toBeTruthy();
+    expect(screen.getByText("Working")).toBeTruthy();
+    expect(screen.getByText("Blocked")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Block card 2" })).toBeNull();
+    expect(m.get).toHaveBeenCalledWith("/holders/h1/tokens", { callerPersonId: "p1" });
+
+    await user.click(screen.getByRole("button", { name: "Block card 1" }));
 
     await waitFor(() => expect(screen.getByText("The card was blocked.")).toBeTruthy());
-    expect(post).toHaveBeenCalledWith("/holders/h1/tokens", { callerPersonId: "p1", type: "nfc", rawToken: "04A1B2C3" });
     expect(post).toHaveBeenCalledWith("/tokens/tk1/block", undefined, { callerPersonId: "p1" });
+    expect((m.get as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter((c) => c[0] === "/holders/h1/tokens")).toHaveLength(2);
   });
 
-  it("shows the server's refusal when a parent may not add a card", async () => {
-    const post = vi.fn(async () => fail("permission.denied", "You do not have access to this school."));
-    mount(<Statement />, api({ post }));
+  it("says so when no card was issued, and explains the school issues cards", async () => {
+    mount(<Statement />, api({}, ok(lines), ok([])));
+
+    expect(await screen.findByText("No card or wristband has been issued for this child yet.")).toBeTruthy();
+    expect(screen.getByText(/issued by the school/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Add card" })).toBeNull();
+  });
+
+  it("shows the server's refusal when the cards cannot be listed or blocked", async () => {
+    mount(<Statement />, api({ post: vi.fn(async () => fail("permission.denied", "You do not have access to this card.")) }));
     const user = userEvent.setup({ delay: null });
-    await screen.findByText("Tuckshop purchase");
+    await user.click(await screen.findByRole("button", { name: "Block card 1" }));
+    expect((await screen.findByRole("alert")).textContent).toBe("You do not have access to this card.");
+    cleanup();
 
-    await user.type(screen.getByLabelText("Number on the card"), "04A1B2C3");
-    await user.click(screen.getByRole("button", { name: "Add card" }));
-
-    expect((await screen.findByRole("alert")).textContent).toBe("You do not have access to this school.");
+    mount(<Statement />, api({}, ok(lines), fail("holder.not_found", "Child not found.")));
+    expect((await screen.findByRole("alert")).textContent).toBe("Child not found.");
   });
 });

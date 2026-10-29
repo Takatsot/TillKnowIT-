@@ -94,8 +94,5 @@ export interface Reconciliation {
   note: string | null;
 }
 
-/**
- * The holders import is a file upload (multipart form), which the shared Api cannot send: it only speaks JSON. This is the one call made outside Api;
- * it is passed in so a test can replace it. TODO: replace with an upload method on the shared Api when it has one.
- */
+/** Sends the holders import. Defaults to Api.upload; a test passes its own. */
 export type HolderUploader = (schoolId: string, callerPersonId: string, file: File) => Promise<Result<ImportResult>>;

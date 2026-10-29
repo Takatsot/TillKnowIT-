@@ -1,6 +1,8 @@
 import { formatDateTime, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
 import { Badge, Button, Card, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
+import { useProducts, type ProductRef } from "../selling-common/products";
+import { useTillCaller, type TillCaller } from "../selling-common/TillCaller";
 import type { Branch } from "./Branches";
 import { messages } from "./messages";
 
@@ -8,24 +10,26 @@ export interface TransferLine { productId: string; name: string; quantity: numbe
 export interface Transfer {
   id: string; fromShopId: string; toShopId: string; status: string; sentAt: string; closedAt: string | null; note: string | null; lines: TransferLine[];
 }
-interface PulledProduct { id: string; name: string; isActive: boolean }
-interface ProductPull { products: PulledProduct[] }
 
 /**
  * Stock transfers between the head shop and its branches.
- * The server wants a deviceId and staffId on every transfer call (they are the till and the staff member). Until sign-in exists the session's deviceId and
- * personId stand in for them.
+ * The server wants a deviceId and staffId on every transfer call (they are the till and the staff member). They come from the shared till caller: an
+ * approved till of this shop and the signed-in person's own membership here.
  */
 export function Transfers() {
   const t = useMessages(messages);
   const api = useApi();
-  const { personId, shopId, deviceId } = useSession();
+  const { personId, shopId } = useSession();
+  const caller = useTillCaller();
   const [filter, setFilter] = useState("");
-  const who = { deviceId, staffId: personId };
+  const who = { deviceId: caller.deviceId, staffId: caller.staffId };
 
-  const list = useLoad(() => api.get<Transfer[]>(`/shops/${shopId}/stock-transfers`, { ...who, status: filter }), [shopId, deviceId, personId, filter]);
+  const list = useLoad(
+    () => (caller.ready ? api.get<Transfer[]>(`/shops/${shopId}/stock-transfers`, { ...who, status: filter }) : Promise.resolve({ ok: true as const, value: [] as Transfer[] })),
+    [shopId, caller.deviceId, caller.staffId, caller.ready, filter],
+  );
   const branches = useLoad(() => api.get<Branch[]>(`/organisations/${shopId}/branches`, { callerPersonId: personId }), [shopId, personId]);
-  const products = useLoad(() => api.get<ProductPull>(`/shops/${shopId}/sync/products`, { deviceId }), [shopId, deviceId]);
+  const products = useProducts();
 
   const [message, setMessage] = useState("");
   const [receiving, setReceiving] = useState<string | null>(null);
@@ -44,6 +48,7 @@ export function Transfers() {
 
   return (
     <Stack>
+      {caller.card}
       <Card title={t("trHeading")}>
         <Stack>
           <SelectField label={t("trFilter")} value={filter} onChange={(e) => setFilter(e.target.value)}>
@@ -94,14 +99,16 @@ export function Transfers() {
       </Card>
       {receiving && list.data?.find((x) => x.id === receiving) && (
         <ReceiveForm
+          caller={caller}
           transfer={list.data.find((x) => x.id === receiving)!}
           onDone={() => { setReceiving(null); setMessage(t("trReceivedDone")); list.reload(); }}
         />
       )}
       <SendForm
         branches={(branches.data ?? []).filter((b) => b.shopId !== shopId)}
-        products={(products.data?.products ?? []).filter((p) => p.isActive)}
-        productsFailed={products.error !== null || (!products.loading && (products.data?.products.length ?? 0) === 0)}
+        caller={caller}
+        products={(products.data ?? []).filter((p) => p.isActive !== false)}
+        productsFailed={products.error !== null || (!products.loading && (products.data?.length ?? 0) === 0)}
         productsError={products.error?.message ?? null}
         onSent={() => { setMessage(t("trSentDone")); list.reload(); }}
       />
@@ -109,10 +116,10 @@ export function Transfers() {
   );
 }
 
-function ReceiveForm({ transfer, onDone }: { transfer: Transfer; onDone: () => void }) {
+function ReceiveForm({ transfer, caller, onDone }: { transfer: Transfer; caller: TillCaller; onDone: () => void }) {
   const t = useMessages(messages);
   const api = useApi();
-  const { personId, shopId, deviceId } = useSession();
+  const { shopId } = useSession();
   const [qty, setQty] = useState<Record<string, string>>(() => Object.fromEntries(transfer.lines.map((l) => [l.productId, String(l.quantity)])));
   const parsed = transfer.lines.map((l) => {
     const raw = qty[l.productId] ?? "";
@@ -121,7 +128,7 @@ function ReceiveForm({ transfer, onDone }: { transfer: Transfer; onDone: () => v
   });
   const allValid = parsed.every((p) => p.valid);
   const receive = useAction(() => api.post<Transfer>(`/shops/${shopId}/stock-transfers/${transfer.id}/receive`, {
-    deviceId, staffId: personId, lines: parsed.map((p) => ({ productId: p.line.productId, quantity: p.n })),
+    deviceId: caller.deviceId, staffId: caller.staffId, lines: parsed.map((p) => ({ productId: p.line.productId, quantity: p.n })),
   }));
 
   async function submit() {
@@ -147,7 +154,7 @@ function ReceiveForm({ transfer, onDone }: { transfer: Transfer; onDone: () => v
             </Inline>
           ))}
           {receive.error && <Notice kind="danger">{receive.error.message}</Notice>}
-          <div><Button type="submit" disabled={receive.busy || !allValid}>{t("trConfirmReceive")}</Button></div>
+          <div><Button type="submit" disabled={receive.busy || !allValid || !caller.ready}>{t("trConfirmReceive")}</Button></div>
         </Stack>
       </form>
     </Card>
@@ -156,12 +163,12 @@ function ReceiveForm({ transfer, onDone }: { transfer: Transfer; onDone: () => v
 
 interface DraftLine { productId: string; name: string; quantity: number }
 
-function SendForm({ branches, products, productsFailed, productsError, onSent }: {
-  branches: Branch[]; products: PulledProduct[]; productsFailed: boolean; productsError: string | null; onSent: () => void;
+function SendForm({ branches, products, productsFailed, productsError, caller, onSent }: {
+  branches: Branch[]; products: ProductRef[]; caller: TillCaller; productsFailed: boolean; productsError: string | null; onSent: () => void;
 }) {
   const t = useMessages(messages);
   const api = useApi();
-  const { personId, shopId, deviceId } = useSession();
+  const { shopId } = useSession();
   const [to, setTo] = useState("");
   const [product, setProduct] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -171,15 +178,15 @@ function SendForm({ branches, products, productsFailed, productsError, onSent }:
   const qtyValid = quantity.trim() !== "" && Number.isInteger(qtyNumber) && qtyNumber > 0;
 
   const send = useAction(() => api.post<Transfer>(`/shops/${shopId}/stock-transfers`, {
-    deviceId, staffId: personId, id: crypto.randomUUID(), toShopId: to,
+    deviceId: caller.deviceId, staffId: caller.staffId, id: crypto.randomUUID(), toShopId: to,
     lines: lines.map((l) => ({ productId: l.productId, quantity: l.quantity, toProductId: null })),
     note: note.trim() === "" ? null : note.trim(),
   }));
 
   function addLine() {
-    const p = products.find((x) => x.id === product);
+    const p = products.find((x) => x.productId === product);
     if (!p || !qtyValid) return;
-    setLines((ls) => [...ls.filter((l) => l.productId !== p.id), { productId: p.id, name: p.name, quantity: qtyNumber }]);
+    setLines((ls) => [...ls.filter((l) => l.productId !== p.productId), { productId: p.productId, name: p.name, quantity: qtyNumber }]);
     setProduct("");
     setQuantity("");
   }
@@ -198,7 +205,6 @@ function SendForm({ branches, products, productsFailed, productsError, onSent }:
     <Card title={t("trSendHeading")}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <Stack>
-          <Notice kind="info">{t("trStandIn")}</Notice>
           {branches.length === 0 && <p>{t("trNoBranches")}</p>}
           {productsError ? <Notice kind="danger">{productsError}</Notice> : productsFailed && <p>{t("trNoProducts")}</p>}
           <SelectField label={t("trDestination")} value={to} onChange={(e) => setTo(e.target.value)}>
@@ -208,7 +214,7 @@ function SendForm({ branches, products, productsFailed, productsError, onSent }:
           <Inline>
             <SelectField label={t("trProduct")} value={product} onChange={(e) => setProduct(e.target.value)}>
               <option value="">{t("trChoose")}</option>
-              {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {products.map((p) => <option key={p.productId} value={p.productId}>{p.name}</option>)}
             </SelectField>
             <TextField label={t("trQuantity")} inputMode="numeric" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
             <Button variant="secondary" disabled={product === "" || !qtyValid} onClick={addLine}>{t("trAddLine")}</Button>
@@ -225,7 +231,7 @@ function SendForm({ branches, products, productsFailed, productsError, onSent }:
           )}
           <TextField label={t("trNote")} value={note} onChange={(e) => setNote(e.target.value)} />
           {send.error && <Notice kind="danger">{send.error.message}</Notice>}
-          <div><Button type="submit" disabled={send.busy || to === "" || lines.length === 0}>{t("trSend")}</Button></div>
+          <div><Button type="submit" disabled={send.busy || !caller.ready || to === "" || lines.length === 0}>{t("trSend")}</Button></div>
         </Stack>
       </form>
     </Card>

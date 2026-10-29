@@ -158,13 +158,14 @@ Six apps, each built from small areas that follow `frontend/SCREENS.md`. All tal
 | Platform admin | Packs, plans, suppliers and ranking settings, disputes and reconciliation, schools and wallet, partner API clients, catalogue suggestions and lookups. |
 | Parent app | Children, top-ups, spending rules, statement and QR, pre-orders, requests. |
 
-Known gaps found while building (all also need a decision or a small server change):
+Gaps fixed since the first screens: the server now lists a shop's staff, devices and products, finds a supplier from its organisation, lists schools, wallet reconciliations and a child's cards, shows the accounting connection and finance partners, and has a `school_wallet` pack flag and the shop name in the pack; the back office picks a real till and staff id instead of stand-ins; uploads use the shared client; parents no longer see admin-only actions; the till has price override with a manager PIN, online refunds of split/wallet/voucher/lay-by sales, voucher/points/wallet payments in the sell screen, serial numbers after a sale, and a quote/customer bridge into the sale.
+
+Still open:
 - Sign-in does not exist: every app uses a typed-in person id (`packages/app-kit/src/session.tsx`).
-- The server has no list of a shop's staff or devices for the back office, no list of suppliers by organisation, no list of schools, no list of a child's cards, and no way to read one product; several screens work around this by asking for ids or keeping what was just created.
-- Several back-office and till routes want a till device and staff id rather than a person; the back office uses stand-ins that the server may refuse.
-- Parents cannot do some things the screens offer (edit a child, photo, tokens, child left): the server only lets a school admin.
-- Four screens still upload files with their own `fetch`; the API client now has `upload`, and they should be switched to it.
-- The till's price override with a manager PIN, refunds of split/wallet/voucher/lay-by sales, and a school-wallet pack flag are not built.
+- No server route lists a shop's suppliers, a school's single holders, or a child's cards with friendly names; card types show by position.
+- A voucher, points or wallet payment taken in the sell screen cannot be undone if the cashier then abandons the sale (no server route to reverse it). Voucher and points cannot both be used on one sale.
+- Quote "Add to sale" does not mark the quote converted; tables/tickets cannot be loaded into the main sale (the server closes tickets itself).
+- The Xero/Sage sign-in is a pasted code, not a real OAuth flow.
 - Test timeouts were raised because the first render in each file is slow on this machine.
 
 ## Hand-over list

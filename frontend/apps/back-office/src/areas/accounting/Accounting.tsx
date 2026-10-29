@@ -32,7 +32,12 @@ function ConnectCard({ onNotice }: { onNotice: (s: string) => void }) {
   const [provider, setProvider] = useState("xero");
   const [code, setCode] = useState("");
   const [startsOn, setStartsOn] = useState("");
-  const [connection, setConnection] = useState<Connection | null>(null);
+  const existing = useLoad(() => api.get<Connection>(`/shops/${shopId}/accounting/connection`, { personId }), [shopId, personId]);
+  const [override, setOverride] = useState<{ value: Connection | null } | null>(null);
+  const connection = override ? override.value : existing.data;
+  const setConnection = (c: Connection | null) => setOverride({ value: c });
+  // accounting.not_connected is the normal answer for a shop with no package yet, not a failure.
+  const loadError = existing.error && existing.error.code !== "accounting.not_connected" ? existing.error : null;
 
   const connect = useAction(() => api.post<Connection>(`/shops/${shopId}/accounting/connections/${provider}`, { personId, authorisationCode: code.trim(), startsOn: startsOn === "" ? null : startsOn }));
   const disconnect = useAction(() => api.delete<unknown>(`/shops/${shopId}/accounting/connection`, { personId }));
@@ -55,7 +60,8 @@ function ConnectCard({ onNotice }: { onNotice: (s: string) => void }) {
     }
   }
 
-  const error = connect.error ?? disconnect.error;
+  const error = connect.error ?? disconnect.error ?? loadError;
+  const providerName = (p: string) => (p === "sage" ? t("sage") : t("xero"));
   return (
     <Card title={t("connectHeading")}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
@@ -68,12 +74,13 @@ function ConnectCard({ onNotice }: { onNotice: (s: string) => void }) {
           <TextField label={t("code")} value={code} onChange={(e) => setCode(e.target.value)} required autoComplete="off" />
           <TextField label={t("startsOn")} hint={t("startsOnHint")} type="date" value={startsOn} onChange={(e) => setStartsOn(e.target.value)} />
           {error && <Notice kind="danger">{isPlanError(error) ? t("planNote") : error.message}</Notice>}
+          {existing.loading && !override && <p>{t("connectionLoading")}</p>}
+          {connection && <Notice kind="info">{t("currentConnection", { provider: providerName(connection.provider), tenant: connection.tenantName ? ` (${connection.tenantName})` : "" })}</Notice>}
           {connection && <p>{t("startsFrom", { date: formatDate(connection.startsOn) })}</p>}
           <Inline>
-            <Button type="submit" disabled={connect.busy || code.trim() === ""}>{t("connect")}</Button>
-            <Button variant="quiet" disabled={disconnect.busy} onClick={() => void doDisconnect()}>{t("disconnect")}</Button>
+            <Button type="submit" disabled={connect.busy || code.trim() === ""}>{connection ? t("reconnect") : t("connect")}</Button>
+            {connection && <Button variant="quiet" disabled={disconnect.busy} onClick={() => void doDisconnect()}>{t("disconnect")}</Button>}
           </Inline>
-          <p>{t("connectionUnknown")}</p>
         </Stack>
       </form>
     </Card>

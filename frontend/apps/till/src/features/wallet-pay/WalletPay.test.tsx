@@ -18,8 +18,8 @@ async function fill(user: ReturnType<typeof userEvent.setup>, token = "QR-TOKEN-
 }
 
 describe("wallet-pay feature", () => {
-  it("has no pack flag, because the pack has none for school wallets, and needs the server", () => {
-    expect(feature.flag).toBeUndefined();
+  it("is switched on by the school_wallet pack flag and needs the server", () => {
+    expect(feature.flag).toBe("school_wallet");
     expect(feature.requiresOnline).toBe(true);
     expect(feature.id.startsWith("core-")).toBe(false);
   });

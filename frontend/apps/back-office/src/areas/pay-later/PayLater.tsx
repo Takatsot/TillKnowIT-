@@ -9,6 +9,7 @@ export interface CreditApplication {
 }
 export interface Draw { id: string; orderId: string; supplierName: string; principalCents: number; repayCents: number; repaidCents: number; dueOn: string; status: string }
 export interface DataShare { at: string; partnerCode: string; months: number; totalSalesCents: number }
+export interface UnpaidOrder { id: string; supplierName: string; reference: string; paymentStatus: string; totalCents: number }
 export interface CreditSummary { consents: Consent[]; applications: CreditApplication[]; draws: Draw[]; shared: DataShare[] }
 
 export function PayLater() {
@@ -54,11 +55,12 @@ function ConsentCard({ consents, onDone }: { consents: Consent[]; onDone: (text:
   const t = useMessages(messages);
   const api = useApi();
   const { personId, shopId } = useSession();
+  const partners = useLoad(() => api.get<string[]>("/credit/partners"), []);
   const [partner, setPartner] = useState("");
   const [months, setMonths] = useState("6");
   const n = Number(months);
   const monthsValid = months.trim() !== "" && Number.isInteger(n) && n >= 1 && n <= 24;
-  const grant = useAction(() => api.post<Consent>(`/shops/${shopId}/credit/consents`, { personId, partnerCode: partner.trim(), months: n }));
+  const grant = useAction(() => api.post<Consent>(`/shops/${shopId}/credit/consents`, { personId, partnerCode: partner, months: n }));
   const withdraw = useAction((c: Consent) => api.delete<unknown>(`/shops/${shopId}/credit/consents/${c.id}`, { personId }));
   const error = grant.error ?? withdraw.error;
 
@@ -81,9 +83,13 @@ function ConsentCard({ consents, onDone }: { consents: Consent[]; onDone: (text:
       <Stack>
         <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
           <Stack>
-            <TextField label={t("partner")} hint={t("partnerHint")} value={partner} onChange={(e) => setPartner(e.target.value)} required />
+            <SelectField label={t("partner")} hint={t("partnerHint")} value={partner} onChange={(e) => setPartner(e.target.value)}>
+              <option value="">{t("applyChoose")}</option>
+              {(partners.data ?? []).map((p) => <option key={p} value={p}>{p}</option>)}
+            </SelectField>
+            {partners.error && <Notice kind="danger">{partners.error.message}</Notice>}
             <TextField label={t("months")} inputMode="numeric" value={months} error={monthsValid ? null : t("badMonths")} onChange={(e) => setMonths(e.target.value)} />
-            <div><Button type="submit" disabled={grant.busy || partner.trim() === "" || !monthsValid}>{t("grant")}</Button></div>
+            <div><Button type="submit" disabled={grant.busy || partner === "" || !monthsValid}>{t("grant")}</Button></div>
           </Stack>
         </form>
         {error && <Notice kind="danger">{error.code === "plan.feature_not_included" ? t("planNote") : error.message}</Notice>}
@@ -165,7 +171,9 @@ function DrawCard({ applications, draws, onDone }: { applications: CreditApplica
   const { personId, shopId } = useSession();
   const [applicationId, setApplicationId] = useState("");
   const [orderId, setOrderId] = useState("");
-  const draw = useAction(() => api.post<Draw>(`/shops/${shopId}/credit/draws`, { personId, applicationId, orderId: orderId.trim() }));
+  const orders = useLoad(() => api.get<UnpaidOrder[]>(`/shops/${shopId}/purchase-orders`, { callerPersonId: personId }), [shopId, personId, draws.length]);
+  const unpaid = (orders.data ?? []).filter((o) => o.paymentStatus === "owing");
+  const draw = useAction(() => api.post<Draw>(`/shops/${shopId}/credit/draws`, { personId, applicationId, orderId }));
 
   async function submit() {
     const r = await draw.run();
@@ -185,8 +193,13 @@ function DrawCard({ applications, draws, onDone }: { applications: CreditApplica
                 <option value="">{t("applyChoose")}</option>
                 {applications.map((a) => <option key={a.id} value={a.id}>{t("drawApplicationOption", { partner: a.partnerCode, available: formatRand(a.availableCents) })}</option>)}
               </SelectField>
-              <TextField label={t("drawOrder")} hint={t("drawOrderHint")} value={orderId} onChange={(e) => setOrderId(e.target.value)} />
-              <div><Button type="submit" disabled={draw.busy || applicationId === "" || orderId.trim() === ""}>{t("draw")}</Button></div>
+              <SelectField label={t("drawOrder")} hint={t("drawOrderHint")} value={orderId} onChange={(e) => setOrderId(e.target.value)}>
+                <option value="">{t("applyChoose")}</option>
+                {unpaid.map((o) => <option key={o.id} value={o.id}>{t("drawOrderOption", { supplier: o.supplierName, reference: o.reference, total: formatRand(o.totalCents) })}</option>)}
+              </SelectField>
+              {orders.error && <Notice kind="danger">{orders.error.message}</Notice>}
+              {!orders.loading && !orders.error && unpaid.length === 0 && <p>{t("noUnpaidOrders")}</p>}
+              <div><Button type="submit" disabled={draw.busy || applicationId === "" || orderId === ""}>{t("draw")}</Button></div>
             </Stack>
           </form>
         )}

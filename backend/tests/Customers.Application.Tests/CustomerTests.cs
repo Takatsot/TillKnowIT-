@@ -174,7 +174,7 @@ public class CustomerFlowTests
         public string? LoyaltySettings { get; set; }
         public Task<bool> IsOn(Guid shopId, string feature, CancellationToken ct) => Task.FromResult(!Off.Contains(feature));
         public Task<ShopPackResponse> For(Guid shopId, CancellationToken ct) =>
-            Task.FromResult(new ShopPackResponse(shopId, "test", "Test", 1, "slip.sale", [new FeatureDto("loyalty", LoyaltySettings), new FeatureDto("customers", null)]));
+            Task.FromResult(new ShopPackResponse(shopId, "test", "Test", 1, "slip.sale", [new FeatureDto("loyalty", LoyaltySettings), new FeatureDto("customers", null)], "Test shop"));
     }
 
     private readonly Store _store = new();

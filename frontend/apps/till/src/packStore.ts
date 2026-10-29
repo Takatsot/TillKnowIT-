@@ -40,12 +40,14 @@ export interface ServerPack {
   packVersion: number;
   slipTemplateCode: string;
   features: Array<{ flag: string; settingsJson?: string | null }>;
+  shopName?: string | null;
 }
 
 export function mapPack(p: ServerPack): ShopPack {
   return {
     shopId: p.shopId, packCode: p.packCode, packName: p.packName, packVersion: p.packVersion, slipTemplateCode: p.slipTemplateCode,
     features: (p.features ?? []).map((f) => ({ flag: f.flag, settingsJson: f.settingsJson ?? null })),
+    ...(p.shopName ? { shopName: p.shopName } : {}),
   };
 }
 
@@ -54,5 +56,8 @@ export function mapPack(p: ServerPack): ShopPack {
  */
 export function chooseIncomingPack(current: ShopPack, incoming: ShopPack): ShopPack {
   if (incoming.shopId !== current.shopId) return current;
-  return incoming.packCode !== current.packCode ? incoming : newerPack(current, incoming);
+  if (incoming.packCode !== current.packCode) return incoming;
+  // The same version only changes when it brings the shop's name (a pack saved before the server sent it, or a renamed shop).
+  if (incoming.packVersion === current.packVersion && incoming.shopName && incoming.shopName !== current.shopName) return { ...current, shopName: incoming.shopName };
+  return newerPack(current, incoming);
 }

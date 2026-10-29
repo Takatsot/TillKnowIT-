@@ -16,9 +16,9 @@ function getter(products: unknown[] = [product]) {
 }
 
 describe("Catalogue", () => {
-  it("asks for the supplier id when none is saved", () => {
+  it("asks for the supplier id only when the server has no supplier yet", async () => {
     mount(<Catalogue />, {}, false);
-    expect(screen.getByText(/no route that finds it/)).toBeTruthy();
+    expect(await screen.findByLabelText("Supplier id")).toBeTruthy();
   });
 
   it("lists the products and says so when there are none", async () => {

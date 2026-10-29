@@ -14,6 +14,8 @@ export interface CatalogueItem {
   priceCents: Cents;
   costCents: Cents;
   soldByWeight: boolean;
+  /** The shop wants a serial number for each unit sold. Products downloaded from the server carry it; the till then offers to take the serials after the sale. */
+  requiresSerial?: boolean;
 }
 
 /** One line of the sale in progress. Quantity is units, or grams when the product is sold by weight (then the unit price is per kilogram). */
@@ -26,6 +28,13 @@ export interface BasketEntry {
   unitDivisor: UnitDivisor;
   /** Set when a scale label carried the price: the line is exactly that, and no promotion changes it. */
   fixedTotalCents?: Cents;
+  /**
+   * A manager's price override: the unit price the customer pays instead of unitPriceCents, always lower. It goes on the sale as a discount of the difference
+   * with priceOverrideBy as the reason. Both are set together (see setPriceOverride).
+   */
+  overrideUnitPriceCents?: Cents;
+  /** The staff id of the manager or owner who approved the override. */
+  overrideApprovedBy?: string;
 }
 
 export interface Basket {
@@ -108,6 +117,25 @@ export function setQuantity(basket: Basket, productId: string, quantity: number)
   return ok({ ...basket, entries: basket.entries.map((e) => (e.productId === productId ? { ...e, quantity } : e)) });
 }
 
+/**
+ * A manager approved a lower price for a line. Only a decrease is allowed (a discount), never below zero, and never on a labelled line (its price is the
+ * label). The caller has already checked the manager's PIN; the server checks their role again when the sale arrives.
+ */
+export function setPriceOverride(basket: Basket, productId: string, newUnitPriceCents: Cents, approvedBy: string): Result<Basket> {
+  const entry = basket.entries.find((e) => e.productId === productId);
+  if (!entry) return fail("basket.line_not_found", "That item is not in the sale.");
+  if (entry.fixedTotalCents !== undefined) return fail("basket.label_line", "A labelled item cannot be changed. Remove it and scan again.");
+  if (approvedBy.trim() === "") return fail("basket.override_approver", "A price change needs a manager's approval.");
+  if (!Number.isInteger(newUnitPriceCents) || newUnitPriceCents < 0) return fail("basket.override_invalid", "The new price must be a whole number of cents, not negative.");
+  if (newUnitPriceCents >= entry.unitPriceCents) return fail("basket.override_not_lower", "The price can only be lowered, never raised.");
+  return ok({ ...basket, entries: basket.entries.map((e) => (e.productId === productId ? { ...e, overrideUnitPriceCents: newUnitPriceCents, overrideApprovedBy: approvedBy } : e)) });
+}
+
+/** Takes a price override off a line, back to the list price. */
+export function clearPriceOverride(basket: Basket, productId: string): Basket {
+  return { ...basket, entries: basket.entries.map((e) => { if (e.productId !== productId) return e; const { overrideUnitPriceCents: _o, overrideApprovedBy: _b, ...rest } = e; return rest; }) };
+}
+
 export function removeItem(basket: Basket, productId: string): Basket {
   return { ...basket, entries: basket.entries.filter((e) => e.productId !== productId) };
 }
@@ -121,6 +149,8 @@ export interface PricedLine extends BasketEntry {
   discountCents: Cents;
   /** The promotion behind the discount: the server refuses a discount it cannot explain. */
   promotionId: string | null;
+  /** The manager behind a price override discount, or null. A line has a promotion or an override, not both. */
+  priceOverrideBy: string | null;
   totalCents: Cents;
 }
 
@@ -140,13 +170,18 @@ export interface BasketSummary {
 
 /** The basket as the customer sees it, with promotions worked out the way the server does. Weighed and labelled lines are never discounted. */
 export function summariseBasket(basket: Basket, promotions: readonly PromotionDef[], now: Date, vatRatePercent = 15): BasketSummary {
-  const promotable = basket.entries.filter((e) => e.unitDivisor === 1 && e.fixedTotalCents === undefined);
+  // A line with a manager's price override is not promoted as well: the override is the discount.
+  const promotable = basket.entries.filter((e) => e.unitDivisor === 1 && e.fixedTotalCents === undefined && e.overrideUnitPriceCents === undefined);
   const priced = priceBasket(promotable.map((e) => ({ productId: e.productId, quantity: e.quantity, unitPriceCents: e.unitPriceCents })), promotions.filter((p) => isRunning(p, now)), now);
 
   const lines: PricedLine[] = basket.entries.map((e) => {
     const gross = e.fixedTotalCents ?? lineGross(e.unitPriceCents, e.quantity, e.unitDivisor);
+    if (e.overrideUnitPriceCents !== undefined && e.overrideApprovedBy !== undefined && e.fixedTotalCents === undefined && e.overrideUnitPriceCents < e.unitPriceCents) {
+      const overridden = Math.min(gross, gross - lineGross(e.overrideUnitPriceCents, e.quantity, e.unitDivisor));
+      return { ...e, discountCents: overridden, promotionId: null, priceOverrideBy: overridden > 0 ? e.overrideApprovedBy : null, totalCents: gross - overridden };
+    }
     const discount = Math.min(gross, priced.discountsByProduct.get(e.productId) ?? 0);
-    return { ...e, discountCents: discount, promotionId: discount > 0 ? priced.promotionByProduct.get(e.productId) ?? null : null, totalCents: gross - discount };
+    return { ...e, discountCents: discount, promotionId: discount > 0 ? priced.promotionByProduct.get(e.productId) ?? null : null, priceOverrideBy: null, totalCents: gross - discount };
   });
   const subtotal = lines.reduce((sum, l) => sum + l.totalCents + l.discountCents, 0);
   const discount = lines.reduce((sum, l) => sum + l.discountCents, 0);
@@ -165,7 +200,7 @@ export interface SaleUploadDto {
   tenderedCents: Cents | null;
   changeCents: Cents | null;
   accountId: string | null;
-  lines: Array<{ productId: string; name: string; quantity: number; priceCents: Cents; costCents: Cents; unitDivisor: number; discountCents: Cents; promotionId: string | null }>;
+  lines: Array<{ productId: string; name: string; quantity: number; priceCents: Cents; costCents: Cents; unitDivisor: number; discountCents: Cents; promotionId: string | null; priceOverrideBy?: string | null }>;
   payments: Array<{ methodCode: string; amountCents: Cents; reference: string | null; tenderedCents: Cents | null }> | null;
   tipCents: Cents;
   customerId: string | null;
@@ -222,6 +257,8 @@ export function toSaleUpload(basket: Basket, summary: BasketSummary, payments: r
   const lines = summary.lines.map((l) => ({
     productId: l.productId, name: l.name, quantity: l.quantity, priceCents: l.fixedTotalCents ?? l.unitPriceCents, costCents: l.costCents, unitDivisor: l.unitDivisor,
     discountCents: l.discountCents, promotionId: l.promotionId,
+    // Only when a manager approved the price, so every other line goes up exactly as before.
+    ...(l.priceOverrideBy ? { priceOverrideBy: l.priceOverrideBy } : {}),
   }));
   return ok({
     id: ids.saleId, staffId: ids.staffId, soldAt: soldAt.toISOString(),

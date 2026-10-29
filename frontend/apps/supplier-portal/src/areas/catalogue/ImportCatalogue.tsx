@@ -1,7 +1,7 @@
-import { useMessages, useSession } from "@tillknowit/app-kit";
+import { useApi, useMessages, useSession } from "@tillknowit/app-kit";
 import { Badge, Button, Card, Inline, Notice, Stack, Table } from "@tillknowit/design-system";
 import { useRef, useState } from "react";
-import { postForm, type PostForm } from "../../shared/postForm";
+import type { Api } from "@tillknowit/api-client";
 import { messages } from "./messages";
 
 export interface CatalogueLine { row: number; barcode: string | null; name: string; unitsPerCase: number; casePriceCents: number; action: string; issues: string[] }
@@ -10,7 +10,8 @@ export interface CatalogueUpload {
 }
 
 /** Preview first (apply false), then the same file again with apply true: the server's own two-step import. */
-export function ImportCatalogue({ supplierId, upload = postForm }: { supplierId: string; upload?: PostForm }) {
+export function ImportCatalogue({ supplierId, upload }: { supplierId: string; upload?: Api["upload"] }) {
+  const api = useApi();
   const t = useMessages(messages);
   const { personId } = useSession();
   const input = useRef<HTMLInputElement>(null);
@@ -27,7 +28,7 @@ export function ImportCatalogue({ supplierId, upload = postForm }: { supplierId:
     form.append("callerPersonId", personId);
     form.append("apply", apply ? "true" : "false");
     form.append("file", file);
-    const r = await upload<CatalogueUpload>(`/suppliers/${supplierId}/products/import`, form);
+    const r = await (upload ?? api.upload)<CatalogueUpload>(`/suppliers/${supplierId}/products/import`, form);
     setBusy(false);
     if (r.ok) setResult(r.value); else setError(r.message);
   }

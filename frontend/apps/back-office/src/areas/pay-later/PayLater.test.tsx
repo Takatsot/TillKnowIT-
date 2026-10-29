@@ -18,8 +18,20 @@ const full: CreditSummary = {
   shared: [{ at: "2026-10-01T08:05:00Z", partnerCode: "lendco", months: 6, totalSalesCents: 9876500 }],
 };
 
+const orders = [
+  { id: "o9", supplierName: "Metro Wholesale", reference: "PO-9", paymentStatus: "owing", totalCents: 120000 },
+  { id: "o8", supplierName: "Metro Wholesale", reference: "PO-8", paymentStatus: "paid", totalCents: 50000 },
+];
+
+/** The partner list and the shop's orders are their own routes; everything else goes to the fake the test gave. */
 function mount(api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}><PayLater /></SessionProvider>);
+  const inner = api.get as (path: string, query?: unknown) => Promise<unknown>;
+  const get = async (path: string, query?: unknown) => {
+    if (path === "/credit/partners") return ok(["lendco", "otherco"]);
+    if (path === "/shops/s1/purchase-orders") return ok(orders);
+    return inner(path, query);
+  };
+  render(<SessionProvider api={{ ...api, get } as Api} initial={session}><PayLater /></SessionProvider>);
 }
 
 describe("PayLater", () => {
@@ -38,11 +50,21 @@ describe("PayLater", () => {
     const user = userEvent.setup();
     await screen.findByText("You have not agreed to share your sales with anyone.");
 
-    await user.type(screen.getByLabelText("Finance partner code"), "lendco");
+    await user.selectOptions(await screen.findByLabelText("Finance partner to share with"), "lendco");
     await user.click(screen.getByRole("button", { name: "I agree to share my sales" }));
 
     await waitFor(() => expect(screen.getByText("You agreed to share your sales with lendco.")).toBeTruthy());
     expect(post).toHaveBeenCalledWith("/shops/s1/credit/consents", { personId: "p1", partnerCode: "lendco", months: 6 });
+  });
+
+  it("offers the server's partners and only the orders that are still owing", async () => {
+    mount({ get: vi.fn(async () => ok(full)) as never });
+    await screen.findByText("Metro Wholesale");
+
+    const partners = Array.from((screen.getByLabelText("Finance partner to share with") as HTMLSelectElement).options).map((o) => o.value);
+    expect(partners).toEqual(["", "lendco", "otherco"]);
+    const choices = Array.from((screen.getByLabelText("Supplier order") as HTMLSelectElement).options).map((o) => o.value);
+    expect(choices).toEqual(["", "o9"]);
   });
 
   it("shows limit, available, repayments and the share log, and withdraws consent", async () => {
@@ -73,7 +95,7 @@ describe("PayLater", () => {
     expect(body).toMatchObject({ personId: "p1", consentId: "c1", requestedCents: 500000 });
 
     await user.selectOptions(screen.getByLabelText("Approved credit"), "a1");
-    await user.type(screen.getByLabelText("Order id"), "o9");
+    await user.selectOptions(screen.getByLabelText("Supplier order"), "o9");
     await user.click(screen.getByRole("button", { name: "Pay the order with credit" }));
     await waitFor(() => expect(post).toHaveBeenCalledWith("/shops/s1/credit/draws", { personId: "p1", applicationId: "a1", orderId: "o9" }));
   });
@@ -91,7 +113,7 @@ describe("PayLater", () => {
     await screen.findByText("Metro Wholesale");
 
     await user.selectOptions(screen.getByLabelText("Approved credit"), "a1");
-    await user.type(screen.getByLabelText("Order id"), "o9");
+    await user.selectOptions(screen.getByLabelText("Supplier order"), "o9");
     await user.click(screen.getByRole("button", { name: "Pay the order with credit" }));
 
     expect((await screen.findByRole("alert")).textContent).toBe("Only R2500 of your credit is available.");

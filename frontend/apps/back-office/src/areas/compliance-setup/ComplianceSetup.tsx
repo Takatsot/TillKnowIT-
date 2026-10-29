@@ -2,7 +2,8 @@ import { formatDate, saveFile, useAction, useApi, useLoad, useMessages, useSessi
 import { Badge, Button, Card, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useEffect, useState } from "react";
 import { messages, type ComplianceSetupKey } from "./messages";
-import { uploadDocument, type DocumentUploader } from "./upload";
+import { useTillCaller } from "../selling-common/TillCaller";
+import { uploadWith, type DocumentUploader } from "./upload";
 
 interface SetupStep { item: string; done: boolean; completedAt: string | null; note: string | null }
 interface Checklist { steps: SetupStep[]; allDone: boolean; shopStatus: string }
@@ -13,8 +14,9 @@ const statusKeys: Record<string, ComplianceSetupKey> = { valid: "status_valid", 
 
 type Saver = (file: { blob: Blob; fileName: string }) => void;
 
-export function ComplianceSetup({ upload = uploadDocument, save = saveFile }: { upload?: DocumentUploader; save?: Saver }) {
+export function ComplianceSetup({ upload, save = saveFile }: { upload?: DocumentUploader; save?: Saver }) {
   const t = useMessages(messages);
+  const api = useApi();
   const [tab, setTab] = useState<"setup" | "documents">("setup");
   return (
     <Stack>
@@ -22,7 +24,7 @@ export function ComplianceSetup({ upload = uploadDocument, save = saveFile }: { 
         <Button variant={tab === "setup" ? "primary" : "secondary"} aria-pressed={tab === "setup"} onClick={() => setTab("setup")}>{t("tabSetup")}</Button>
         <Button variant={tab === "documents" ? "primary" : "secondary"} aria-pressed={tab === "documents"} onClick={() => setTab("documents")}>{t("tabDocuments")}</Button>
       </Inline>
-      {tab === "setup" ? <Setup /> : <Documents upload={upload} save={save} />}
+      {tab === "setup" ? <Setup /> : <Documents upload={upload ?? uploadWith(api)} save={save} />}
     </Stack>
   );
 }
@@ -89,7 +91,9 @@ const stepLabels = {
 function Documents({ upload, save }: { upload: DocumentUploader; save: Saver }) {
   const t = useMessages(messages);
   const api = useApi();
-  const { shopId, personId, deviceId, language } = useSession();
+  const { shopId, language } = useSession();
+  const caller = useTillCaller();
+  const { deviceId, staffId: personId } = caller;
   const docs = useLoad(() => api.get<ComplianceDocument[]>(`/shops/${shopId}/compliance/documents`), [shopId]);
   const types = useLoad(() => api.get<Lookup[]>("/lookups/document_types"), []);
   const [typeCode, setTypeCode] = useState("");
@@ -144,6 +148,7 @@ function Documents({ upload, save }: { upload: DocumentUploader; save: Saver }) 
 
   return (
     <Stack>
+      {caller.card}
       <Card title={t("docsHeading")}>
         <Stack>
           {docs.error && <Notice kind="danger">{docs.error.message}</Notice>}
@@ -185,10 +190,9 @@ function Documents({ upload, save }: { upload: DocumentUploader; save: Saver }) 
               <TextField label={t("docFile")} key={fileKey} type="file" accept="image/jpeg,image/png,application/pdf" error={errors.file} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
               <TextField label={t("expiresOn")} type="date" value={expiresOn} onChange={(e) => setExpiresOn(e.target.value)} />
             </Inline>
-            {deviceId === "" && <Notice kind="warning">{t("needsDevice")}</Notice>}
             {send.error && <Notice kind="danger">{send.error.message}</Notice>}
             {message && <Notice kind="success">{message}</Notice>}
-            <Button type="submit" disabled={send.busy}>{t("upload")}</Button>
+            <Button type="submit" disabled={send.busy || !caller.ready}>{t("upload")}</Button>
           </Stack>
         </form>
       </Card>

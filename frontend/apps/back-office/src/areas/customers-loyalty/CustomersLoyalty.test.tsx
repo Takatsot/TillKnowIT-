@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fail, ok } from "@tillknowit/domain";
 import type { Api } from "@tillknowit/api-client";
+import { withCaller } from "../selling-common/testing";
 import { SessionProvider, type Session } from "@tillknowit/app-kit";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -22,12 +23,12 @@ const layby = {
 };
 
 function mount(api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}><CustomersLoyalty /></SessionProvider>);
+  render(<SessionProvider api={withCaller(api)} initial={session}><CustomersLoyalty /></SessionProvider>);
 }
 
 const get = (extra: Record<string, unknown> = {}) => vi.fn(async (path: string, _q?: unknown) => {
   for (const [suffix, value] of Object.entries(extra)) if (path.endsWith(suffix)) return value;
-  if (path.endsWith("/stock")) return ok([{ productId: "tv", name: "Television" }]);
+  if (path === "/shops/s1/products") return ok([{ id: "tv", name: "Television", barcode: null, categoryCode: "electronics", costCents: 100000, priceCents: 150000, isActive: true }]);
   if (path.endsWith("/customers")) return ok([thandi, dup]);
   if (path.endsWith("/points")) return ok(points);
   if (path.endsWith("/quotes")) return ok([quote]);

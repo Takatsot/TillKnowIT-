@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  addItem, addWeighed, emptyBasket, removeItem, scan, setQuantity, setTip, summariseBasket, toSaleUpload,
+  addItem, addWeighed, clearPriceOverride, emptyBasket, removeItem, scan, setPriceOverride, setQuantity, setTip, summariseBasket, toSaleUpload,
   type Basket, type CatalogueItem, type Payment,
 } from "./basket";
 import { buildEmbeddedBarcode, type EmbeddedBarcodeRules, type PromotionDef } from "./selling";
@@ -197,5 +197,62 @@ describe("making the sale record", () => {
 
     expect(sale.lines[0]).toMatchObject({ quantity: 1_250, priceCents: 12_000, unitDivisor: 1000, discountCents: 0 });
     expect(sale.totalCents).toBe(15_000);
+  });
+});
+
+describe("a manager's price override", () => {
+  const promo: PromotionDef = { id: "00000000-0000-0000-0000-000000000001", name: "10%", type: "percent_off", productIds: [], percent: 10, amountCents: 0, items: [], startsAt: new Date("2026-10-01T00:00:00Z"), endsAt: new Date("2026-12-01T00:00:00Z"), days: [0, 1, 2, 3, 4, 5, 6] };
+
+  it("turns a lower price into a discount on the line with the approver as the reason", () => {
+    const b = must(setPriceOverride(must(addItem(emptyBasket, bread, 2)), "p-bread", 1_500, "mgr-1"));
+    const s = summariseBasket(b, [], now);
+
+    expect(s.lines[0]).toMatchObject({ discountCents: 600, promotionId: null, priceOverrideBy: "mgr-1", totalCents: 3_000 });
+    expect(s.totalCents).toBe(3_000);
+    const sale = must(toSaleUpload(b, s, [{ method: "card", amountCents: 3_000 }], ids, now));
+    expect(sale.lines[0]).toMatchObject({ priceCents: 1_800, discountCents: 600, promotionId: null, priceOverrideBy: "mgr-1" });
+    expect(sale.totalCents).toBe(sale.lines.reduce((sum, l) => sum + l.priceCents * l.quantity - l.discountCents, 0));
+  });
+
+  it("follows the quantity and a weighed line, and leaves other lines without an approver", () => {
+    let b = must(addItem(must(addItem(emptyBasket, milk)), bread));
+    b = must(setPriceOverride(b, "p-bread", 1_000, "mgr-1"));
+    b = must(setQuantity(b, "p-bread", 3));
+    const s = summariseBasket(b, [], now);
+    expect(s.lines.find((l) => l.productId === "p-bread")).toMatchObject({ discountCents: 2_400 });
+    const sale = must(toSaleUpload(b, s, [{ method: "card", amountCents: s.dueCents }], ids, now));
+    expect("priceOverrideBy" in sale.lines.find((l) => l.productId === "p-milk")!).toBe(false);
+
+    const w = must(setPriceOverride(must(addWeighed(emptyBasket, mince, 1_000)), "p-mince", 10_000, "mgr-1"));
+    expect(summariseBasket(w, [], now).lines[0]).toMatchObject({ discountCents: 2_000, totalCents: 10_000 });
+  });
+
+  it("is the line's discount instead of a promotion, not on top of it", () => {
+    const b = must(setPriceOverride(must(addItem(emptyBasket, bread)), "p-bread", 1_000, "mgr-1"));
+
+    expect(summariseBasket(b, [promo], now).lines[0]).toMatchObject({ discountCents: 800, promotionId: null, priceOverrideBy: "mgr-1" });
+  });
+
+  it("only ever lowers the price, never below zero, and not on a labelled line", () => {
+    const b = must(addItem(emptyBasket, bread));
+
+    expect(setPriceOverride(b, "p-bread", 1_800, "m")).toMatchObject({ ok: false, code: "basket.override_not_lower" });
+    expect(setPriceOverride(b, "p-bread", 2_500, "m")).toMatchObject({ ok: false, code: "basket.override_not_lower" });
+    expect(setPriceOverride(b, "p-bread", -1, "m")).toMatchObject({ ok: false, code: "basket.override_invalid" });
+    expect(setPriceOverride(b, "p-bread", 10.5, "m")).toMatchObject({ ok: false, code: "basket.override_invalid" });
+    expect(setPriceOverride(b, "p-bread", 100, " ")).toMatchObject({ ok: false, code: "basket.override_approver" });
+    expect(setPriceOverride(b, "nope", 100, "m")).toMatchObject({ ok: false, code: "basket.line_not_found" });
+    const priceRules: EmbeddedBarcodeRules = { prefix: "20", itemDigits: 5, valueDigits: 5, valueType: "price", decimals: 2 };
+    const labelled = must(scan(emptyBasket, buildEmbeddedBarcode(priceRules, "00042", 4_599), [{ ...bread, barcode: "00042" }], priceRules));
+    expect(labelled.kind === "item" && setPriceOverride(labelled.basket, "p-bread", 100, "m")).toMatchObject({ ok: false, code: "basket.label_line" });
+    expect(must(setPriceOverride(b, "p-bread", 0, "m")).entries[0]!.overrideUnitPriceCents).toBe(0);
+  });
+
+  it("can be taken off again", () => {
+    const b = must(setPriceOverride(must(addItem(emptyBasket, bread)), "p-bread", 1_000, "mgr-1"));
+    const cleared = clearPriceOverride(b, "p-bread");
+
+    expect(summariseBasket(cleared, [], now).lines[0]).toMatchObject({ discountCents: 0, priceOverrideBy: null, totalCents: 1_800 });
+    expect("overrideApprovedBy" in cleared.entries[0]!).toBe(false);
   });
 });

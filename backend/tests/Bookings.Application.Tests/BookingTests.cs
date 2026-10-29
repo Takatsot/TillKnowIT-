@@ -180,7 +180,7 @@ public class BookingFlowTests
     {
         public HashSet<string> Off { get; } = [];
         public Task<bool> IsOn(Guid shopId, string feature, CancellationToken ct) => Task.FromResult(!Off.Contains(feature));
-        public Task<ShopPackResponse> For(Guid shopId, CancellationToken ct) => Task.FromResult(new ShopPackResponse(shopId, "t", "T", 1, "slip.sale", []));
+        public Task<ShopPackResponse> For(Guid shopId, CancellationToken ct) => Task.FromResult(new ShopPackResponse(shopId, "t", "T", 1, "slip.sale", [], "Test shop"));
     }
 
     private sealed class Customers : ICustomerDirectory

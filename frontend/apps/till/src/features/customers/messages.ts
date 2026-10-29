@@ -30,6 +30,7 @@ const en = {
   "detail.consentYes": "Agreed to messages on {date}.",
   "detail.consentYesNoDate": "Agreed to messages.",
   "detail.consentNo": "Has not agreed to messages. Do not message this customer.",
+  "detail.attach": "Add {name} to the sale on the till",
   "points.title": "Loyalty points",
   "points.balance": "{points} points, worth {value}.",
   "points.min": "Points can be used from {min} at a time.",
