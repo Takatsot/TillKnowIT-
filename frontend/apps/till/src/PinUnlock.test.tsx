@@ -21,6 +21,15 @@ async function enter(user: ReturnType<typeof userEvent.setup>, pin: string) {
   await user.click(screen.getByRole("button", { name: "OK" }));
 }
 
+/** Each try is checked (slowly, by design) before the next is typed, so wait for its answer instead of racing it. */
+const SLOW = { timeout: 15_000 };
+async function wrongTries(user: ReturnType<typeof userEvent.setup>, count: number) {
+  for (let left = 4; left > 4 - count && left >= 0; left--) {
+    await enter(user, "0000");
+    await screen.findByText(left === 0 ? /Too many wrong tries/ : `That PIN is not right. Tries left: ${left}.`, undefined, SLOW);
+  }
+}
+
 describe("PinUnlock", () => {
   it("unlocks with the right PIN", async () => {
     const onUnlock = vi.fn();
@@ -69,18 +78,17 @@ describe("PinUnlock", () => {
     expect(onUnlock).not.toHaveBeenCalled();
   });
 
-  it("stays locked after a restart, so closing the app is no way round the lock", async () => {
+  it("stays locked after a restart, so closing the app is no way round the lock", { timeout: 60_000 }, async () => {
     const user = userEvent.setup();
     const first = render(<PinUnlock staff={[thandi]} language="en" onUnlock={vi.fn()} />);
     await user.click(screen.getByRole("button", { name: "Thandi" }));
-    for (let i = 0; i < 5; i++) await enter(user, "0000");
-    await screen.findByText(/Too many wrong tries/);
+    await wrongTries(user, 5);
     first.unmount();
 
     render(<PinUnlock staff={[thandi]} language="en" onUnlock={vi.fn()} />);
     await user.click(screen.getByRole("button", { name: "Thandi" }));
 
-    expect(screen.getByText(/Too many wrong tries/)).toBeTruthy();
+    expect(await screen.findByText(/Too many wrong tries/, undefined, SLOW)).toBeTruthy();
     expect(button("1").disabled).toBe(true);
   });
 
