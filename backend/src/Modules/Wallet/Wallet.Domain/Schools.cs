@@ -228,8 +228,11 @@ public sealed class HolderToken : Entity
 {
     private HolderToken() { }
 
-    public HolderToken(Guid holderId, TokenType type, string rawToken, DateTimeOffset now)
+    public const int MaxLabel = 40;
+
+    public HolderToken(Guid holderId, TokenType type, string rawToken, DateTimeOffset now, string? label = null)
     {
+        Label = string.IsNullOrWhiteSpace(label) ? null : label.Trim();
         HolderId = holderId;
         Type = type;
         TokenHash = Hash(rawToken);
@@ -241,6 +244,7 @@ public sealed class HolderToken : Entity
     public TokenType Type { get; private set; }
     public string TokenHash { get; private set; } = default!;
     public TokenStatus Status { get; private set; }
+    public string? Label { get; private set; }
     public DateTimeOffset? BlockedAt { get; private set; }
 
     /// <summary>The UID is compared without case, colons or spaces, so readers that print it differently still agree.</summary>

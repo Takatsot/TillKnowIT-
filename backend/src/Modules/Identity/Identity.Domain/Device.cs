@@ -28,6 +28,22 @@ public sealed class Device : VersionedEntity
 
     public bool IsEnrolled => EnrolledAt is not null;
 
+    /// <summary>Goes up each time the owner resets the till's credential; the till's token names the version it was issued under, so an older token no longer checks in.</summary>
+    public int CredentialVersion { get; private set; }
+
+    public string TokenSubject => $"device:{Id}:{CredentialVersion}";
+
+    /// <summary>The till lost its credential (or was handed over): the old token stops working, a new setup code is made, and the owner approves the till again.</summary>
+    public Result<string> ResetCredential()
+    {
+        if (Status == DeviceStatus.Disabled) return Result<string>.Fail("device.disabled", "This till was switched off. Add it again.");
+        CredentialVersion++;
+        Status = DeviceStatus.Pending;
+        var code = NewEnrolmentCode();
+        Touch();
+        return Result<string>.Ok(code);
+    }
+
     private const string CodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
     /// <summary>Makes the one-time setup code (shown to the owner once) and keeps its hash.</summary>

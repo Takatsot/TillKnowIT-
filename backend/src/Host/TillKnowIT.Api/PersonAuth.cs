@@ -52,7 +52,7 @@ public sealed class PersonAuthMiddleware(RequestDelegate next, AuthSettings sett
         if (claims.Count == 0 && devices.Count > 0 && signedIn is null)
         {
             var deviceSubject = ExpiringToken.Verify(settings.TokenKey, request.Headers["X-Device-Token"].ToString(), DateTimeOffset.UtcNow);
-            var proven = deviceSubject is not null && deviceSubject.StartsWith("device:", StringComparison.Ordinal) && Guid.TryParse(deviceSubject[7..], out var deviceId) && devices.All(d => d == deviceId);
+            var proven = deviceSubject is not null && deviceSubject.StartsWith("device:", StringComparison.Ordinal) && Guid.TryParse(deviceSubject[7..].Split(':')[0], out var deviceId) && devices.All(d => d == deviceId);
             if (!proven && (_required || request.Headers.ContainsKey("X-Device-Token"))) { await Refuse(context, 401, "auth.device_required", "This till is not signed in. Set it up again."); return; }
         }
         await next(context);

@@ -3,7 +3,8 @@ import { formatRand, newId } from "@tillknowit/domain";
 import { useState } from "react";
 import type { TillContext } from "../../feature";
 import { ErrorNotice, saveFile, suggestRef, TabGate, useAction, useKitT, useLoad, useT, who, type Caller, type Translate } from "../till-kit/kit";
-import { costOf, divisorOf, LinesEditor, lineCents } from "../till-kit/LinesEditor";
+import { LinesEditor } from "../till-kit/LinesEditor";
+import { addLinesToSale } from "../till-kit/saleBridge";
 import { PayPanel } from "../till-kit/PayPanel";
 import { addDays, saDate } from "../till-kit/time";
 import type { TicketLineDto, TicketResponse } from "../till-kit/types";
@@ -45,17 +46,13 @@ function QuotesBody({ ctx, caller }: { ctx: TillContext; caller: Caller }) {
     }
   };
   /** Puts the quote's goods into the sale being rung up on the Sell tab, at the quoted prices, then shows that tab. */
-  const addToSale = (q: Quote) => {
-    const sale = ctx.sale;
-    if (!sale) return;
-    for (const l of q.lines) {
-      // A weighed line goes in as one item at its quoted total, because its quantity is grams.
-      const r = sale.addLine(divisorOf(l) === 1000
-        ? { productId: l.productId, name: l.name, priceCents: lineCents(l), costCents: costOf(ctx.catalogue, l.productId), quantity: 1 }
-        : { productId: l.productId, name: l.name, priceCents: l.priceCents, costCents: costOf(ctx.catalogue, l.productId), quantity: l.quantity });
-      if (!r.ok) return setInfo(t("addToSale.failed", { name: l.name, message: r.message }));
-    }
-    setInfo(t("addToSale.done", { number: q.number }));
+  const addToSale = async (q: Quote) => {
+    const added = addLinesToSale(ctx, q.lines);
+    if (!added.ok) return setInfo(t("addToSale.failed", { name: added.name, message: added.message }));
+    // The goods are on the sale now; marking the quote converted needs the server, and its failure must not undo the sale.
+    const marked = await ctx.api.post<void>(`/shops/${caller.shopId}/quotes/${q.id}/to-sale`, who(caller));
+    setInfo(t(marked.ok ? "addToSale.done" : "addToSale.notMarked", { number: q.number }));
+    if (marked.ok) quotes.reload();
     ctx.openSell?.();
   };
   const cancel = async (q: Quote) => {
@@ -131,7 +128,7 @@ function QuotesBody({ ctx, caller }: { ctx: TillContext; caller: Caller }) {
                     {q.status === "open" ? (
                       <>
                         <Button aria-label={t("act.convert", { number: q.number })} disabled={action.busy} onClick={() => void convert(q)}>{t("act.convert", { number: q.number })}</Button>
-                        {ctx.sale ? <Button variant="secondary" aria-label={t("act.addToSale", { number: q.number })} onClick={() => addToSale(q)}>{t("act.addToSale", { number: q.number })}</Button> : null}
+                        {ctx.sale ? <Button variant="secondary" aria-label={t("act.addToSale", { number: q.number })} onClick={() => void addToSale(q)}>{t("act.addToSale", { number: q.number })}</Button> : null}
                         <Button variant="quiet" aria-label={t("act.cancel", { number: q.number })} onClick={() => setSure(q.id)}>{t("act.cancel", { number: q.number })}</Button>
                       </>
                     ) : null}

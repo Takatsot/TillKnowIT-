@@ -30,9 +30,10 @@ public sealed record ImportHoldersResult(int Created, int Duplicates, int Invali
 
 public sealed record LinkCodeRow(Guid HolderId, string Name, string? Grade, string? ClassName, string LinkCode);
 
-public sealed record IssueTokenRequest(Guid CallerPersonId, string Type, string RawToken);
+/// <summary>Label is what the parent sees to tell cards apart, such as "Blue wristband". Optional.</summary>
+public sealed record IssueTokenRequest(Guid CallerPersonId, string Type, string RawToken, string? Label = null);
 
-public sealed record TokenResponse(Guid Id, Guid HolderId, string Type, string Status);
+public sealed record TokenResponse(Guid Id, Guid HolderId, string Type, string Status, string? Label = null);
 
 // ---------------------------------------------------------------- parents and wallets
 

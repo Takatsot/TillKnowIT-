@@ -55,7 +55,11 @@ const en = {
   setupJson: "Value for tillknowit.device",
   setupCode: "Setup code (type it into the till)",
   setupCodeOnce: "Write this setup code down now. It is not shown again. The till asks for it, together with the shop id and the till id, the first time it is set up.",
-  setupCodeGone: "The setup code was shown once, when this till was added, and cannot be shown again. A till that lost its saved credential cannot be reset: add it again here as a new till, then set it up with the new code.",
+  setupCodeGone: "The setup code was shown once, and cannot be shown again. A till that lost its saved credential can be reset: its old credential stops working and you get a new setup code.",
+  reset: "Reset {name}",
+  confirmReset: "Yes, reset {name}",
+  resetNote: "Resetting stops this till's saved credential from working, gives you a new setup code, and the till must be approved again. Sales already waiting on the till are kept.",
+  resetDone: "{name} was reset. Type the new setup code into the till, then approve it.",
   noShop: "Choose a shop first.",
 } as const;
 

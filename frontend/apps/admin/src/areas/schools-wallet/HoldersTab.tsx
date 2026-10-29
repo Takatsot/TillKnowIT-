@@ -1,6 +1,7 @@
 import { saveFile, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Notice, Stack, Table } from "@tillknowit/design-system";
+import { Badge, Button, Card, Inline, Notice, Stack, Table } from "@tillknowit/design-system";
 import { useState } from "react";
+import { HolderCards } from "./HolderCards";
 import { AddHolderCard, EditHolderCard } from "./HolderForms";
 import { messages } from "./messages";
 import type { Holder, HolderUploader, ImportResult, School } from "./types";
@@ -17,6 +18,7 @@ export function HoldersTab({ school, upload }: { school: School; upload: HolderU
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Holder | null>(null);
+  const [cardsFor, setCardsFor] = useState<Holder | null>(null);
 
   async function send() {
     if (!file) return;
@@ -44,6 +46,7 @@ export function HoldersTab({ school, upload }: { school: School; upload: HolderU
     <Stack>
       <AddHolderCard school={school} onAdded={list.reload} />
       {editing && <EditHolderCard key={editing.id} holder={editing} onCancel={() => setEditing(null)} onSaved={() => { setEditing(null); list.reload(); }} />}
+      {cardsFor && <HolderCards key={cardsFor.id} holder={cardsFor} onClose={() => setCardsFor(null)} />}
       <Card title={t("importHeading")}>
         <form onSubmit={(e) => { e.preventDefault(); void send(); }}>
           <Stack>
@@ -103,7 +106,12 @@ export function HoldersTab({ school, upload }: { school: School; upload: HolderU
               { header: t("colGrade"), cell: (h) => h.grade ?? "" },
               { header: t("colClass"), cell: (h) => h.className ?? "" },
               { header: t("colStatus"), cell: (h) => <Badge>{h.status}</Badge> },
-              { header: t("colActions"), cell: (h) => <Button variant="quiet" aria-label={t("editHolderFor", { name: `${h.firstName} ${h.lastName}` })} onClick={() => setEditing(h)}>{t("editHolder")}</Button> },
+              { header: t("colActions"), cell: (h) => (
+                <Inline>
+                  <Button variant="quiet" aria-label={t("editHolderFor", { name: `${h.firstName} ${h.lastName}` })} onClick={() => setEditing(h)}>{t("editHolder")}</Button>
+                  <Button variant="quiet" aria-label={t("cardsFor", { name: `${h.firstName} ${h.lastName}` })} onClick={() => setCardsFor(h)}>{t("cards")}</Button>
+                </Inline>
+              ) },
             ]}
           />
         )}

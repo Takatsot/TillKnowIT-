@@ -17,7 +17,7 @@ import type { Caller } from "./features/till-kit/kit";
 import { newRedemptionReference, redeemVoucher } from "./features/vouchers/voucherApi";
 import { takeWalletPayment, type WalletItem } from "./features/wallet-pay/walletApi";
 import { MemoryKeyValueStore, type KeyValueStore } from "./localData";
-import { releaseNow, type Release } from "./pendingReleases";
+import { dropHeldRelease, holdRelease, releaseNow, type Release } from "./pendingReleases";
 import { queuePendingSerials } from "./pendingSerials";
 import styles from "./SellScreen.module.css";
 import { loadStaff, type StaffRecord } from "./staffStore";
@@ -325,6 +325,7 @@ export function SellScreen({
     const words: string[] = [];
     for (const { part, release } of releases) {
       const r = await releaseNow({ kv: store, api, caller, online }, release);
+      if (kv) await dropHeldRelease(kv, release);   // a waiting note (if any) now covers it
       if (r.outcome === "given_back") words.push(part.method === "wallet" ? x("sell.back.wallet") : part.method === "points" ? x("sell.back.points") : x("sell.back.voucher"));
       else if (r.outcome === "waiting") words.push(x("sell.back.waiting"));
       else words.push(x("sell.back.refused", { message: r.message ?? "" }));
@@ -350,6 +351,7 @@ export function SellScreen({
       return setMessage([problem(sale.code), gave].filter(Boolean).join(" "));
     }
     await queueSale(outbox, sale.value, now);
+    if (kv) await dropHeldRelease(kv, { saleId });
     saleIdRef.current = null;
     attemptRefs.current.clear();
     // Items that take serial numbers are offered right away; the numbers wait on the till until the sale has reached the server.
@@ -515,6 +517,13 @@ export function SellScreen({
 
   function takePart(method: "voucher" | "points" | "wallet", cents: number, reference: string, extra: { code?: string; customerId?: string } = {}) {
     const part: SplitPart = { method, amount: (cents / 100).toFixed(2), reference, received: "", locked: true, ...extra };
+    // If the till is closed before this sale finishes, the next start gives this back.
+    if (kv) {
+      const saleId = currentSaleId();
+      void holdRelease(kv, method === "voucher" && extra.code ? { kind: "voucher", code: extra.code, reference, saleId }
+        : method === "points" && extra.customerId ? { kind: "points", customerId: extra.customerId, reference, saleId }
+        : { kind: "wallet", purchaseId: reference, saleId });
+    }
     setParts((current) => [...current.filter((p) => p.locked || !(isBlank(p) || p.method === method)), part]);
     setOnlineForm(null);
     setOnlineAmount("");

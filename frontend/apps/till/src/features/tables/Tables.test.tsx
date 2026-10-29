@@ -90,6 +90,24 @@ describe("tables feature", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("Another till is working on this ticket.");
   });
 
+  it("moves a ticket's items to the sale on the till and voids the ticket", async () => {
+    const user = userEvent.setup();
+    const get = vi.fn(async (path: string) => (path.endsWith("floor-plan") ? ok([t4]) : ok([ticket()])));
+    const post = vi.fn(async () => ok(undefined));
+    const addLine = vi.fn(() => ok(undefined));
+    const openSell = vi.fn();
+    const { ctx } = makeCtx({ flags, api: { get, post } as never, sale: { addLine, addProduct: vi.fn(), setCustomer: vi.fn() }, openSell });
+    render(<Tables ctx={ctx} />);
+
+    await user.click(await screen.findByRole("button", { name: /Table T4, Open/ }));
+    await user.click(screen.getByRole("button", { name: "Move to the sale on the till" }));
+
+    expect(addLine).toHaveBeenCalledWith({ productId: "p-bread", name: "Bread", priceCents: 1800, costCents: 1200, quantity: 2 });
+    await waitFor(() => expect(post).toHaveBeenCalledWith(expect.stringContaining("/k1/void"), { deviceId: DEVICE, staffId: STAFF }));
+    expect(openSell).toHaveBeenCalled();
+    expect(await screen.findByText("T4 was moved to the sale on the till.")).toBeTruthy();
+  });
+
   it("voids only after a second confirmation", async () => {
     const user = userEvent.setup();
     const get = vi.fn(async (path: string) => (path.endsWith("floor-plan") ? ok([t4]) : ok([ticket()])));

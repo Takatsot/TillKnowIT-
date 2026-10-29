@@ -221,6 +221,32 @@ describe("SchoolsWallet", () => {
     expect(api.get.mock.calls.filter((c) => c[0] === "/schools/sc1/holders")).toHaveLength(2);
   });
 
+  it("links a named card to a person, lists their cards, and blocks a lost one", async () => {
+    const holder = { id: "h1", schoolId: "sc1", type: "learner", firstName: "Thabo", lastName: "Dlamini", grade: "4", className: "4B", status: "active", walletId: "w1", hasPhoto: false };
+    const api = fake({
+      "GET /admin/schools": ok([school]), "/schools/sc1/holders": ok([holder]),
+      "GET /holders/h1/tokens": ok([{ id: "tk1", holderId: "h1", type: "nfc", status: "active", label: "Blue wristband" }]),
+      "POST /holders/h1/tokens": ok({ id: "tk2", holderId: "h1", type: "nfc", status: "active", label: "Spare" }),
+      "POST /tokens/tk1/block": ok(undefined),
+    });
+    mount(api);
+    const user = userEvent.setup();
+    await openSchool(user);
+    await user.click(screen.getByRole("tab", { name: "Holders" }));
+    await user.click(await screen.findByRole("button", { name: "Cards for Thabo Dlamini" }));
+    expect(await screen.findByText("Blue wristband")).toBeTruthy();
+
+    await user.type(screen.getByLabelText("Card number"), " 04:A2:2B:1C ");
+    await user.type(screen.getByLabelText("Card name"), "Spare");
+    await user.click(screen.getByRole("button", { name: "Link card" }));
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith("/holders/h1/tokens", { callerPersonId: "p1", type: "nfc", rawToken: "04:A2:2B:1C", label: "Spare" }));
+    expect(await screen.findByText("The card is now linked to Thabo Dlamini.")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Block Blue wristband" }));
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith("/tokens/tk1/block", undefined, { callerPersonId: "p1" }));
+    expect(await screen.findByText("The card is blocked.")).toBeTruthy();
+  });
+
   it("saves breaks and adds a menu item", async () => {
     const api = fake({
  "GET /admin/schools": ok([school]),

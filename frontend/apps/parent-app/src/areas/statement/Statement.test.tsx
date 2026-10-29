@@ -107,6 +107,14 @@ describe("Statement", () => {
     expect((m.get as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter((c) => c[0] === "/holders/h1/tokens")).toHaveLength(2);
   });
 
+  it("shows the name the school gave a card instead of its position", async () => {
+    mount(<Statement />, api({}, ok(lines), ok([{ id: "tk1", holderId: "h1", type: "nfc", status: "active", label: "Blue wristband" }, { id: "tk2", holderId: "h1", type: "nfc", status: "active" }])));
+
+    expect(await screen.findByText("Blue wristband")).toBeTruthy();
+    expect(screen.getByText("Card 2 (tap card)")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Block Blue wristband" })).toBeTruthy();
+  });
+
   it("says so when no card was issued, and explains the school issues cards", async () => {
     mount(<Statement />, api({}, ok(lines), ok([])));
 

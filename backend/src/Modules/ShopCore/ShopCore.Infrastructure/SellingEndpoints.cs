@@ -75,6 +75,7 @@ internal static class SellingEndpoints
             return result.IsSuccess ? Results.File(result.Value!.Content, result.Value.ContentType, result.Value.FileName) : Problem(result.Error!);
         });
         api.MapPost("/shops/{shopId:guid}/quotes/{id:guid}/convert", async (Guid shopId, Guid id, TillCall call, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ConvertQuote(shopId, id, call), ct)));
+        api.MapPost("/shops/{shopId:guid}/quotes/{id:guid}/to-sale", async (Guid shopId, Guid id, TillCall call, IDispatcher d, CancellationToken ct) => Done(await d.Send(new MarkQuoteInSale(shopId, id, call), ct)));
         api.MapPost("/shops/{shopId:guid}/quotes/{id:guid}/cancel", async (Guid shopId, Guid id, TillCall call, IDispatcher d, CancellationToken ct) => Done(await d.Send(new CancelQuote(shopId, id, call), ct)));
 
         // ---- lay-by ----

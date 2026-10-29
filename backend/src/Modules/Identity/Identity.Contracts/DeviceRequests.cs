@@ -1,6 +1,6 @@
 namespace Identity.Contracts;
 
-public sealed record RegisterDeviceRequest(string Name);
+public sealed record RegisterDeviceRequest(Guid CallerPersonId, string Name);
 
 /// <summary>EnrolmentCode is shown once. The owner types it into the till the first time it is set up.</summary>
 public sealed record RegisterDeviceResponse(Guid DeviceId, string EnrolmentCode);

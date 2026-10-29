@@ -61,6 +61,7 @@ internal sealed class HolderTokenConfiguration : IEntityTypeConfiguration<Holder
         b.Property(x => x.Type).HasConversion<string>().HasMaxLength(20);
         b.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         b.Property(x => x.TokenHash).HasMaxLength(64).IsRequired();
+        b.Property(x => x.Label).HasMaxLength(HolderToken.MaxLabel);
         b.HasIndex(x => x.TokenHash).IsUnique();   // a card belongs to one person
         b.HasIndex(x => x.HolderId);
     }

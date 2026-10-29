@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { TillContext } from "../../feature";
 import { ErrorNotice, useAction, useKitT, type Caller, type Translate } from "../till-kit/kit";
 import { LinesEditor } from "../till-kit/LinesEditor";
+import { addLinesToSale } from "../till-kit/saleBridge";
 import type { TicketLineDto, TicketResponse } from "../till-kit/types";
 import type { TablesKey } from "./messages";
 import { PayPanel } from "../till-kit/PayPanel";
@@ -84,6 +85,17 @@ export function TicketPanel({ ctx, caller, ticket: initial, tables, others, t, c
       take(r.value);
     }
   };
+  /** The ticket's goods go onto the sale on the Sell tab and the ticket is voided, so it is not paid twice. */
+  const toSale = async () => {
+    const added = addLinesToSale(ctx, lines);
+    if (!added.ok) return setInfo(t("ticket.toSaleFailed", { name: added.name, message: added.message }));
+    const r = await action.run(() => ctx.api.post<void>(`${base(caller)}/${ticket.id}/void`, pair(caller)));
+    if (r.ok) {
+      changed();
+      leave(t("ticket.toSaleDone", { label: ticket.label }));
+      ctx.openSell?.();
+    }
+  };
   const voidIt = async () => {
     const r = await action.run(() => ctx.api.post<void>(`${base(caller)}/${ticket.id}/void`, pair(caller)));
     if (r.ok) {
@@ -114,6 +126,7 @@ export function TicketPanel({ ctx, caller, ticket: initial, tables, others, t, c
           {!mine && !ticket.lockedForYou ? <Button onClick={() => void hold()} disabled={action.busy}>{t("ticket.hold")}</Button> : null}
           {mine && dirty ? <Button onClick={() => void save()} disabled={action.busy}>{t("ticket.save")}</Button> : null}
           {mine ? <Button variant="secondary" onClick={() => void release()} disabled={action.busy || dirty}>{t("ticket.release")}</Button> : null}
+          {mine && ctx.sale && !dirty && lines.length > 0 ? <Button variant="secondary" onClick={() => void toSale()} disabled={action.busy}>{t("ticket.toSale")}</Button> : null}
           {!ticket.lockedForYou ? <Button onClick={() => (lines.length === 0 ? setInfo(t("ticket.empty")) : setPaying(true))} disabled={action.busy || dirty}>{t("ticket.pay")}</Button> : null}
         </Inline>
 

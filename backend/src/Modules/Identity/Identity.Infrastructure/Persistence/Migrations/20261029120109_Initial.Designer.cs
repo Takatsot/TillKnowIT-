@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20261029094804_Initial")]
+    [Migration("20261029120109_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -40,6 +40,10 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
+
+                    b.Property<int>("CredentialVersion")
+                        .HasColumnType("int")
+                        .HasColumnName("credential_version");
 
                     b.Property<Guid?>("DeviceId")
                         .HasColumnType("uniqueidentifier")

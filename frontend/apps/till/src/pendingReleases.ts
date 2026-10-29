@@ -27,6 +27,40 @@ async function save(kv: KeyValueStore, list: Release[]): Promise<void> {
   await kv.set(KEY, list);
 }
 
+const HELD_KEY = "releases.held";
+
+async function heldNotes(kv: KeyValueStore): Promise<Release[]> {
+  return (await kv.get<Release[]>(HELD_KEY)) ?? [];
+}
+
+/**
+ * Written the moment a part is taken, before the cashier has finished paying. If the till is closed or crashes with the part still on screen, the note is still here
+ * the next time the app starts, and adoptHeldReleases turns it into something to give back.
+ */
+export async function holdRelease(kv: KeyValueStore, r: Release): Promise<void> {
+  const list = await heldNotes(kv);
+  if (!list.some((o) => same(o, r))) await kv.set(HELD_KEY, [...list, r]);
+}
+
+/** The sale went through, or the part was given back (or refused for good): the note is no longer needed. */
+export async function dropHeldRelease(kv: KeyValueStore, match: { saleId: string } | Release): Promise<void> {
+  const list = await heldNotes(kv);
+  const rest = list.filter((o) => ("kind" in match ? !same(o, match) : o.saleId !== match.saleId));
+  if (rest.length !== list.length) await kv.set(HELD_KEY, rest);
+}
+
+/**
+ * Called once when the app starts, before any sale can be under way: whatever is still held belongs to a sale that never finished, so it becomes a note to give back.
+ * (A sale that did reach the queue is told apart later: sendPendingReleases skips a note whose sale is waiting to upload, and the server refuses to give back a sale it has.)
+ */
+export async function adoptHeldReleases(kv: KeyValueStore): Promise<number> {
+  const held = await heldNotes(kv);
+  if (held.length === 0) return 0;
+  for (const r of held) await remember(kv, r);
+  await kv.set(HELD_KEY, []);
+  return held.length;
+}
+
 async function remember(kv: KeyValueStore, r: Release): Promise<void> {
   const list = await pendingReleases(kv);
   if (!list.some((o) => same(o, r))) await save(kv, [...list, r]);

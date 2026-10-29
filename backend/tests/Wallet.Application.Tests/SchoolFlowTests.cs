@@ -165,6 +165,21 @@ public class SchoolFlowTests
     }
 
     [Fact]
+    public async Task A_card_can_carry_a_short_name_the_parent_sees()
+    {
+        await _w.OpenSchool();
+        var child = await _w.EnrolChild(withCard: false);
+
+        var named = await _w.TokenOps.Handle(new IssueToken(child.HolderId, new(_w.SchoolAdmin, "nfc", "04A22B1C", "  Blue wristband ")), default);
+        var plain = await _w.TokenOps.Handle(new IssueToken(child.HolderId, new(_w.SchoolAdmin, "nfc", "04A22B1D")), default);
+        var tooLong = await _w.TokenOps.Handle(new IssueToken(child.HolderId, new(_w.SchoolAdmin, "nfc", "04A22B1E", new string('x', 41))), default);
+
+        Assert.Equal("Blue wristband", named.Value!.Label);
+        Assert.Null(plain.Value!.Label);
+        Assert.Equal("token.label_invalid", tooLong.Error!.Code);
+    }
+
+    [Fact]
     public async Task Issuing_a_card_needs_a_school_admin_a_readable_uid_and_an_active_person()
     {
         await _w.OpenSchool();

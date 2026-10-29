@@ -38,6 +38,10 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("created_by");
 
+                    b.Property<int>("CredentialVersion")
+                        .HasColumnType("int")
+                        .HasColumnName("credential_version");
+
                     b.Property<Guid?>("DeviceId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");

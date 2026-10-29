@@ -112,18 +112,33 @@ describe("Staff and tills", () => {
     expect(screen.getByText('{"shopId":"s1","deviceId":"d1"}')).toBeTruthy();
     expect(screen.getByText("WXYZ-4321")).toBeTruthy();
     expect(screen.getByText(/Write this setup code down now. It is not shown again./)).toBeTruthy();
-    expect(post).toHaveBeenCalledWith("/shops/s1/devices", { name: "Counter 1" });
+    expect(post).toHaveBeenCalledWith("/shops/s1/devices", { callerPersonId: "p1", name: "Counter 1" });
     expect(await screen.findByText("Waiting for approval")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Approve Counter 1" }));
-    await waitFor(() => expect(post).toHaveBeenCalledWith("/devices/d1/approve"));
+    await waitFor(() => expect(post).toHaveBeenCalledWith("/devices/d1/approve", undefined, { callerPersonId: "p1" }));
     expect(await screen.findByText("Approved")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Wipe Counter 1" }));
-    expect(post).not.toHaveBeenCalledWith("/devices/d1/wipe");
+    expect(post).not.toHaveBeenCalledWith("/devices/d1/wipe", undefined, { callerPersonId: "p1" });
     await user.click(screen.getByRole("button", { name: "Yes, wipe Counter 1" }));
-    await waitFor(() => expect(post).toHaveBeenCalledWith("/devices/d1/wipe"));
+    await waitFor(() => expect(post).toHaveBeenCalledWith("/devices/d1/wipe", undefined, { callerPersonId: "p1" }));
     expect(await screen.findByText("Wipe requested")).toBeTruthy();
+  });
+
+  it("resets a till after confirming and shows the new setup code once", async () => {
+    const { get } = server({ devices: [{ deviceId: "d7", name: "Counter 2", status: "approved", lastSeenAt: null, wipeRequested: false }] });
+    const post = vi.fn(async () => ok({ deviceId: "d7", enrolmentCode: "NEWCODE789" }));
+    mount({ get: get as never, post: post as never });
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole("button", { name: "Reset Counter 2" }));
+    expect(post).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Yes, reset Counter 2" }));
+
+    await waitFor(() => expect(post).toHaveBeenCalledWith("/devices/d7/reset-credential", undefined, { callerPersonId: "p1" }));
+    expect(await screen.findByText("NEWCODE789")).toBeTruthy();
+    expect(screen.getByText("Counter 2 was reset. Type the new setup code into the till, then approve it.")).toBeTruthy();
   });
 
   it("shows the setup value for a till chosen from the list", async () => {
@@ -134,7 +149,7 @@ describe("Staff and tills", () => {
     await user.click(await screen.findByRole("button", { name: "Show setup for Counter 2" }));
     expect(screen.getByText('{"shopId":"s1","deviceId":"d7"}')).toBeTruthy();
     expect(screen.getByText(/cannot be shown again/)).toBeTruthy();
-    expect(screen.getByText(/cannot be reset: add it again/)).toBeTruthy();
+    expect(screen.getByText(/can be reset: its old credential stops working/)).toBeTruthy();
   });
 
   it("shows the server's message when registering fails", async () => {

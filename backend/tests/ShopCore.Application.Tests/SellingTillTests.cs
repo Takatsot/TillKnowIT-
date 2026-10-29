@@ -238,6 +238,18 @@ public class QuoteFlowTests
     }
 
     [Fact]
+    public async Task A_quote_rung_up_on_the_main_sale_is_marked_converted_once()
+    {
+        var quote = (await Create()).Value!;
+        Assert.True((await _w.Quotes.Handle(new MarkQuoteInSale(_w.Shop, quote.Id, new(_w.TillA, _w.Cashier)), default)).IsSuccess);
+
+        var row = (await _w.Quotes.Handle(new ListQuotes(_w.Shop, _w.TillA, _w.Cashier), default)).Value!.Single();
+        Assert.Equal(("converted", null), (row.Status, row.TicketId));
+        Assert.Equal("quote.not_open", (await _w.Quotes.Handle(new MarkQuoteInSale(_w.Shop, quote.Id, new(_w.TillA, _w.Cashier)), default)).Error!.Code);
+        Assert.Equal("quote.not_found", (await _w.Quotes.Handle(new MarkQuoteInSale(_w.Shop, Guid.NewGuid(), new(_w.TillA, _w.Cashier)), default)).Error!.Code);
+    }
+
+    [Fact]
     public async Task Quotes_need_their_pack_feature_and_valid_dates()
     {
         Assert.Equal("quote.expiry_invalid", (await Create(null, Today.AddDays(-1))).Error!.Code);

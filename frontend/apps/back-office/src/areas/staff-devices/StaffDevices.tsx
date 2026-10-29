@@ -122,8 +122,10 @@ function DevicesCard() {
   const [note, setNote] = useState("");
   const [confirming, setConfirming] = useState<string | null>(null);
 
-  const register = useAction(() => api.post<{ deviceId: string; enrolmentCode: string }>(`/shops/${shopId}/devices`, { name: name.trim() }));
-  const act = useAction((path: string) => api.post<void>(path));
+  const register = useAction(() => api.post<{ deviceId: string; enrolmentCode: string }>(`/shops/${shopId}/devices`, { callerPersonId: personId, name: name.trim() }));
+  const act = useAction((path: string) => api.post<void>(path, undefined, { callerPersonId: personId }));
+  const reset = useAction((deviceId: string) => api.post<{ deviceId: string; enrolmentCode: string }>(`/devices/${deviceId}/reset-credential`, undefined, { callerPersonId: personId }));
+  const [resetting, setResetting] = useState<string | null>(null);
 
   async function submit() {
     setNote("");
@@ -141,6 +143,18 @@ function DevicesCard() {
     setNote("");
     const r = await act.run(`/devices/${d.deviceId}/approve`);
     if (r.ok) { list.reload(); setNote(t("approvedNote", { name: d.name })); }
+  }
+
+  async function resetCredential(d: DeviceRow) {
+    setNote("");
+    setResetting(null);
+    const r = await reset.run(d.deviceId);
+    if (r.ok) {
+      setSetupFor(d.deviceId);
+      setCode({ deviceId: d.deviceId, value: r.value.enrolmentCode });
+      list.reload();
+      setNote(t("resetDone", { name: d.name }));
+    }
   }
 
   async function wipe(d: DeviceRow) {
@@ -168,6 +182,7 @@ function DevicesCard() {
           </Stack>
         </form>
         {act.error && <Notice kind="danger">{act.error.message}</Notice>}
+        {reset.error && <Notice kind="danger">{reset.error.message}</Notice>}
         {list.error && <Notice kind="danger">{list.error.message}</Notice>}
         <Table
           rows={rows}
@@ -183,6 +198,14 @@ function DevicesCard() {
                 <Inline>
                   {d.status === "pending" && <Button disabled={act.busy} onClick={() => void approve(d)}>{t("approve", { name: d.name })}</Button>}
                   <Button variant="quiet" onClick={() => { setSetupFor(d.deviceId); setCode(null); }}>{t("showSetup", { name: d.name })}</Button>
+                  {d.status !== "disabled" && !d.wipeRequested && (resetting === d.deviceId ? (
+                    <>
+                      <Button variant="secondary" disabled={reset.busy} onClick={() => void resetCredential(d)}>{t("confirmReset", { name: d.name })}</Button>
+                      <Button variant="quiet" onClick={() => setResetting(null)}>{t("keep")}</Button>
+                    </>
+                  ) : (
+                    <Button variant="quiet" disabled={reset.busy} onClick={() => setResetting(d.deviceId)}>{t("reset", { name: d.name })}</Button>
+                  ))}
                   {confirming === d.deviceId ? (
                     <>
                       <Button variant="secondary" disabled={act.busy} onClick={() => void wipe(d)}>{t("confirmWipe", { name: d.name })}</Button>
@@ -197,6 +220,7 @@ function DevicesCard() {
           ]}
         />
         {confirming && <Notice kind="warning">{t("wipeNote")}</Notice>}
+        {resetting && <Notice kind="warning">{t("resetNote")}</Notice>}
         {setupDevice && [setupDevice].map((d) => (
           <Card key={d.deviceId} title={t("setupHeading", { name: d.name })}>
             <p>{t("setupHint")}</p>

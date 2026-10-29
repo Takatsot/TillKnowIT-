@@ -101,3 +101,11 @@ export interface Reconciliation {
 
 /** Sends the holders import. Defaults to Api.upload; a test passes its own. */
 export type HolderUploader = (schoolId: string, callerPersonId: string, file: File) => Promise<Result<ImportResult>>;
+
+export interface Token {
+  id: string;
+  holderId: string;
+  type: string;
+  status: string;
+  label?: string | null;
+}

@@ -9,6 +9,12 @@ namespace Identity.Application.Tests;
 
 public class DeviceCredentialTests
 {
+    private sealed class Allow(bool yes = true) : Identity.Contracts.IOrganisationAccess
+    {
+        public Task<bool> Has(Guid p, Guid o, string perm, CancellationToken ct) => Task.FromResult(yes && perm == "device.manage");
+    }
+    private static readonly Allow Owner = new();
+
     private sealed class Store : IDeviceStore
     {
         public Organisation? Shop { get; set; }
@@ -27,7 +33,7 @@ public class DeviceCredentialTests
 
     private async Task<(Guid Id, string Code)> Register()
     {
-        var r = (await new RegisterDeviceHandler(_store).Handle(new RegisterDevice(Guid.NewGuid(), "Till 1"), default)).Value!;
+        var r = (await new RegisterDeviceHandler(_store, Owner).Handle(new RegisterDevice(Guid.NewGuid(), "Till 1", Guid.NewGuid()), default)).Value!;
         return (r.DeviceId, r.EnrolmentCode);
     }
 
@@ -38,7 +44,7 @@ public class DeviceCredentialTests
 
         var first = (await CheckIn.Handle(new CheckInDevice(id, code.ToLowerInvariant()), default)).Value!;
 
-        Assert.Equal($"device:{id}", ExpiringToken.Verify(Key, first.Token, _clock.GetUtcNow()));
+        Assert.Equal($"device:{id}:0", ExpiringToken.Verify(Key, first.Token, _clock.GetUtcNow()));
         Assert.Equal("device.credential_required", (await CheckIn.Handle(new CheckInDevice(id, code), default)).Error!.Code);   // the code is used up: only the token gets in now
     }
 
@@ -75,5 +81,36 @@ public class DeviceCredentialTests
         _clock.Advance(TimeSpan.FromDays(31));
 
         Assert.Equal("device.credential_required", (await CheckIn.Handle(new CheckInDevice(id, null, token), default)).Error!.Code);
+    }
+
+    [Fact]
+    public async Task Resetting_a_till_cancels_its_old_token_and_gives_a_new_setup_code_and_needs_approval_again()
+    {
+        var (id, code) = await Register();
+        await new ApproveDeviceHandler(_store, Owner).Handle(new ApproveDevice(id, Guid.NewGuid()), default);
+        var oldToken = (await CheckIn.Handle(new CheckInDevice(id, code), default)).Value!.Token;
+
+        var reset = await new ResetDeviceCredentialHandler(_store, Owner).Handle(new ResetDeviceCredential(id, Guid.NewGuid()), default);
+
+        Assert.NotEqual(code, reset.Value!.EnrolmentCode);
+        Assert.Equal(DeviceStatus.Pending, _store.Devices.Single(d => d.Id == id).Status);
+        Assert.Equal("device.enrolment_required", (await CheckIn.Handle(new CheckInDevice(id, null, oldToken), default)).Error!.Code);   // the old token is not a setup code
+        var fresh = (await CheckIn.Handle(new CheckInDevice(id, reset.Value.EnrolmentCode), default)).Value!;
+        Assert.Equal($"device:{id}:1", ExpiringToken.Verify(Key, fresh.Token, _clock.GetUtcNow()));
+        Assert.Equal("device.credential_required", (await CheckIn.Handle(new CheckInDevice(id, null, oldToken), default)).Error!.Code);
+    }
+
+    [Fact]
+    public async Task Only_the_owner_can_add_approve_switch_off_or_reset_a_till_and_a_switched_off_till_cannot_be_reset()
+    {
+        var stranger = new Allow(false);
+        Assert.Equal("permission.denied", (await new RegisterDeviceHandler(_store, stranger).Handle(new RegisterDevice(Guid.NewGuid(), "Till 9", Guid.NewGuid()), default)).Error!.Code);
+        var (id, _) = await Register();
+        Assert.Equal("permission.denied", (await new ApproveDeviceHandler(_store, stranger).Handle(new ApproveDevice(id, Guid.NewGuid()), default)).Error!.Code);
+        Assert.Equal("permission.denied", (await new WipeDeviceHandler(_store, stranger).Handle(new WipeDevice(id, Guid.NewGuid()), default)).Error!.Code);
+        Assert.Equal("permission.denied", (await new ResetDeviceCredentialHandler(_store, stranger).Handle(new ResetDeviceCredential(id, Guid.NewGuid()), default)).Error!.Code);
+
+        await new WipeDeviceHandler(_store, Owner).Handle(new WipeDevice(id, Guid.NewGuid()), default);
+        Assert.Equal("device.disabled", (await new ResetDeviceCredentialHandler(_store, Owner).Handle(new ResetDeviceCredential(id, Guid.NewGuid()), default)).Error!.Code);
     }
 }

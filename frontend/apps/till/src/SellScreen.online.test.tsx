@@ -7,7 +7,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SaleBridge } from "./feature";
 import { MemoryKeyValueStore } from "./localData";
-import { pendingReleases, sendPendingReleases } from "./pendingReleases";
+import { adoptHeldReleases, pendingReleases, sendPendingReleases } from "./pendingReleases";
 import { pendingSerials } from "./pendingSerials";
 import { SellScreen } from "./SellScreen";
 import { saveStaff, type StaffRecord } from "./staffStore";
@@ -293,6 +293,45 @@ describe("vouchers, points and the wallet in a split payment", () => {
       const redeem = post.mock.calls[0]![1] as { reference: string };
       expect(release[1]).toEqual({ deviceId: DEVICE, staffId: staff.id, code: "ABCD-1234", reference: redeem.reference });
       expect(await pendingReleases(kv)).toEqual([]);
+    });
+
+    it("keeps a note of a taken part while the sale is open, so a till closed mid-payment gives it back on the next start", async () => {
+      const post = vi.fn(async (_path: string, _body?: unknown) => ok(voucherOk));
+      const { user, kv, outbox } = await setup({ flags, api: { post } });
+      await toSplit(user);
+      await takeVoucher(user);
+
+      const held = (await kv.get<Array<{ kind: string; code: string }>>("releases.held"))!;
+      expect(held).toHaveLength(1);
+      expect(held[0]).toMatchObject({ kind: "voucher", code: "ABCD-1234" });
+      expect(await pendingReleases(kv)).toEqual([]);   // nothing is given back while the cashier is still paying
+
+      // The till is closed here. When it starts again, the held note becomes a note to give back, and is sent.
+      expect(await adoptHeldReleases(kv)).toBe(1);
+      expect(await kv.get("releases.held")).toEqual([]);
+      const caller = { shopId: SHOP, deviceId: DEVICE, staffId: staff.id };
+      const r = await sendPendingReleases({ kv, api: { post } as unknown as Api, outbox, caller });
+      expect(r.given).toBe(1);
+      expect(post.mock.calls.some((c) => c[0] === `/shops/${SHOP}/vouchers/release`)).toBe(true);
+      expect(await pendingReleases(kv)).toEqual([]);
+    });
+
+    it("drops the held note when the sale goes through, and when the part is given back", async () => {
+      const post = vi.fn(async (_path: string, _body?: unknown) => ok(voucherOk));
+      const { user, kv, outbox } = await setup({ flags, api: { post } });
+      await toSplit(user);
+      await takeVoucher(user);
+      await user.click(screen.getByRole("button", { name: "Pay" }));
+      await waitFor(async () => expect((await queuedSales(outbox)).length).toBe(1));
+      expect(await kv.get("releases.held")).toEqual([]);
+      cleanup();
+
+      const second = await setup({ flags, api: { post } });
+      await toSplit(second.user);
+      await takeVoucher(second.user);
+      await backTwice(second.user);
+      await screen.findByText("The voucher amount was given back.");
+      expect(await second.kv.get("releases.held")).toEqual([]);
     });
 
     it("releases the voucher, the wallet payment and the points (with their reference) together, so a voucher and points share a sale", async () => {

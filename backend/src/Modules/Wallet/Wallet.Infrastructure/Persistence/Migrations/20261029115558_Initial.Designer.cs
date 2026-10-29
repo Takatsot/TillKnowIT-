@@ -12,7 +12,7 @@ using Wallet.Infrastructure.Persistence;
 namespace Wallet.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(WalletDbContext))]
-    [Migration("20261027105520_Initial")]
+    [Migration("20261029115558_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -339,6 +339,11 @@ namespace Wallet.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("HolderId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("holder_id");
+
+                    b.Property<string>("Label")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("label");
 
                     b.Property<string>("Status")
                         .IsRequired()

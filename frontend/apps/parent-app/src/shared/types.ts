@@ -88,4 +88,6 @@ export interface Token {
   holderId: string;
   type: string;
   status: string;
+  /** What the school called this card, such as "Blue wristband". */
+  label?: string | null;
 }

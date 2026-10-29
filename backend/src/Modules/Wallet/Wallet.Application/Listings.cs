@@ -36,6 +36,6 @@ internal sealed class WalletListHandlers(IWalletStore store, IWalletListings lis
         var allowed = await store.GuardianshipOf(q.CallerPersonId, holder.Id, ct) is not null ? Result.Ok() : await SchoolAccess.Admin(store, permissions, holder.SchoolId, q.CallerPersonId, ct);
         if (!allowed.IsSuccess) return Result<List<TokenResponse>>.Fail(allowed.Error!.Code, allowed.Error.Message);
         return Result<List<TokenResponse>>.Ok((await store.TokensOf(holder.Id, ct)).OrderBy(t => t.CreatedAt)
-            .Select(t => new TokenResponse(t.Id, holder.Id, t.Type == TokenType.Nfc ? "nfc" : "qr", t.Status == TokenStatus.Active ? "active" : "blocked")).ToList());
+            .Select(t => new TokenResponse(t.Id, holder.Id, t.Type == TokenType.Nfc ? "nfc" : "qr", t.Status == TokenStatus.Active ? "active" : "blocked", t.Label)).ToList());
     }
 }

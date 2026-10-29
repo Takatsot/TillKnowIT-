@@ -173,12 +173,12 @@ function Cards({ child }: { child: Child }) {
         <ul style={listStyle}>
           {tokens.data.map((c, n) => (
             <li key={c.id} style={itemStyle}>
-              <span>{t("cardNumberLabel", { n: n + 1, type: cardType(c.type, t) })}</span>
+              <span>{c.label ?? t("cardNumberLabel", { n: n + 1, type: cardType(c.type, t) })}</span>
               <span><Badge>{c.status === "active" ? t("cardActive") : t("cardBlocked")}</Badge></span>
               {c.status === "active" && (
                 <Button
                   variant="secondary"
-                  aria-label={t("blockOneNamed", { n: n + 1 })}
+                  aria-label={c.label ? t("blockOneLabelled", { label: c.label }) : t("blockOneNamed", { n: n + 1 })}
                   disabled={blockOne.busy}
                   onClick={() => void blockOne.run(c.id).then((r) => { if (r.ok) { setNote(t("cardBlockedNow")); tokens.reload(); } })}
                 >

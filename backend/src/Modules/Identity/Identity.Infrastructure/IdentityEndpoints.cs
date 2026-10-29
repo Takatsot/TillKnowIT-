@@ -74,22 +74,28 @@ public static class IdentityEndpoints
 
         api.MapPost("/shops/{shopId:guid}/devices", async (Guid shopId, RegisterDeviceRequest req, IDispatcher d, CancellationToken ct) =>
         {
-            var result = await d.Send(new RegisterDevice(shopId, req.Name), ct);
+            var result = await d.Send(new RegisterDevice(shopId, req.Name, req.CallerPersonId), ct);
             return result.IsSuccess
                 ? Results.Created($"/api/v1/devices/{result.Value}", result.Value)
                 : Problem(result);
         });
 
-        api.MapPost("/devices/{id:guid}/approve", async (Guid id, IDispatcher d, CancellationToken ct) =>
+        api.MapPost("/devices/{id:guid}/approve", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) =>
         {
-            var result = await d.Send(new ApproveDevice(id), ct);
+            var result = await d.Send(new ApproveDevice(id, callerPersonId), ct);
             return result.IsSuccess ? Results.NoContent() : Problem(result);
         });
 
-        api.MapPost("/devices/{id:guid}/wipe", async (Guid id, IDispatcher d, CancellationToken ct) =>
+        api.MapPost("/devices/{id:guid}/wipe", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) =>
         {
-            var result = await d.Send(new WipeDevice(id), ct);
+            var result = await d.Send(new WipeDevice(id, callerPersonId), ct);
             return result.IsSuccess ? Results.NoContent() : Problem(result);
+        });
+
+        api.MapPost("/devices/{id:guid}/reset-credential", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Send(new ResetDeviceCredential(id, callerPersonId), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
         });
 
         api.MapGet("/shops/{shopId:guid}/devices/{deviceId:guid}/staff", async (Guid shopId, Guid deviceId, IDispatcher d, CancellationToken ct) =>

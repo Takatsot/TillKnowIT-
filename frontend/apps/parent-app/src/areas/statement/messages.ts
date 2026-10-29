@@ -41,6 +41,7 @@ const en = {
   typeqr: "QR code",
   typewristband: "wristband",
   blockOneNamed: "Block card {n}",
+  blockOneLabelled: "Block {label}",
   schoolIssues: "New cards and wristbands are issued by the school. Ask the school if you need one.",
   cardActive: "Working",
   cardBlocked: "Blocked",

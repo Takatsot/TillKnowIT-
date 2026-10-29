@@ -63,6 +63,16 @@ public sealed class Quote : VersionedEntity
         return Result.Ok();
     }
 
+    /// <summary>The quote's goods were rung up on the main sale, not on a ticket, so there is no ticket to point at.</summary>
+    public Result ConvertToSale(DateOnly today)
+    {
+        var status = StatusOn(today);
+        if (status != QuoteStatus.Open) return Result.Fail(status == QuoteStatus.Expired ? "quote.expired" : "quote.not_open", status == QuoteStatus.Expired ? "This quote has expired." : "This quote is no longer open.");
+        Status = QuoteStatus.Converted;
+        Touch();
+        return Result.Ok();
+    }
+
     public Result Cancel()
     {
         if (Status != QuoteStatus.Open) return Result.Fail("quote.not_open", "This quote is no longer open.");

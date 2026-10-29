@@ -3,7 +3,7 @@ import { fail, isSaleEntry, ok } from "@tillknowit/domain";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DEVICE, makeCtx, STAFF } from "../till-kit/testing";
+import { DEVICE, makeCtx, SHOP, STAFF } from "../till-kit/testing";
 import { feature } from "./index";
 import { Quotes } from "./Quotes";
 
@@ -103,14 +103,16 @@ describe("quote to the sale on the till", () => {
     const user = userEvent.setup();
     const addLine = vi.fn(() => ok(undefined));
     const openSell = vi.fn();
-    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote(), quote({ id: "q2", number: "Q-2", status: "converted" })])) as never }, sale: { addLine, addProduct: vi.fn(), setCustomer: vi.fn() }, openSell });
+    const post = vi.fn(async (_path: string, _body?: unknown) => ok(undefined));
+    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote(), quote({ id: "q2", number: "Q-2", status: "converted" })])), post } as never, sale: { addLine, addProduct: vi.fn(), setCustomer: vi.fn() }, openSell });
     render(<Quotes ctx={ctx} />);
 
     await user.click(await screen.findByRole("button", { name: "Add Q-1 to the sale on the till" }));
 
     expect(addLine).toHaveBeenCalledWith({ productId: "p-bread", name: "Bread", priceCents: 1800, costCents: 1200, quantity: 2 });
     expect(openSell).toHaveBeenCalled();
-    expect(screen.getByText(/Q-1 was added to the sale/)).toBeTruthy();
+    expect(post).toHaveBeenCalledWith(`/shops/${SHOP}/quotes/q1/to-sale`, expect.objectContaining({ deviceId: DEVICE, staffId: STAFF }));
+    expect(await screen.findByText(/Q-1 was added to the sale and is now marked/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Add Q-2 to the sale on the till" })).toBeNull();
   });
 

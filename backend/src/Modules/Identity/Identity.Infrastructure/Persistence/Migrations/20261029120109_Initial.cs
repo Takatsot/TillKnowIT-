@@ -130,6 +130,7 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     wipe_requested = table.Column<bool>(type: "bit", nullable: false),
                     enrolment_code_hash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     enrolled_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    credential_version = table.Column<int>(type: "int", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),

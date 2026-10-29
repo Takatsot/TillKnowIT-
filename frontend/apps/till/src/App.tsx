@@ -12,7 +12,7 @@ import { tillFeatures } from "./features";
 import { IndexedDbOutbox } from "./indexedDbOutbox";
 import { IndexedDbKeyValueStore, type KeyValueStore } from "./localData";
 import { loadPack } from "./packStore";
-import { sendPendingReleases } from "./pendingReleases";
+import { adoptHeldReleases, sendPendingReleases } from "./pendingReleases";
 import { sendPendingSerials } from "./pendingSerials";
 import { PinUnlock } from "./PinUnlock";
 import { deviceHeaders } from "./deviceToken";
@@ -143,6 +143,11 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   useEffect(() => {
     if (counts.waiting === 0) void sendSerials();
   }, [counts.waiting, sendSerials, user]);
+
+  // Parts that were still on screen when the till was last closed belong to a sale that never finished: they become notes to give back. Once, before any sale here.
+  useEffect(() => {
+    void adoptHeldReleases(kv);
+  }, [kv]);
 
   // Vouchers, points and wallet payments taken for a sale that was given up are given back as soon as the till is online (a note waits until then).
   useEffect(() => {

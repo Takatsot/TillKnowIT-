@@ -85,6 +85,7 @@ namespace Wallet.Infrastructure.Persistence.Migrations
                     type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     token_hash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    label = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: true),
                     blocked_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),

@@ -274,6 +274,7 @@ internal sealed class TokenHandlers(IWalletStore store, IPermissionChecker permi
         if (!Enum.TryParse<TokenType>(c.Request.Type?.Replace("_", ""), ignoreCase: true, out var type)) return Result<TokenResponse>.Fail("token.type_invalid", "Type is nfc.");
         if (type != TokenType.Nfc) return Result<TokenResponse>.Fail("token.type_invalid", "Only card and wristband tokens are issued here; phones use rotating QR codes.");
 
+        if (c.Request.Label is { } label && label.Trim().Length > HolderToken.MaxLabel) return Result<TokenResponse>.Fail("token.label_invalid", $"A card name can be up to {HolderToken.MaxLabel} characters.");
         var raw = new string((c.Request.RawToken ?? "").Where(char.IsLetterOrDigit).ToArray());
         if (raw.Length < 4 || raw.Length > 32) return Result<TokenResponse>.Fail("token.uid_invalid", "Tap the card again: its number could not be read.");
 
@@ -281,10 +282,10 @@ internal sealed class TokenHandlers(IWalletStore store, IPermissionChecker permi
         var existing = await store.TokenByHash(HolderToken.Hash(raw), ct);
         if (existing is not null) return Result<TokenResponse>.Fail("token.already_linked", "This card is already linked to someone.");
 
-        var token = new HolderToken(holder.Id, type, raw, clock.GetUtcNow());
+        var token = new HolderToken(holder.Id, type, raw, clock.GetUtcNow(), c.Request.Label);
         await store.Add(token, ct);
         await store.Save(ct);
-        return Result<TokenResponse>.Ok(new TokenResponse(token.Id, holder.Id, "nfc", "active"));
+        return Result<TokenResponse>.Ok(new TokenResponse(token.Id, holder.Id, "nfc", "active", token.Label));
     }
 
     /// <summary>The school admin blocks a lost card; so does a parent of that child.</summary>
