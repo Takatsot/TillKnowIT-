@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using ShopCore.Application.Stock;
+using ShopCore.Application.Sync;
 using ShopCore.Contracts;
 using ShopCore.Domain;
 using ShopCore.Infrastructure.Persistence;
@@ -38,6 +39,8 @@ public static class TransferEndpoints
     // TODO(auth): the till identifies itself with device and staff ids until sign-in exists.
     public static IEndpointRouteBuilder MapTransferEndpoints(this IEndpointRouteBuilder api)
     {
+        api.MapGet("/shops/{shopId:guid}/sync/products", async (Guid shopId, Guid deviceId, DateTimeOffset? since, IDispatcher d, CancellationToken ct) =>
+            Reply(await d.Ask(new PullProducts(shopId, deviceId, since), ct)));
         api.MapPost("/shops/{shopId:guid}/stock-transfers", async (Guid shopId, SendTransferRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new SendTransfer(shopId, req), ct)));
         api.MapPost("/shops/{shopId:guid}/stock-transfers/{id:guid}/receive", async (Guid shopId, Guid id, ReceiveTransferRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ReceiveTransfer(shopId, id, req), ct)));
         api.MapPost("/shops/{shopId:guid}/stock-transfers/{id:guid}/cancel", async (Guid shopId, Guid id, CancelTransferRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new CancelTransfer(shopId, id, req), ct)));

@@ -81,6 +81,12 @@ public static class IdentityEndpoints
             return result.IsSuccess ? Results.NoContent() : Problem(result);
         });
 
+        api.MapGet("/shops/{shopId:guid}/devices/{deviceId:guid}/staff", async (Guid shopId, Guid deviceId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new GetDeviceStaff(shopId, deviceId), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
+        });
+
         api.MapPost("/devices/{id:guid}/check-in", async (Guid id, IDispatcher d, CancellationToken ct) =>
         {
             var result = await d.Send(new CheckInDevice(id), ct);
