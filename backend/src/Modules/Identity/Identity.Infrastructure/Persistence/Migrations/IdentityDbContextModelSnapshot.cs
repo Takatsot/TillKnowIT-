@@ -229,6 +229,61 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     b.ToTable("organisations", "identity");
                 });
 
+            modelBuilder.Entity("Identity.Domain.OtpChallenge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int")
+                        .HasColumnName("attempts");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("code_hash");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("device_id");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("person_id");
+
+                    b.Property<string>("PhoneKey")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("phone_key");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("used_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_otp_challenges");
+
+                    b.HasIndex("PhoneKey", "CreatedAt")
+                        .HasDatabaseName("ix_otp_challenges_phone_key_created_at");
+
+                    b.ToTable("otp_challenges", "identity");
+                });
+
             modelBuilder.Entity("Identity.Domain.Person", b =>
                 {
                     b.Property<Guid>("Id")

@@ -132,9 +132,10 @@ internal sealed class LaybyHandlers(ISellingStore store, ITillAccessChecker till
 public sealed record IssueVoucher(Guid ShopId, IssueVoucherRequest Request) : ICommand<VoucherIssued>;
 public sealed record CheckVoucher(Guid ShopId, string Code, Guid DeviceId, Guid StaffId) : IQuery<VoucherResponse>;
 public sealed record RedeemVoucher(Guid ShopId, RedeemVoucherRequest Request) : ICommand<VoucherResponse>;
+public sealed record ReleaseVoucher(Guid ShopId, ReleaseVoucherRequest Request) : ICommand<VoucherResponse>;
 
 internal sealed class VoucherHandlers(ISellingStore store, ITillAccessChecker tills, IFeatureGate gate, TimeProvider clock)
-    : ICommandHandler<IssueVoucher, VoucherIssued>, IQueryHandler<CheckVoucher, VoucherResponse>, ICommandHandler<RedeemVoucher, VoucherResponse>
+    : ICommandHandler<IssueVoucher, VoucherIssued>, IQueryHandler<CheckVoucher, VoucherResponse>, ICommandHandler<RedeemVoucher, VoucherResponse>, ICommandHandler<ReleaseVoucher, VoucherResponse>
 {
     private Task<Result> Allowed(Guid shop, Guid device, Guid staff, CancellationToken ct) => SellingAccess.TillAndFeature(tills, gate, shop, device, staff, "sale.create", "vouchers", ct);
 
@@ -184,6 +185,23 @@ internal sealed class VoucherHandlers(ISellingStore store, ITillAccessChecker ti
 
         var redeemed = voucher.Redeem(r.AmountCents, r.SaleId, r.Reference.Trim(), r.StaffId, clock.GetUtcNow());
         if (!redeemed.IsSuccess) return Result<VoucherResponse>.Fail(redeemed.Error!.Code, redeemed.Error.Message);
+        await store.Save(ct);
+        return Result<VoucherResponse>.Ok(ToResponse(voucher));
+    }
+
+    /// <summary>The cashier abandoned the sale after taking the voucher: the amount goes back. Refused once the sale it was for has reached the server.</summary>
+    public async Task<Result<VoucherResponse>> Handle(ReleaseVoucher c, CancellationToken ct)
+    {
+        var r = c.Request;
+        var allowed = await Allowed(c.ShopId, r.DeviceId, r.StaffId, ct);
+        if (!allowed.IsSuccess) return Result<VoucherResponse>.Fail(allowed.Error!.Code, allowed.Error.Message);
+        var voucher = await store.VoucherByHash(c.ShopId, GiftVoucher.Hash(r.Code ?? ""), ct);
+        if (voucher is null) return Result<VoucherResponse>.Fail("voucher.not_found", "That code is not a voucher of this shop.");
+        var reference = r.Reference?.Trim() ?? "";
+        if (voucher.SaleOfRedemption(reference) is { } saleId && await store.SaleSummary(c.ShopId, saleId, ct) is not null)
+            return Result<VoucherResponse>.Fail("payment.sale_recorded", "That sale was completed, so the voucher stays used. Refund the sale instead.");
+        var released = voucher.Release(reference, r.StaffId, clock.GetUtcNow());
+        if (!released.IsSuccess) return Result<VoucherResponse>.Fail(released.Error!.Code, released.Error.Message);
         await store.Save(ct);
         return Result<VoucherResponse>.Ok(ToResponse(voucher));
     }

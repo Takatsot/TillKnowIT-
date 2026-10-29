@@ -288,6 +288,16 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = new Guid("89f62969-b288-c2bd-023b-fcccde6d1637"),
+                            Body = "Your TillKnowIT code is {code}. It works for 10 minutes. Do not share it.",
+                            Channel = "Sms",
+                            Code = "otp.code",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("798e0704-8c27-eeff-3c13-37500c751995"),
                             Body = "{shop}: we could not send {day} to your accounting package ({error}). Open the app to fix it and try again.",
                             Channel = "Whatsapp",

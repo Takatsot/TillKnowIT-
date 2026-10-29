@@ -20,6 +20,7 @@ public static class CustomersEndpoints
         api.MapPost("/shops/{shopId:guid}/customers/{id:guid}/merge", async (Guid shopId, Guid id, MergeCustomersRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new MergeCustomers(shopId, id, req), ct)));
         api.MapGet("/shops/{shopId:guid}/customers/{id:guid}/points", async (Guid shopId, Guid id, Guid deviceId, Guid staffId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetPoints(shopId, id, deviceId, staffId), ct)));
         api.MapPost("/shops/{shopId:guid}/customers/{id:guid}/points/redeem", async (Guid shopId, Guid id, RedeemPointsRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new RedeemPoints(shopId, id, req), ct)));
+        api.MapPost("/shops/{shopId:guid}/customers/{id:guid}/points/release", async (Guid shopId, Guid id, ReleasePointsRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ReleasePoints(shopId, id, req), ct)));
         api.MapPost("/shops/{shopId:guid}/customers/{id:guid}/points/adjust", async (Guid shopId, Guid id, AdjustPointsRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new AdjustPoints(shopId, id, req), ct)));
         return api;
     }

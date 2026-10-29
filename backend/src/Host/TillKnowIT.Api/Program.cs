@@ -23,6 +23,7 @@ var db = builder.Configuration.GetConnectionString("Database")
 builder.Services.AddEncryptedLocalFileStore(builder.Configuration["Storage:Root"], builder.Configuration["Storage:Key"]);
 builder.Services.AddSlipOptions(builder.Configuration["Slips:BaseUrl"], builder.Configuration["Slips:SigningKey"]);
 builder.Services.AddOpenApi();
+builder.Services.AddIdentityAuth(builder.Configuration, builder.Environment.IsDevelopment());
 builder.Services.AddProblemDetails();
 builder.Services
     .AddIdentityModule(db)
@@ -57,9 +58,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+app.UseMiddleware<TillKnowIT.Api.PersonAuthMiddleware>();
 
 var api = app.MapGroup("/api/v1");
 api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+api.MapAuthEndpoints();
 api.MapIdentityEndpoints();
 api.MapShopCoreEndpoints();
 api.MapTransferEndpoints();

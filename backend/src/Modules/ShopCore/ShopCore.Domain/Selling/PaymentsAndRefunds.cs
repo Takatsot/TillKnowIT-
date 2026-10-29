@@ -7,11 +7,12 @@ public static class ExtraPaymentMethods
 {
     public const string Wallet = "wallet";
     public const string Voucher = "voucher";
+    public const string Points = "points";
     public const string Layby = "layby";
     public const string Split = "split";
 
     /// <summary>What one part of a split payment can be: not "split" or "layby", which describe a whole sale.</summary>
-    public static bool IsPart(string? code) => code is PaymentMethods.Cash or PaymentMethods.Card or PaymentMethods.Qr or PaymentMethods.Credit or Wallet or Voucher;
+    public static bool IsPart(string? code) => code is PaymentMethods.Cash or PaymentMethods.Card or PaymentMethods.Qr or PaymentMethods.Credit or Wallet or Voucher or Points;
 }
 
 /// <summary>
@@ -42,7 +43,7 @@ public static class SplitPayments
         {
             if (p.MethodCode == PaymentMethods.Credit && p.AccountId is null) return Result<long>.Fail("payment.account_required", "A credit payment needs a credit account.");
             if (p.MethodCode != PaymentMethods.Credit && p.AccountId is not null) return Result<long>.Fail("payment.account_unexpected", "Only a credit payment has a credit account.");
-            if (p.MethodCode is ExtraPaymentMethods.Wallet or ExtraPaymentMethods.Voucher && string.IsNullOrWhiteSpace(p.Reference)) return Result<long>.Fail("payment.reference_required", $"A {p.MethodCode} payment needs its reference.");
+            if (p.MethodCode is ExtraPaymentMethods.Wallet or ExtraPaymentMethods.Voucher or ExtraPaymentMethods.Points && string.IsNullOrWhiteSpace(p.Reference)) return Result<long>.Fail("payment.reference_required", $"A {p.MethodCode} payment needs its reference.");
             if (p.MethodCode == PaymentMethods.Cash)
             {
                 if (p.TenderedCents is { } t && t < p.AmountCents) return Result<long>.Fail("payment.tender_invalid", "The cash handed over is less than the cash payment.");

@@ -108,6 +108,8 @@ public sealed record VoucherIssued(Guid Id, string Code, long BalanceCents, Date
 
 public sealed record VoucherResponse(Guid Id, string CodeLast4, long BalanceCents, DateOnly? ExpiresOn, bool IsVoid, bool IsExpired);
 
+public sealed record ReleaseVoucherRequest(Guid DeviceId, Guid StaffId, string Code, string Reference);
+
 public sealed record RedeemVoucherRequest(Guid DeviceId, Guid StaffId, string Code, long AmountCents, string Reference, Guid? SaleId);
 
 public sealed record SerialItem(Guid ProductId, string Serial);

@@ -147,10 +147,11 @@ internal sealed class CustomerHandlers(ICustomerStore store, ITillAccessChecker 
 
 public sealed record GetPoints(Guid ShopId, Guid CustomerId, Guid DeviceId, Guid StaffId) : IQuery<PointsResponse>;
 public sealed record RedeemPoints(Guid ShopId, Guid CustomerId, RedeemPointsRequest Request) : ICommand<RedeemPointsResponse>;
+public sealed record ReleasePoints(Guid ShopId, Guid CustomerId, ReleasePointsRequest Request) : ICommand<PointsResponse>;
 public sealed record AdjustPoints(Guid ShopId, Guid CustomerId, AdjustPointsRequest Request) : ICommand<PointsResponse>;
 
 internal sealed class LoyaltyHandlers(ICustomerStore store, ITillAccessChecker tills, IShopFeatures features, TimeProvider clock)
-    : IQueryHandler<GetPoints, PointsResponse>, ICommandHandler<RedeemPoints, RedeemPointsResponse>, ICommandHandler<AdjustPoints, PointsResponse>
+    : IQueryHandler<GetPoints, PointsResponse>, ICommandHandler<RedeemPoints, RedeemPointsResponse>, ICommandHandler<AdjustPoints, PointsResponse>, ICommandHandler<ReleasePoints, PointsResponse>
 {
     private Task<Result> Allowed(Guid shop, Guid device, Guid staff, CancellationToken ct) => CustomerAccess.Till(tills, features, shop, device, staff, "sale.create", "loyalty", ct);
 
@@ -160,6 +161,26 @@ internal sealed class LoyaltyHandlers(ICustomerStore store, ITillAccessChecker t
         if (!allowed.IsSuccess) return Result<PointsResponse>.Fail(allowed.Error!.Code, allowed.Error.Message);
         var customer = await store.Get(q.ShopId, q.CustomerId, ct);
         if (customer is null) return Result<PointsResponse>.Fail("customer.not_found", "Customer not found.");
+        return Result<PointsResponse>.Ok(await Respond(customer, ct));
+    }
+
+    /// <summary>The cashier abandoned the sale after redeeming points: the points go back, once. Asking again changes nothing.</summary>
+    public async Task<Result<PointsResponse>> Handle(ReleasePoints c, CancellationToken ct)
+    {
+        var r = c.Request;
+        var allowed = await Allowed(c.ShopId, r.DeviceId, r.StaffId, ct);
+        if (!allowed.IsSuccess) return Result<PointsResponse>.Fail(allowed.Error!.Code, allowed.Error.Message);
+        var customer = await store.Get(c.ShopId, c.CustomerId, ct);
+        if (customer is null || customer.IsMerged) return Result<PointsResponse>.Fail("customer.not_found", "Customer not found.");
+        var reference = r.Reference?.Trim() ?? "";
+        var redeemed = await store.EntryByReference(customer.Id, $"redeem:{reference}", ct);
+        if (redeemed is null || redeemed.Type != LoyaltyEntryType.Redeem) return Result<PointsResponse>.Fail("loyalty.redemption_not_found", "No redemption with that reference.");
+        var releaseReference = $"release:{reference}";
+        if (await store.EntryByReference(customer.Id, releaseReference, ct) is null)
+        {
+            store.Add(new LoyaltyEntry(customer.Id, c.ShopId, LoyaltyEntryType.Reverse, -redeemed.Points, releaseReference, null, "Sale not completed", r.StaffId, clock.GetUtcNow()));
+            await store.Save(ct);
+        }
         return Result<PointsResponse>.Ok(await Respond(customer, ct));
     }
 

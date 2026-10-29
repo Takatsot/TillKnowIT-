@@ -44,6 +44,9 @@ internal static class MessagingSeed
         ("bundle.warning", [MessageChannel.Whatsapp], null, "{shop}: you have used {used} of your {limit} messages this month. Slips can still be shown as a QR code."),
         ("bundle.exhausted", [MessageChannel.Whatsapp], null, "{shop}: your {limit} messages for this month are used up. Slips are shown as a QR code until next month, or upgrade your plan."),
 
+        // Signing in.
+        ("otp.code", [MessageChannel.Sms], null, "Your TillKnowIT code is {code}. It works for 10 minutes. Do not share it."),
+
         // Accounting: told once when a day could not be sent after several tries.
         ("accounting.failed", [MessageChannel.Whatsapp], null, "{shop}: we could not send {day} to your accounting package ({error}). Open the app to fix it and try again."),
 

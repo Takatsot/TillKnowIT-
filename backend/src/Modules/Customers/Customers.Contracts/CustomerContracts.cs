@@ -17,6 +17,8 @@ public sealed record PointsResponse(Guid CustomerId, int Points, long ValueCents
 public sealed record RedeemPointsRequest(Guid DeviceId, Guid StaffId, int Points, string Reference);
 
 /// <summary>ValueCents is what the points are worth. The till pays it as a "voucher" part of the sale with this RedemptionReference.</summary>
+public sealed record ReleasePointsRequest(Guid DeviceId, Guid StaffId, string Reference);
+
 public sealed record RedeemPointsResponse(string RedemptionReference, int Points, long ValueCents, int BalanceAfter);
 
 public sealed record AdjustPointsRequest(Guid DeviceId, Guid ApprovedBy, Guid StaffId, int Points, string Reason);

@@ -86,6 +86,7 @@ public static class MarketplaceEndpoints
 
         api.MapGet("/shops/{shopId:guid}/sharing", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetSharing(shopId, callerPersonId), ct)));
 
+        api.MapGet("/shops/{shopId:guid}/usual-suppliers", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListUsualSuppliers(shopId, callerPersonId), ct)));
         api.MapPut("/shops/{shopId:guid}/usual-suppliers", async (Guid shopId, SetUsualSupplierRequest req, IDispatcher d, CancellationToken ct) => Done(await d.Send(new SetUsualSupplier(shopId, req), ct)));
 
         api.MapGet("/admin/marketplace/settings", async (Guid adminPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetMarketplaceSettings(adminPersonId), ct)));

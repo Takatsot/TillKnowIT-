@@ -94,6 +94,8 @@ internal static class SellingEndpoints
         api.MapPost("/shops/{shopId:guid}/vouchers/check", async (Guid shopId, CheckVoucherRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new CheckVoucher(shopId, req.Code, req.DeviceId, req.StaffId), ct)));
         api.MapPost("/shops/{shopId:guid}/vouchers/redeem", async (Guid shopId, RedeemVoucherRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new RedeemVoucher(shopId, req), ct)));
 
+        api.MapPost("/shops/{shopId:guid}/vouchers/release", async (Guid shopId, ReleaseVoucherRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ReleaseVoucher(shopId, req), ct)));
+
         // ---- serial numbers ----
         api.MapPost("/shops/{shopId:guid}/sales/{saleId:guid}/serials", async (Guid shopId, Guid saleId, RecordSerialsRequest req, IDispatcher d, CancellationToken ct) => Done(await d.Send(new RecordSerials(shopId, saleId, req), ct)));
         api.MapGet("/shops/{shopId:guid}/serials", async (Guid shopId, string text, Guid deviceId, Guid staffId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new FindSerials(shopId, text, deviceId, staffId), ct)));

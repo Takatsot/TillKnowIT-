@@ -279,6 +279,23 @@ public sealed class GiftVoucher : VersionedEntity
         return Result.Ok();
     }
 
+    /// <summary>
+    /// Gives back a redemption that was taken for a sale that was never completed. It puts the same amount back, once: asking again changes nothing. The caller checks the sale
+    /// really was not completed.
+    /// </summary>
+    public Result Release(string reference, Guid staffId, DateTimeOffset now)
+    {
+        var redeemed = _entries.FirstOrDefault(e => e.Type == VoucherEntryType.Redeem && e.Reference == reference);
+        if (redeemed is null) return Result.Fail("voucher.redemption_not_found", "No redemption with that reference.");
+        var releaseReference = $"release:{reference}";
+        if (_entries.Any(e => e.Reference == releaseReference)) return Result.Ok();
+        _entries.Add(new VoucherEntry(Id, VoucherEntryType.Refund, -redeemed.AmountCents, redeemed.SaleId, releaseReference, staffId, now));
+        Touch();
+        return Result.Ok();
+    }
+
+    public Guid? SaleOfRedemption(string reference) => _entries.FirstOrDefault(e => e.Type == VoucherEntryType.Redeem && e.Reference == reference)?.SaleId;
+
     public void Cancel()
     {
         IsVoid = true;

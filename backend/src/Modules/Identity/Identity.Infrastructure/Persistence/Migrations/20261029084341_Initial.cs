@@ -39,6 +39,27 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "otp_challenges",
+                schema: "identity",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    person_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    phone_key = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    code_hash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    expires_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    attempts = table.Column<int>(type: "int", nullable: false),
+                    used_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    created_by = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    device_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_otp_challenges", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "outbox_messages",
                 schema: "identity",
                 columns: table => new
@@ -341,6 +362,12 @@ namespace Identity.Infrastructure.Persistence.Migrations
                 column: "parent_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_otp_challenges_phone_key_created_at",
+                schema: "identity",
+                table: "otp_challenges",
+                columns: new[] { "phone_key", "created_at" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_outbox_messages_occurred_at",
                 schema: "identity",
                 table: "outbox_messages",
@@ -378,6 +405,10 @@ namespace Identity.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "memberships",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "otp_challenges",
                 schema: "identity");
 
             migrationBuilder.DropTable(

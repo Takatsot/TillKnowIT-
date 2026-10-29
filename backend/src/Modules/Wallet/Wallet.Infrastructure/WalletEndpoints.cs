@@ -119,6 +119,7 @@ public static class WalletEndpoints
         });
 
         // ---- at the till ----
+        api.MapPost("/shops/{shopId:guid}/wallet-payments/{purchaseId:guid}/void", async (Guid shopId, Guid purchaseId, VoidWalletPaymentRequest req, IDispatcher d, CancellationToken ct) => Done(await d.Send(new VoidWalletPayment(shopId, purchaseId, req), ct)));
         api.MapPost("/shops/{shopId:guid}/wallet-payments", async (Guid shopId, WalletPaymentRequest req, IDispatcher d, CancellationToken ct) =>
             Reply(await d.Send(new ProcessWalletPayment(shopId, req), ct)));
         api.MapGet("/shops/{shopId:guid}/wallet-snapshot", async (Guid shopId, Guid deviceId, Guid staffId, IDispatcher d, CancellationToken ct) =>

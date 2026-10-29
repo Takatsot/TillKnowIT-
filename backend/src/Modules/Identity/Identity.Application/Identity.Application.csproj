@@ -6,6 +6,8 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Dispatching\TillKnowIT.Dispatching.csproj" />
     <ProjectReference Include="..\..\Catalogue\Catalogue.Contracts\Catalogue.Contracts.csproj" />
     <ProjectReference Include="..\..\Billing\Billing.Contracts\Billing.Contracts.csproj" />
+    <ProjectReference Include="..\..\Messaging\Messaging.Contracts\Messaging.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TillKnowIT.Security\TillKnowIT.Security.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

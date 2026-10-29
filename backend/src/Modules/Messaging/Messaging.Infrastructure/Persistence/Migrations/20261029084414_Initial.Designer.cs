@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messaging.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MessagingDbContext))]
-    [Migration("20261028085121_Initial")]
+    [Migration("20261029084414_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -285,6 +285,16 @@ namespace Messaging.Infrastructure.Persistence.Migrations
                             Body = "{shop}: your {limit} messages for this month are used up. Slips are shown as a QR code until next month, or upgrade your plan.",
                             Channel = "Whatsapp",
                             Code = "bundle.exhausted",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Language = "en",
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("89f62969-b288-c2bd-023b-fcccde6d1637"),
+                            Body = "Your TillKnowIT code is {code}. It works for 10 minutes. Do not share it.",
+                            Channel = "Sms",
+                            Code = "otp.code",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Language = "en",
                             Version = 1
