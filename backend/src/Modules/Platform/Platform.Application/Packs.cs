@@ -137,3 +137,15 @@ internal sealed class PackAdminHandlers(IPackStore store, IPermissionChecker per
         return Result<List<PackResponse>>.Ok((await store.List(activeOnly: false, ct)).OrderBy(p => p.Code).Select(PackMapping.ToResponse).ToList());
     }
 }
+
+/// <summary>The pack a till keeps, for an approved device of the shop. A till has no person to ask as, so the device is what proves it belongs here.</summary>
+public sealed record GetDevicePack(Guid ShopId, Guid DeviceId) : IQuery<ShopPackResponse>;
+
+internal sealed class DevicePackHandler(Identity.Contracts.IDeviceGate gate, IShopFeatures features) : IQueryHandler<GetDevicePack, ShopPackResponse>
+{
+    public async Task<Result<ShopPackResponse>> Handle(GetDevicePack q, CancellationToken ct)
+    {
+        var allowed = await gate.Approved(q.ShopId, q.DeviceId, ct);
+        return allowed.IsSuccess ? Result<ShopPackResponse>.Ok(await features.For(q.ShopId, ct)) : Result<ShopPackResponse>.Fail(allowed.Error!.Code, allowed.Error.Message);
+    }
+}

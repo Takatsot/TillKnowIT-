@@ -1,0 +1,45 @@
+import type { AreaMessages } from "@tillknowit/i18n";
+
+const en = {
+  title: "Transfers",
+  "mode.incoming": "Coming in",
+  "mode.sent": "Sent",
+  "mode.send": "Send stock",
+  loading: "Loading transfers…",
+  "incoming.empty": "Nothing is on its way to this shop.",
+  "sent.empty": "This shop has not sent any stock yet.",
+  from: "From shop {shop}",
+  to: "To shop {shop}",
+  sentAt: "Sent {time}",
+  status: "Status: {status}",
+  "status.sent": "on its way",
+  "status.received": "received",
+  "status.cancelled": "cancelled",
+  note: "Note: {note}",
+  line: "{name}: {quantity} sent",
+  lineReceived: "{name}: {received} of {quantity} received (short by {short})",
+  received: "Received quantity of {name}",
+  receive: "Receive",
+  receiveDone: "Transfer received.",
+  cancel: "Cancel transfer",
+  cancelDone: "Transfer cancelled.",
+  find: "Scan a barcode or type a product name",
+  notFound: "No product like that on this till.",
+  toShop: "Send to shop (number from the back office)",
+  toShopInvalid: "That shop number does not look right. It is a long code with dashes.",
+  sameShop: "That is this shop. Choose another branch.",
+  quantity: "Quantity of {name}",
+  remove: "Remove {name}",
+  noteField: "Note (optional)",
+  empty: "Add the products you are sending.",
+  quantityInvalid: "Every quantity must be a whole number above zero.",
+  send: "Send stock",
+  sendDone: "Stock sent. The other branch can now receive it.",
+  "plan.feature_not_included": "Your plan does not include moving stock between branches. Ask the owner about upgrading.",
+  "transfer.not_a_branch": "You can only send stock to your own branches.",
+  needsOnline: "Stock transfers need the internet. Connect the till and try again.",
+} as const;
+
+export type TransfersKey = keyof typeof en;
+
+export const messages: AreaMessages<TransfersKey> = { en };

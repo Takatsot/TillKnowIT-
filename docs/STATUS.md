@@ -145,6 +145,28 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 | G6-2 Five more languages | Partly | Sepedi, Xitsonga, Tshivenda, isiNdebele and siSwati are registered in the front-end language list (backend already accepted them) and show English until translated. NO translations exist: they must be written and reviewed by first-language speakers. |
 | G6-1 Group buying groups, M6-4 invite-only | Done (backend) | Marketplace: buying groups (stokvel, school, other), admin shop, single-use 7-day invite codes (hashed), members, leave/remove; group deals can be limited to a group (members only, any area, others get not-found); shared history with the admin seeing members' open quantities. No UI yet. |
 
+## Screens
+
+Six apps, each built from small areas that follow `frontend/SCREENS.md`. All talk to the real routes through one typed API client and are tested against fake APIs only: **no screen has been run against a live server or looked at in a browser**.
+
+| App | Areas |
+| --- | --- |
+| Till (`apps/till`) | Register this till and download staff, products, promotions and the pack; selling with tips, split pay, credit, customer, scale, slip print, drawer; refunds and cancels, cash-up, credit payments, stock receive/count/write-off, transfers; tickets and tables, kitchen, quotes, lay-by, vouchers, customers and loyalty, appointments, serial numbers, school wallet payment. Everything the till writes goes through the offline queue. |
+| Back office (`apps/back-office`) | Stock and products, reordering and group deals, reports and the owner dashboard, credit book, compliance and setup checklist, staff and tills, business type, promotions, modifiers/variants/floor plan, services and appointments, customers/vouchers/quotes/lay-by, branches with manager access and transfers, billing, accounting, pay-later, insights opt-in and partner access, buying groups. |
+| Supplier portal | Application, catalogue and import, orders and statements, deals and group deals, plan, invoices and sponsored campaigns. |
+| Insights portal | Area trend reports and plan. |
+| Platform admin | Packs, plans, suppliers and ranking settings, disputes and reconciliation, schools and wallet, partner API clients, catalogue suggestions and lookups. |
+| Parent app | Children, top-ups, spending rules, statement and QR, pre-orders, requests. |
+
+Known gaps found while building (all also need a decision or a small server change):
+- Sign-in does not exist: every app uses a typed-in person id (`packages/app-kit/src/session.tsx`).
+- The server has no list of a shop's staff or devices for the back office, no list of suppliers by organisation, no list of schools, no list of a child's cards, and no way to read one product; several screens work around this by asking for ids or keeping what was just created.
+- Several back-office and till routes want a till device and staff id rather than a person; the back office uses stand-ins that the server may refuse.
+- Parents cannot do some things the screens offer (edit a child, photo, tokens, child left): the server only lets a school admin.
+- Four screens still upload files with their own `fetch`; the API client now has `upload`, and they should be switched to it.
+- The till's price override with a manager PIN, refunds of split/wallet/voucher/lay-by sales, and a school-wallet pack flag are not built.
+- Test timeouts were raised because the first render in each file is slow on this machine.
+
 ## Hand-over list
 
 Everything below needs a person, an account, a partner or a decision. None of it can be finished by more code alone.
@@ -171,7 +193,7 @@ Everything below needs a person, an account, a partner or a decision. None of it
 
 **Still to build**
 
-12. Every screen: the till app has only PIN unlock. Back office (branches, billing, exports, groups), supplier portal, parent app, insights portal.
+12. Look at every screen in a browser against a running server; none has been.
 13. Real printer, drawer, scale and kitchen-screen adapters once the devices are chosen.
 14. The separate Insights service and warehouse database, and the separate Partner API host and gateway, if the scale needs them (both run inside the main host today).
 15. Offline sync of stock transfers; lay-by deposits and tips in the accounting journal; a shared rate-limit counter; M3-3 suggested replacement; W2-5 automatic weekly top-up.

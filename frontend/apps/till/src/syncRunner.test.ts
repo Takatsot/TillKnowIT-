@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { MemoryOutbox, queueSale, type SaleUploadDto, type SendBatch } from "@tillknowit/domain";
+import { MemoryOutbox, queueBuilt, queueSale, stockMovementRecord, cashUpRecord, type SaleUploadDto, type SendBatch, type UploadRequest } from "@tillknowit/domain";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { httpSend, loadDeviceConfig, startSync } from "./syncRunner";
 
@@ -87,6 +87,38 @@ describe("startSync", () => {
     handle.nudge();
     await settle();
     expect(send).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("startSync with every kind of record", () => {
+  it("sends sales, stock movements and cash-ups together and keeps the one the server refused", async () => {
+    const outbox = new MemoryOutbox();
+    const at = new Date("2026-10-26T08:00:00Z");
+    await queueSale(outbox, sale("a"), at);
+    await queueBuilt(outbox, "stock_movement", stockMovementRecord({ productId: "p", type: "receive", quantity: 3 }, { id: "m1", staffId: "s", at }), at);
+    await queueBuilt(outbox, "cash_up", cashUpRecord({ floatCents: 0, expectedCents: 0, countedCents: 0 }, { id: "u1", staffId: "s", at }), at);
+    const requests: UploadRequest[] = [];
+    const send: SendBatch = async (r) => {
+      requests.push(r);
+      return { results: [{ kind: "sale", id: "a", status: "accepted" }, { kind: "stock_movement", id: "m1", status: "accepted" }, { kind: "cash_up", id: "u1", status: "rejected", code: "cashup.exists", message: "Already done." }] };
+    };
+    const counts: Array<{ waiting: number; refused: number }> = [];
+
+    const handle = startSync({ outbox, config: () => ({ shopId: "shop", deviceId: "till" }), send, onCounts: (c) => counts.push(c), isOnline: () => true, setTimer: () => 0, clearTimer: () => {} });
+    await settle();
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatchObject({ shopId: "shop", deviceId: "till", sales: [{ id: "a" }], stockMovements: [{ id: "m1" }], cashUps: [{ id: "u1" }] });
+    expect((await outbox.all()).map((e) => [e.id, e.state])).toEqual([["u1", "rejected"]]);
+    expect(counts.at(-1)).toEqual({ waiting: 0, refused: 1 });
+    handle.stop();
+  });
+
+  it("posts the other lists in the same json body as the sales", async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ results: [] }), { status: 200 }));
+    await httpSend("/api/v1", fetcher as unknown as typeof fetch)({ shopId: "s", deviceId: "d", sales: [], stockMovements: [{ id: "m" }] });
+
+    expect(JSON.parse((fetcher.mock.calls[0] as unknown as [string, { body: string }])[1].body)).toEqual({ shopId: "s", deviceId: "d", sales: [], stockMovements: [{ id: "m" }] });
   });
 });
 

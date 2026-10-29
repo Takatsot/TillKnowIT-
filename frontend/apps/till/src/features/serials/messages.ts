@@ -1,0 +1,43 @@
+import type { AreaMessages } from "@tillknowit/i18n";
+
+const en = {
+  title: "Serial numbers",
+  "tab.record": "Record against a sale",
+  "tab.search": "Find a serial number",
+  "record.sale": "Sale",
+  "record.saleChoose": "Choose one of this till's recent sales",
+  "record.saleOption": "{time}, {total}",
+  "record.saleOther": "Or type the sale reference",
+  "record.saleOtherHint": "The long reference of the sale, if it is not in the list.",
+  "record.noRecent": "No recent sales are waiting on this till, so type the sale reference.",
+  "record.item": "Item",
+  "record.itemChoose": "Choose the item",
+  "record.serial": "Serial number",
+  "record.add": "Add serial number",
+  "record.staged": "Serial numbers to record",
+  "record.none": "Nothing added yet.",
+  "record.colItem": "Item",
+  "record.colSerial": "Serial number",
+  "record.remove": "Remove {serial}",
+  "record.save": "Record serial numbers",
+  "record.saleRequired": "Choose the sale or type its reference.",
+  "record.saleBad": "That does not look like a sale reference.",
+  "record.itemRequired": "Choose the item.",
+  "record.serialRequired": "Type the serial number.",
+  "record.dupe": "{serial} is already in the list.",
+  "record.nothing": "Add at least one serial number.",
+  "record.saved": "Recorded {count} serial numbers.",
+  "record.wait": "The server does not have that sale yet. It is still waiting to be sent from this till. Try again in a moment.",
+  "search.text": "Serial number or part of it",
+  "search.hint": "Type at least 3 characters.",
+  "search.button": "Find",
+  "search.short": "Type at least 3 characters.",
+  "search.none": "No sold item has that serial number.",
+  "search.colSerial": "Serial number",
+  "search.colItem": "Item",
+  "search.colSold": "Sold",
+  "search.colSale": "Sale",
+} as const;
+
+export type SerialsKey = keyof typeof en;
+export const messages: AreaMessages<SerialsKey> = { en };

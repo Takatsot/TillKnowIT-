@@ -15,6 +15,7 @@ public static class PlatformEndpoints
     {
         api.MapGet("/business-packs", async (IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListBusinessPacks(), ct)));
         api.MapGet("/shops/{shopId:guid}/business-pack", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetShopPack(shopId, callerPersonId), ct)));
+        api.MapGet("/shops/{shopId:guid}/devices/{deviceId:guid}/business-pack", async (Guid shopId, Guid deviceId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetDevicePack(shopId, deviceId), ct)));
         api.MapPut("/shops/{shopId:guid}/business-pack", async (Guid shopId, ChoosePackRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ChooseShopPack(shopId, req), ct)));
 
         api.MapGet("/admin/business-packs", async (Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListAllBusinessPacks(callerPersonId), ct)));

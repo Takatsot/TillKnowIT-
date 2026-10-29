@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { buildEmbeddedBarcode, formatRand, MemoryOutbox, type CatalogueItem, type EmbeddedBarcodeRules, type PromotionDef } from "@tillknowit/domain";
+import { buildEmbeddedBarcode, formatRand, MemoryOutbox, type CatalogueItem, type EmbeddedBarcodeRules, type PromotionDef, type SaleOutboxEntry } from "@tillknowit/domain";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -139,7 +139,7 @@ describe("SellScreen", () => {
     await user.click(screen.getByRole("button", { name: "Exact" }));
 
     await waitFor(() => expect(onSaleQueued).toHaveBeenCalled());
-    const [queued] = await outbox.all();
+    const [queued] = (await outbox.all()) as SaleOutboxEntry[];
     expect(queued).toMatchObject({ state: "pending", sale: { paymentMethodCode: "cash", totalCents: 3_600, tenderedCents: 3_600, changeCents: 0, staffId: staff.id, soldAt: now.toISOString() } });
     expect(queued!.sale.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     expect(screen.getByRole("status").textContent).toContain("Sale saved");
@@ -155,7 +155,7 @@ describe("SellScreen", () => {
     await user.type(screen.getByRole("textbox", { name: "Cash received" }), "20");
     await user.click(screen.getByRole("button", { name: /^Change:/ }));
 
-    const [queued] = await outbox.all();
+    const [queued] = (await outbox.all()) as SaleOutboxEntry[];
     expect(queued!.sale).toMatchObject({ totalCents: 1_800, tenderedCents: 2_000, changeCents: 200 });
     expect(screen.getByRole("status").textContent).toContain("Change:");
   });
@@ -179,7 +179,7 @@ describe("SellScreen", () => {
     await user.click(screen.getByRole("button", { name: /^Pay/ }));
     await user.click(screen.getByRole("button", { name: "Card" }));
 
-    const [queued] = await outbox.all();
+    const [queued] = (await outbox.all()) as SaleOutboxEntry[];
     expect(queued!.sale).toMatchObject({ paymentMethodCode: "card", totalCents: 2_199, tenderedCents: null });
   });
 

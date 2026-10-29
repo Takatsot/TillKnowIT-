@@ -1,9 +1,10 @@
 import type { Api } from "@tillknowit/api-client";
-import type { CatalogueItem, Outbox, PromotionDef } from "@tillknowit/domain";
+import type { CatalogueItem, Outbox, PromotionDef, Result } from "@tillknowit/domain";
 import type { ICashDrawer, IKitchenDisplay, IPrinter, IScale } from "@tillknowit/hardware";
 import type { AreaMessages, LanguageCode } from "@tillknowit/i18n";
 import type { FeatureFlag, Features } from "@tillknowit/packs";
 import type { ComponentType } from "react";
+import type { KeyValueStore } from "./localData";
 import type { StaffRecord } from "./staffStore";
 import type { DeviceConfig } from "./syncRunner";
 
@@ -31,6 +32,24 @@ export interface TillContext {
   hardware: TillHardware;
   /** Ask the sync runner to send the queue now (after something was written to it). */
   nudgeSync: () => void;
+  /** The till's small local database: downloaded data and the till's own books (recent sales, cash in). Missing in tests that do not need it. */
+  kv?: KeyValueStore;
+  /** The shop's name for slips, when known. */
+  shopName?: string;
+  /** Put something in the sale that is being rung up on the Sell tab. */
+  sale?: SaleBridge;
+  /** Go back to the Sell tab. */
+  openSell?: () => void;
+}
+
+/** What another tab can do to the sale in progress on the Sell tab (see SellScreen). */
+export interface SaleBridge {
+  /** A line at an agreed price (a ticket total, a service, a lay-by balance). The product must be one of the shop's products: the server checks. Not discounted. */
+  addLine(line: { productId: string; name: string; priceCents: number; costCents?: number; quantity?: number }): Result<void>;
+  /** One more of a catalogue product (or grams, for a product sold by weight), priced and discounted like a scanned item. */
+  addProduct(productId: string, quantity?: number): Result<void>;
+  /** Attach the sale to a customer (loyalty), or detach with null. */
+  setCustomer(customerId: string | null): void;
 }
 
 /**

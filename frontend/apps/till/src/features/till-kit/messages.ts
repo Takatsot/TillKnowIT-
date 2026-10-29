@@ -1,0 +1,48 @@
+import type { AreaMessages } from "@tillknowit/i18n";
+
+/** Text shared by the business-pack tabs. Each tab keeps its own words in its own messages.ts. */
+const en = {
+  "kit.noDevice": "This till is not registered to a shop yet, so this tab cannot reach the server.",
+  "kit.offline": "This tab needs a connection. Selling carries on; come back here when the till is online.",
+  "kit.loading": "Loading...",
+  "kit.retry": "Try again",
+  "kit.planMissing": "This is not part of the shop's current plan. Ask the owner to look at the plan in the back office.",
+  "kit.notEnabled": "This feature is not switched on for this shop.",
+  "kit.search": "Search for an item",
+  "kit.searchHint": "Type part of the name or a barcode.",
+  "kit.noMatch": "No item matches that.",
+  "kit.add": "Add {name}",
+  "kit.weightLabel": "Weight of {name} in grams",
+  "kit.addWeighed": "Add weighed item",
+  "kit.cancel": "Cancel",
+  "kit.lines": "Items",
+  "kit.noLines": "No items yet.",
+  "kit.colItem": "Item",
+  "kit.colQty": "Quantity",
+  "kit.colPrice": "Price",
+  "kit.colTotal": "Total",
+  "kit.colActions": "Change",
+  "kit.more": "One more {name}",
+  "kit.less": "One less {name}",
+  "kit.remove": "Remove {name}",
+  "kit.note": "Note for {name}",
+  "kit.total": "Total {amount}",
+  "kit.grams": "{grams} g",
+  "pay.title": "Take payment for {label}",
+  "pay.due": "To pay {amount}",
+  "pay.method": "Paid by",
+  "pay.cash": "Cash",
+  "pay.card": "Card",
+  "pay.qr": "QR",
+  "pay.given": "Cash received",
+  "pay.confirm": "Take {amount} and close the ticket",
+  "pay.back": "Back to the ticket",
+  "pay.cashShort": "The cash received is less than the amount to pay.",
+  "pay.done": "Paid {amount}. The ticket is closed.",
+  "pay.change": "Change {amount}",
+  "pay.retry": "The sale is saved on this till. The server could not close the ticket yet; press the button again.",
+  "kit.pdfFailed": "The file could not be saved.",
+} as const;
+
+export type KitKey = keyof typeof en;
+export const kitMessages: AreaMessages<KitKey> = { en };

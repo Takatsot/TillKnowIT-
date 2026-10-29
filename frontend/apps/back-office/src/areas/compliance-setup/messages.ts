@@ -1,0 +1,63 @@
+import type { AreaMessages } from "@tillknowit/i18n";
+
+const en = {
+  title: "Setup and compliance",
+  loading: "Loading...",
+  tabSetup: "Setup checklist",
+  tabDocuments: "Compliance documents",
+
+  // setup
+  setupHeading: "Shop setup",
+  setupHint: "These steps are normally completed by the TillKnowIT field agent. The signed-in person is sent as the agent, which is a stand-in until sign-in exists.",
+  setupEmpty: "There are no setup steps.",
+  colStep: "Step",
+  colDone: "Done",
+  colNote: "Note",
+  colActions: "Actions",
+  step_device_check: "Device check",
+  step_shop_details: "Shop details",
+  step_document_photos: "Document photos",
+  step_catalogue_import: "Catalogue import",
+  step_staff_pins: "Staff PINs",
+  step_test_sale: "Test sale",
+  step_training_signoff: "Training sign-off",
+  done: "Done",
+  notDone: "Not yet",
+  markDone: "Mark done",
+  markDoneFor: "Mark {step} as done",
+  allDone: "Every step is done.",
+  shopStatus: "Shop status: {status}",
+  stepSaved: "{step} was marked as done.",
+
+  // documents
+  docsHeading: "Documents",
+  docsEmpty: "No documents uploaded yet.",
+  colType: "Document",
+  colFile: "File",
+  colExpires: "Expires",
+  colStatus: "Status",
+  noExpiry: "No expiry",
+  daysLeft: "{n} days left",
+  status_valid: "Valid",
+  status_expiring_soon: "Expiring soon",
+  status_expired: "Expired",
+  openFile: "Download",
+  openFileFor: "Download {file}",
+  remove: "Delete",
+  removeFor: "Delete {file}",
+  removed: "{file} was deleted.",
+  uploadHeading: "Upload a document",
+  uploadHint: "A photo (JPEG or PNG) or a PDF, up to 10 MB. Uploaded with this device and the signed-in person as the closest stand-ins for the till device and staff member the server asks for.",
+  docType: "Document type",
+  docTypeChoose: "Choose a document type",
+  docTypeRequired: "Choose what kind of document this is.",
+  docFile: "File",
+  fileRequired: "Choose a file to upload.",
+  expiresOn: "Expiry date (optional)",
+  upload: "Upload document",
+  uploaded: "{file} was uploaded.",
+  needsDevice: "This device is not set up yet, so documents cannot be uploaded from here.",
+} as const;
+
+export type ComplianceSetupKey = keyof typeof en;
+export const messages: AreaMessages<ComplianceSetupKey> = { en };

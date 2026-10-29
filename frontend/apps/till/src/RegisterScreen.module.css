@@ -1,0 +1,27 @@
+.panel {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-large);
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger);
+}

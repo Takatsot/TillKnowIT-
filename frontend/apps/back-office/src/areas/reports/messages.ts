@@ -1,0 +1,52 @@
+import type { AreaMessages } from "@tillknowit/i18n";
+
+const en = {
+  title: "Reports",
+  loading: "Loading...",
+
+  insightsHeading: "How the shop is doing",
+  periodToday: "Today",
+  periodWeek: "This week",
+  periodMonth: "This month",
+  colPeriod: "Period",
+  colSales: "Sales",
+  colProfit: "Profit",
+  colCustomers: "Customers",
+  colAverage: "Average sale",
+  bestSellers: "Best sellers",
+  runningLow: "Running low",
+  notSelling: "Not selling",
+  expiring: "Expiring soon",
+  colProduct: "Product",
+  colUnits: "Units sold",
+  colRevenue: "Revenue",
+  colOnHand: "On hand",
+  colDaysLeft: "Days left",
+  colExpiry: "Expires",
+  listEmpty: "Nothing to show.",
+
+  downloadHeading: "Download a report",
+  report: "Report",
+  report_sales_by_day: "Sales by day",
+  report_sales_by_product: "Sales by product",
+  report_stock_on_hand: "Stock on hand",
+  report_cash_ups: "Cash-ups",
+  report_credit_book: "Credit book",
+  report_tips_by_staff: "Tips by staff",
+  from: "From",
+  to: "To",
+  format: "Format",
+  formatCsv: "CSV (opens in Excel)",
+  formatXlsx: "Excel",
+  formatPdf: "PDF",
+  branch: "Shops to include",
+  branchThis: "This shop",
+  branchAll: "All shops in the business",
+  download: "Download report",
+  downloading: "Preparing the report...",
+  downloaded: "Your report {name} was downloaded.",
+  rangeInvalid: "The start date must not be after the end date.",
+} as const;
+
+export type ReportsKey = keyof typeof en;
+export const messages: AreaMessages<ReportsKey> = { en };

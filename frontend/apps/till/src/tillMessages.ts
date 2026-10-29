@@ -1,0 +1,91 @@
+import { translateArea, type AreaMessages, type LanguageCode } from "@tillknowit/i18n";
+import { HardwareError } from "@tillknowit/hardware";
+
+/**
+ * The till shell's own texts: registration, the banners, and what the Sell tab says about tips, split payments, credit, customers, the scale and the slip.
+ * (The older Sell texts are in @tillknowit/i18n.) English is the source; a language is added later as data.
+ */
+const en = {
+  "reg.title": "Register this till",
+  "reg.intro": "Enter the shop number and the till number that the owner got from the back office.",
+  "reg.shopId": "Shop number",
+  "reg.deviceId": "Till number",
+  "reg.save": "Register till",
+  "reg.shopInvalid": "The shop number does not look right. It is a long code with dashes.",
+  "reg.deviceInvalid": "The till number does not look right. It is a long code with dashes.",
+  "reg.skipDev": "Use example data (development only)",
+  "reg.saveFailed": "This till could not save its registration. Check that the browser is allowed to store data.",
+
+  "banner.pending": "This till is waiting for the owner to approve it in the back office. You can sell, but nothing is sent until it is approved.",
+  "banner.disabled": "The owner has switched this till off. Ask the owner.",
+  "banner.wipeWaiting": "The owner asked for this till to be cleared. {count} sales must be sent first. Keep the till online.",
+  "banner.error": "The last update did not work: {message}",
+  "banner.unregistered": "This till is not registered yet.",
+  "sync.lastAt": "Updated {time}",
+  "sync.never": "Not updated yet",
+  "sync.now": "Update now",
+
+  "sell.due": "To pay",
+  "sell.tip": "Tip",
+  "sell.noTip": "No tip",
+  "sell.tipPercent": "Tip {percent}%",
+  "sell.tipAmount": "Tip amount",
+  "sell.tipSet": "Set tip",
+  "sell.tipTooBig": "A tip cannot be more than the bill.",
+  "sell.tipInvalid": "Type the tip as an amount, for example 10 or 7,50.",
+  "sell.wallet": "Wallet",
+  "sell.voucher": "Voucher",
+  "sell.credit": "Credit",
+  "sell.split": "Split payment",
+  "sell.splitPart": "Part {n}",
+  "sell.splitMethod": "Method for part {n}",
+  "sell.splitAmount": "Amount for part {n}",
+  "sell.splitRef": "Reference for part {n}",
+  "sell.splitReceived": "Cash received for part {n}",
+  "sell.splitAdd": "Add a part",
+  "sell.splitRemove": "Remove part {n}",
+  "sell.splitLeft": "Still to pay: {amount}",
+  "sell.splitOver": "Over by {amount}",
+  "sell.splitMax": "A sale can be split into at most {count} payments.",
+  "sell.splitInvalid": "Check the amounts. Wallet and voucher payments need their reference, and cash received cannot be less than the amount.",
+  "sell.creditPick": "Choose the credit customer",
+  "sell.creditNone": "There are no credit customers on this till yet. The owner adds them in the back office.",
+  "sell.creditOwes": "owes {amount}",
+  "sell.creditOver": "This sale takes {name} over their credit limit. You can still go ahead.",
+  "sell.creditNoTip": "Take the tip off to sell on credit.",
+  "sell.customer": "Customer phone number",
+  "sell.customerFind": "Find customer",
+  "sell.customerAttached": "Customer: {name}",
+  "sell.customerRemove": "Remove customer",
+  "sell.customerNone": "No customer has that phone number.",
+  "sell.customerOnline": "Customers can only be found when the till is online.",
+  "sell.scaleRead": "Read from scale",
+  "sell.printFailed": "The slip did not print: {reason}",
+  "sell.drawerFailed": "The cash drawer did not open: {reason}",
+  "sell.qrGet": "Get QR slip",
+  "sell.qrWait": "The QR slip will be available once this sale has been sent to the server.",
+  "sell.qrOffline": "Connect the till to the internet to get the QR slip.",
+  "sell.qrReady": "QR slip: {url}",
+  "sell.qrPrint": "Print slip with QR",
+  "sell.qrNoDevice": "This till is not registered, so it cannot get a QR slip.",
+
+  "hw.printer_offline": "The printer is not connected. Check the cable or the Bluetooth.",
+  "hw.out_of_paper": "The printer is out of paper. Put in a new roll.",
+  "hw.cover_open": "The printer cover is open. Close it.",
+  "hw.scale_unstable": "The weight is not steady yet. Wait a moment and try again.",
+  "hw.scale_offline": "The scale is not answering. Check it is on and connected.",
+  "hw.drawer_failed": "The cash drawer did not open. Open it with the key.",
+  "hw.kitchen_unreachable": "The kitchen screen cannot be reached.",
+  "hw.other": "The device did not answer.",
+} as const;
+
+export type TillKey = keyof typeof en;
+
+export const tillMessages: AreaMessages<TillKey> = { en };
+
+export const tm = (language: LanguageCode, key: TillKey, params?: Record<string, string | number>): string => translateArea(tillMessages, language, key, params);
+
+/** A device problem in plain words for the cashier, in their language. */
+export function hardwareText(language: LanguageCode, error: unknown): string {
+  return error instanceof HardwareError ? tm(language, `hw.${error.code}`) : tm(language, "hw.other");
+}

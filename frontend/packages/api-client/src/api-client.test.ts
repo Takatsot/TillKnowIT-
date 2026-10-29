@@ -62,4 +62,18 @@ describe("createApi", () => {
     expect(result.ok && result.value.fileName).toBe("sales-by-day-2026-10-31.csv");
     expect(await (result.ok ? result.value.blob.text() : "")).toBe("a,b");
   });
+
+  it("uploads a form without setting a content type and gives the same kind of result", async () => {
+    const fetcher = respond(200, { created: 2 });
+    const data = new FormData();
+    data.append("file", new Blob(["a"]), "a.csv");
+
+    const result = await createApi({ fetcher: fetcher as unknown as typeof fetch }).upload("/schools/1/holders/import", data, { apply: true });
+
+    expect(result).toEqual({ ok: true, value: { created: 2 } });
+    const [url, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("/api/v1/schools/1/holders/import?apply=true");
+    expect(init.body).toBe(data);
+    expect(init.headers).toBeUndefined();
+  });
 });

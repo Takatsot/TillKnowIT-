@@ -1,0 +1,41 @@
+import type { AreaMessages } from "@tillknowit/i18n";
+
+const en = {
+  title: "Business packs",
+  heading: "Business packs",
+  intro: "A pack is a business type made of features. Saving a change makes a new version, so tills know their copy is out of date.",
+  loading: "Loading...",
+  empty: "There are no business packs yet.",
+  colName: "Pack",
+  colCode: "Code",
+  colVersion: "Version",
+  colFeatures: "Features",
+  colSlip: "Slip template",
+  colStatus: "Status",
+  colActions: "Actions",
+  active: "Active",
+  inactive: "Switched off",
+  edit: "Edit",
+  switchOff: "Switch off",
+  switchOn: "Switch on",
+  newPack: "New pack",
+  editing: "Edit {name}",
+  code: "Pack code",
+  codeHint: "Lowercase letters, digits and underscores, 2 to 30 characters, starting with a letter. It cannot be changed later.",
+  name: "Pack name",
+  description: "Description (optional)",
+  slip: "Slip template code",
+  featuresLegend: "Features this pack switches on",
+  settingsFor: "Settings for {flag} (JSON object, optional)",
+  settingsHint: "For example the barcode rules for price_embedded_barcodes.",
+  save: "Save pack",
+  create: "Create pack",
+  cancel: "Cancel",
+  saved: "{name} was saved (version {version}).",
+  created: "{name} was created.",
+  switchedOff: "{name} was switched off.",
+  switchedOn: "{name} was switched on.",
+} as const;
+
+export type PackKey = keyof typeof en;
+export const messages: AreaMessages<PackKey> = { en };

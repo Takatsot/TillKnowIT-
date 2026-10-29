@@ -22,6 +22,8 @@ export interface Api {
   put<T>(path: string, body?: unknown, query?: Query): Promise<Result<T>>;
   patch<T>(path: string, body?: unknown, query?: Query): Promise<Result<T>>;
   delete<T>(path: string, query?: Query): Promise<Result<T>>;
+  /** A file upload (multipart form). The browser sets the content type and boundary. */
+  upload<T>(path: string, form: FormData, query?: Query): Promise<Result<T>>;
   download(path: string, query?: Query): Promise<Result<Download>>;
 }
 
@@ -61,6 +63,21 @@ export function createApi(options: ApiOptions = {}): Api {
     }
   }
 
+  async function form<T>(path: string, data: FormData, query?: Query): Promise<Result<T>> {
+    let response: Response;
+    try {
+      response = await fetcher(`${base}${path}${queryString(query)}`, { method: "POST", body: data });
+    } catch {
+      return fail("network.unreachable", "We cannot reach the server. Check the connection and try again.");
+    }
+    if (!response.ok) {
+      const p = await problem(response);
+      return fail(p.code, p.message);
+    }
+    const text = response.status === 204 ? "" : await response.text();
+    return ok((text === "" ? undefined : JSON.parse(text)) as T);
+  }
+
   async function json<T>(method: string, path: string, query?: Query, body?: unknown): Promise<Result<T>> {
     const response = await send(method, path, query, body);
     if (!response) return fail("network.unreachable", "We cannot reach the server. Check the connection and try again.");
@@ -79,6 +96,7 @@ export function createApi(options: ApiOptions = {}): Api {
     put: (path, body, query) => json("PUT", path, query, body ?? {}),
     patch: (path, body, query) => json("PATCH", path, query, body ?? {}),
     delete: (path, query) => json("DELETE", path, query),
+    upload: form,
     async download(path, query) {
       const response = await send("GET", path, query);
       if (!response) return fail("network.unreachable", "We cannot reach the server. Check the connection and try again.");

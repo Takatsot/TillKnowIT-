@@ -1,0 +1,43 @@
+import type { AreaMessages } from "@tillknowit/i18n";
+
+const en = {
+  title: "School wallet",
+  "pay.intro": "Take a payment from a learner's or teacher's school wallet.",
+  "pay.token": "Scan the QR code or type it",
+  "pay.tokenHint": "Press Enter after scanning. The learner's phone shows a code that changes every few minutes.",
+  "pay.kind": "The code is from",
+  "pay.kind.qr": "A phone (QR code)",
+  "pay.kind.card": "A card or wristband",
+  "pay.staff": "Charge a teacher's monthly staff account",
+  "pay.charge": "Take {amount} from the wallet",
+  "pay.tokenRequired": "Scan or type the code first.",
+  "pay.noItems": "Add at least one item.",
+  "pay.again": "Take another payment",
+  "pay.done": "Took {amount} from {name}'s wallet.",
+  "pay.who": "{name}{grade}{class}",
+  "pay.balance": "Left in the wallet: {amount}.",
+  "pay.staffNote": "Charged to the teacher's staff account.",
+  "pay.check": "Check that the person in front of you is {name}.",
+  "pay.photo": "A photo is on file for this person.",
+  "pay.repeated": "This payment had already gone through, so nothing more was taken.",
+  "pay.queued": "The sale is saved on this till.",
+  "decline.title": "Payment not taken",
+  "decline.token.unknown": "This card is not linked to anyone at this school. Check it is the right card, or ask the office.",
+  "decline.token.blocked": "This card has been blocked. Ask the office.",
+  "decline.token.required": "Scan the QR code or tap the card first.",
+  "decline.qr.invalid": "This QR code has expired or is not valid. Ask the learner to open a fresh one on their phone.",
+  "decline.wallet.insufficient": "There is not enough money in the wallet. The parent can top it up in the parent app.",
+  "decline.wallet.frozen": "This wallet is frozen. Ask the office.",
+  "decline.wallet.item_blocked": "One of these items is blocked on this wallet by the parent.",
+  "decline.wallet.daily_limit": "This would go over the daily spending limit.",
+  "decline.wallet.amount_invalid": "The amount must be more than zero and at most R2000.",
+  "decline.wallet.holder_inactive": "This learner is no longer at the school.",
+  "decline.wallet.busy": "The wallet was being used at the same moment. Try again.",
+  "decline.wallet.no_school": "This shop does not take wallet payments.",
+  "decline.wallet.school_not_active": "This school is not active yet.",
+  "decline.staff.not_a_teacher": "Only a teacher can use a staff account.",
+  "decline.staff.accounts_disabled": "This school does not use staff accounts.",
+} as const;
+
+export type WalletKey = keyof typeof en;
+export const messages: AreaMessages<WalletKey> = { en };

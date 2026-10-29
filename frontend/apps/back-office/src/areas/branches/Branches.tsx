@@ -1,7 +1,9 @@
 import { useAction, useLoad, useApi, useMessages, useSession } from "@tillknowit/app-kit";
 import { Badge, Button, Card, Inline, Notice, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
+import { BranchAccess } from "./BranchAccess";
 import { messages } from "./messages";
+import { Transfers } from "./Transfers";
 
 export interface Branch {
   shopId: string;
@@ -11,7 +13,7 @@ export interface Branch {
   municipalityCode: string | null;
 }
 
-export function Branches() {
+function ShopsTab() {
   const t = useMessages(messages);
   const api = useApi();
   const { personId, shopId } = useSession();
@@ -63,6 +65,24 @@ export function Branches() {
           </Stack>
         </form>
       </Card>
+    </Stack>
+  );
+}
+
+export function Branches() {
+  const t = useMessages(messages);
+  const [tab, setTab] = useState<"shops" | "access" | "transfers">("shops");
+  const tabs = [["shops", t("tabShops")], ["access", t("tabAccess")], ["transfers", t("tabTransfers")]] as const;
+  return (
+    <Stack>
+      <nav aria-label={t("title")}>
+        <Inline>
+          {tabs.map(([id, label]) => <Button key={id} variant={tab === id ? "primary" : "secondary"} aria-pressed={tab === id} onClick={() => setTab(id)}>{label}</Button>)}
+        </Inline>
+      </nav>
+      {tab === "shops" && <ShopsTab />}
+      {tab === "access" && <BranchAccess />}
+      {tab === "transfers" && <Transfers />}
     </Stack>
   );
 }

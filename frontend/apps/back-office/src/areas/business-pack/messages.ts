@@ -1,0 +1,43 @@
+import type { AreaMessages } from "@tillknowit/i18n";
+
+const en = {
+  title: "Business type",
+  currentHeading: "Your shop is on",
+  currentVersion: "Version {version}",
+  currentNone: "No features beyond the basic till are switched on.",
+  packsHeading: "Choose what kind of business this is",
+  packsHint: "The business type decides which extras your tills show. Tills pick up a change the next time they are online.",
+  features: "Switches on",
+  noFeatures: "Nothing extra: the basic till.",
+  choose: "Choose {name}",
+  chosenBadge: "Current",
+  chosen: "Your shop now uses {name}.",
+  empty: "No business types are available.",
+  loading: "Loading...",
+  feature_split_payments: "Split payments",
+  feature_refunds: "Refunds",
+  feature_open_tickets: "Open tickets",
+  feature_tables: "Tables",
+  feature_kitchen: "Kitchen screen",
+  feature_tips: "Tips",
+  feature_variants: "Product variants",
+  feature_modifiers: "Modifiers",
+  feature_promotions: "Promotions",
+  feature_weight: "Selling by weight",
+  feature_price_embedded_barcodes: "Price in the barcode",
+  feature_appointments: "Appointments",
+  feature_commission: "Commission",
+  feature_quotes: "Quotes",
+  feature_layby: "Lay-by",
+  feature_serial_numbers: "Serial numbers",
+  feature_customers: "Customers",
+  feature_loyalty: "Loyalty points",
+  feature_vouchers: "Gift vouchers",
+  feature_printer: "Receipt printer",
+  feature_cash_drawer: "Cash drawer",
+  feature_scale: "Scale",
+  feature_message_bundles: "Message bundles",
+} as const;
+
+export type BusinessPackKey = keyof typeof en;
+export const messages: AreaMessages<BusinessPackKey> = { en };

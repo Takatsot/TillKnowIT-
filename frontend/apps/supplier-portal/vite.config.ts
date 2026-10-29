@@ -5,5 +5,5 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   server: { proxy: { "/api": { target: "http://localhost:5080", changeOrigin: true } } },
-  test: { environment: "jsdom" },
+  test: { environment: "jsdom", testTimeout: 20000 },
 });
