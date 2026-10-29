@@ -135,6 +135,7 @@ public static class MarketplaceEndpoints
         api.MapGet("/suppliers/{id:guid}/group-deals", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListSupplierGroupDeals(id, callerPersonId), ct)));
         api.MapGet("/shops/{shopId:guid}/group-deals", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListGroupDeals(shopId, callerPersonId), ct)));
         api.MapPost("/shops/{shopId:guid}/group-deals/{id:guid}/commitments", async (Guid shopId, Guid id, JoinGroupDealRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new JoinGroupDeal(id, shopId, req), ct)));
+        api.MapGet("/organisations/{organisationId:guid}/supplier", async (Guid organisationId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetSupplierOfOrganisation(organisationId, callerPersonId), ct)));
         api.MapPost("/buying-groups", async (CreateBuyingGroupRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new CreateBuyingGroup(req), ct)));
         api.MapGet("/shops/{shopId:guid}/buying-groups", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListBuyingGroups(shopId, callerPersonId), ct)));
         api.MapPost("/buying-groups/{id:guid}/invites", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new InviteToGroup(id, callerPersonId), ct)));

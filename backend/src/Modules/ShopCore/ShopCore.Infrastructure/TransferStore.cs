@@ -39,6 +39,7 @@ public static class TransferEndpoints
     // TODO(auth): the till identifies itself with device and staff ids until sign-in exists.
     public static IEndpointRouteBuilder MapTransferEndpoints(this IEndpointRouteBuilder api)
     {
+        api.MapGet("/shops/{shopId:guid}/products", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListShopProducts(shopId, callerPersonId), ct)));
         api.MapGet("/shops/{shopId:guid}/sync/products", async (Guid shopId, Guid deviceId, DateTimeOffset? since, IDispatcher d, CancellationToken ct) =>
             Reply(await d.Ask(new PullProducts(shopId, deviceId, since), ct)));
         api.MapPost("/shops/{shopId:guid}/stock-transfers", async (Guid shopId, SendTransferRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new SendTransfer(shopId, req), ct)));

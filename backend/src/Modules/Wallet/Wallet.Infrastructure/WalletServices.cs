@@ -18,6 +18,7 @@ public static partial class WalletModule
     static partial void AddServices(IServiceCollection services)
     {
         services.AddScoped<IWalletStore, WalletStore>();
+        services.AddScoped<Wallet.Application.IWalletListings, WalletListings>();
         services.AddScoped<PurchasePoster>();
         services.AddScoped<PurchaseAlerts>();
         services.AddScoped<IWalletNotifier, WalletNotifier>();

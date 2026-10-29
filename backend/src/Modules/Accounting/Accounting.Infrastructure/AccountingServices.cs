@@ -98,6 +98,7 @@ public static class AccountingEndpoints
     public static IEndpointRouteBuilder MapAccountingEndpoints(this IEndpointRouteBuilder api)
     {
         api.MapPost("/shops/{shopId:guid}/accounting/connections/{provider}", async (Guid shopId, string provider, ConnectRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ConnectAccounting(shopId, provider, req), ct)));
+        api.MapGet("/shops/{shopId:guid}/accounting/connection", async (Guid shopId, Guid personId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetAccountingConnection(shopId, personId), ct)));
         api.MapDelete("/shops/{shopId:guid}/accounting/connection", async (Guid shopId, Guid personId, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new DisconnectAccounting(shopId, personId), ct)));
         api.MapPut("/shops/{shopId:guid}/accounting/mappings", async (Guid shopId, SaveMappingsRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new SaveAccountMappings(shopId, req), ct)));
         api.MapGet("/shops/{shopId:guid}/accounting/mappings", async (Guid shopId, Guid personId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetAccountMappings(shopId, personId), ct)));

@@ -24,6 +24,7 @@ public static class IdentityModule
             .AddInterceptors(new OutboxInterceptor()));
         services.AddScoped<IModuleMigrator, IdentityMigrator>();
         services.AddScoped<IShopStore, ShopStore>();
+        services.AddScoped<IShopListStore, ShopListStore>();
         services.AddScoped<IDeviceGate, DeviceGate>();
         services.AddScoped<IDeviceStaffStore, DeviceStaffStore>();
         services.AddScoped<IBranchStore, BranchStore>();

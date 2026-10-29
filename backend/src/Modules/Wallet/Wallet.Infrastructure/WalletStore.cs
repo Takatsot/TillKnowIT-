@@ -157,3 +157,9 @@ internal sealed class WalletStore(WalletDbContext db) : IWalletStore
         }
     }
 }
+
+internal sealed class WalletListings(WalletDbContext db) : Wallet.Application.IWalletListings
+{
+    public Task<List<WalletReconciliation>> Reconciliations(int take, CancellationToken ct) =>
+        db.Set<WalletReconciliation>().AsNoTracking().OrderByDescending(r => r.Day).ThenByDescending(r => r.CreatedAt).Take(take).ToListAsync(ct);
+}

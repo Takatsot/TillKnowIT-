@@ -68,13 +68,14 @@ public sealed record GrantConsent(Guid ShopId, GrantConsentRequest Request) : IC
 public sealed record WithdrawConsent(Guid ShopId, Guid ConsentId, Guid PersonId) : ICommand<ConsentResponse>;
 public sealed record ApplyForCredit(Guid ShopId, ApplyRequest Request) : ICommand<ApplicationResponse>;
 public sealed record DrawOnCredit(Guid ShopId, DrawRequest Request) : ICommand<DrawResponse>;
+public sealed record ListFinancePartners : IQuery<List<string>>;
 public sealed record GetCreditSummary(Guid ShopId, Guid PersonId) : IQuery<CreditSummaryResponse>;
 public sealed record HandleFinanceCallback(string PartnerCode, string? Signature, string Body) : ICommand<bool>;
 
 internal sealed class FinanceHandlers(IFinanceStore store, IEnumerable<IFinancePartner> partners, IOrganisationAccess access, IEntitlements entitlements, IBranchDirectory branches,
     ISalesHistory history, IOrderPayments orders, TimeProvider clock)
     : ICommandHandler<GrantConsent, ConsentResponse>, ICommandHandler<WithdrawConsent, ConsentResponse>, ICommandHandler<ApplyForCredit, ApplicationResponse>,
-      ICommandHandler<DrawOnCredit, DrawResponse>, IQueryHandler<GetCreditSummary, CreditSummaryResponse>, ICommandHandler<HandleFinanceCallback, bool>
+      ICommandHandler<DrawOnCredit, DrawResponse>, IQueryHandler<GetCreditSummary, CreditSummaryResponse>, IQueryHandler<ListFinancePartners, List<string>>, ICommandHandler<HandleFinanceCallback, bool>
 {
     private IFinancePartner? Partner(string? code) => partners.FirstOrDefault(p => p.Code.Equals(code?.Trim(), StringComparison.OrdinalIgnoreCase));
 
@@ -170,6 +171,8 @@ internal sealed class FinanceHandlers(IFinanceStore store, IEnumerable<IFinanceP
         await orders.SetPaymentStatus(order.OrderId, "paid", ct);
         return Result<DrawResponse>.Ok(FinanceMapping.ToResponse(draw));
     }
+
+    public Task<Result<List<string>>> Handle(ListFinancePartners q, CancellationToken ct) => Task.FromResult(Result<List<string>>.Ok(partners.Select(p => p.Code).Order().ToList()));
 
     public async Task<Result<CreditSummaryResponse>> Handle(GetCreditSummary q, CancellationToken ct)
     {

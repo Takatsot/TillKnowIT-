@@ -78,6 +78,9 @@ public static class WalletEndpoints
             var result = await d.Send(new IssueToken(id, req), ct);
             return result.IsSuccess ? Results.Created($"/api/v1/holders/{id}/tokens", result.Value) : Problem(result.Error!);
         });
+        api.MapGet("/admin/schools", async (Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListSchools(callerPersonId), ct)));
+        api.MapGet("/admin/wallet-reconciliations", async (Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListReconciliations(callerPersonId), ct)));
+        api.MapGet("/holders/{id:guid}/tokens", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListHolderTokens(id, callerPersonId), ct)));
         api.MapPost("/tokens/{id:guid}/block", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Done(await d.Send(new BlockToken(id, callerPersonId), ct)));
         api.MapPost("/holders/{id:guid}/block-cards", async (Guid id, Guid callerPersonId, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new BlockMyChildsCards(id, callerPersonId), ct)));
 

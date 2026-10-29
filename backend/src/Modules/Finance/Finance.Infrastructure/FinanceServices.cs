@@ -103,6 +103,7 @@ public static class FinanceEndpoints
         api.MapDelete("/shops/{shopId:guid}/credit/consents/{id:guid}", async (Guid shopId, Guid id, Guid personId, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new WithdrawConsent(shopId, id, personId), ct)));
         api.MapPost("/shops/{shopId:guid}/credit/applications", async (Guid shopId, ApplyRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ApplyForCredit(shopId, req), ct)));
         api.MapPost("/shops/{shopId:guid}/credit/draws", async (Guid shopId, DrawRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new DrawOnCredit(shopId, req), ct)));
+        api.MapGet("/credit/partners", async (IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListFinancePartners(), ct)));
         api.MapGet("/shops/{shopId:guid}/credit", async (Guid shopId, Guid personId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetCreditSummary(shopId, personId), ct)));
         api.MapPost("/credit/callbacks/{partner}", async (string partner, HttpRequest request, IDispatcher d, CancellationToken ct) =>
         {

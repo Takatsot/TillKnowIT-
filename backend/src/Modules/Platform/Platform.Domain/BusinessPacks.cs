@@ -32,11 +32,12 @@ public static class FeatureFlags
     public const string CashDrawer = "cash_drawer";
     public const string Scale = "scale";
     public const string MessageBundles = "message_bundles";
+    public const string SchoolWallet = "school_wallet";
 
     public static readonly string[] All =
     [
         SplitPayments, Refunds, OpenTickets, Tables, Kitchen, Tips, Variants, Modifiers, Promotions, Weight, PriceEmbeddedBarcodes,
-        Appointments, Commission, Quotes, Layby, SerialNumbers, Customers, Loyalty, Vouchers, Printer, CashDrawer, Scale, MessageBundles,
+        Appointments, Commission, Quotes, Layby, SerialNumbers, Customers, Loyalty, Vouchers, Printer, CashDrawer, Scale, MessageBundles, SchoolWallet,
     ];
 
     public static bool IsKnown(string? flag) => flag is not null && All.Contains(flag);

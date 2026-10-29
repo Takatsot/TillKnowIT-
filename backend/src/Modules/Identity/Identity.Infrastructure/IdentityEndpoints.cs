@@ -41,6 +41,17 @@ public static class IdentityEndpoints
             return result.IsSuccess ? Results.NoContent() : Problem(result);
         });
 
+        api.MapGet("/shops/{shopId:guid}/staff", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new ListShopStaff(shopId, callerPersonId), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
+        });
+        api.MapGet("/shops/{shopId:guid}/devices", async (Guid shopId, Guid callerPersonId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new ListShopDevices(shopId, callerPersonId), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
+        });
+
         api.MapPost("/shops/{shopId:guid}/staff", async (Guid shopId, AddStaffRequest req, IDispatcher d, CancellationToken ct) =>
         {
             var result = await d.Send(new AddStaff(shopId, req.Name, req.Phone, req.RoleCode, req.Pin), ct);

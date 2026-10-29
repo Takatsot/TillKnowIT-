@@ -45,6 +45,7 @@ internal static class AccountingMapping
 }
 
 public sealed record ConnectAccounting(Guid ShopId, string Provider, ConnectRequest Request) : ICommand<ConnectionResponse>;
+public sealed record GetAccountingConnection(Guid ShopId, Guid PersonId) : IQuery<ConnectionResponse>;
 public sealed record DisconnectAccounting(Guid ShopId, Guid PersonId) : ICommand<ConnectionResponse>;
 public sealed record SaveAccountMappings(Guid ShopId, SaveMappingsRequest Request) : ICommand<MappingsResponse>;
 public sealed record GetAccountMappings(Guid ShopId, Guid PersonId) : IQuery<MappingsResponse>;
@@ -55,7 +56,7 @@ public sealed record RunAccountingExports : ICommand<int>;
 internal sealed class AccountingHandlers(IAccountingStore store, IEnumerable<IAccountingExporter> exporters, IOrganisationAccess access, IEntitlements entitlements, IBranchDirectory branches,
     IDailyAccountingSource source, IShopDirectory shops, IMessageQueue queue, TimeProvider clock)
     : ICommandHandler<ConnectAccounting, ConnectionResponse>, ICommandHandler<DisconnectAccounting, ConnectionResponse>, ICommandHandler<SaveAccountMappings, MappingsResponse>,
-      IQueryHandler<GetAccountMappings, MappingsResponse>, IQueryHandler<ListExportRuns, List<ExportRunResponse>>, ICommandHandler<RetryExport, ExportRunResponse>, ICommandHandler<RunAccountingExports, int>
+      IQueryHandler<GetAccountMappings, MappingsResponse>, IQueryHandler<GetAccountingConnection, ConnectionResponse>, IQueryHandler<ListExportRuns, List<ExportRunResponse>>, ICommandHandler<RetryExport, ExportRunResponse>, ICommandHandler<RunAccountingExports, int>
 {
     public const int CatchUpDays = 7;
 
@@ -96,6 +97,13 @@ internal sealed class AccountingHandlers(IAccountingStore store, IEnumerable<IAc
         else existing.Reconnect(exporter.Provider, access_.Value!.TokenReference, access_.Value.TenantName, startsOn, now);
         await store.Save(ct);
         return Result<ConnectionResponse>.Ok(AccountingMapping.ToResponse(existing));
+    }
+
+    public async Task<Result<ConnectionResponse>> Handle(GetAccountingConnection q, CancellationToken ct)
+    {
+        if (!await MayManage(q.PersonId, q.ShopId, ct)) return Result<ConnectionResponse>.Fail("permission.denied", "Only the owner can see this.");
+        var connection = await store.Connection(q.ShopId, ct);
+        return connection is null ? Result<ConnectionResponse>.Fail("accounting.not_connected", "No accounting package is connected.") : Result<ConnectionResponse>.Ok(AccountingMapping.ToResponse(connection));
     }
 
     public async Task<Result<ConnectionResponse>> Handle(DisconnectAccounting c, CancellationToken ct)
