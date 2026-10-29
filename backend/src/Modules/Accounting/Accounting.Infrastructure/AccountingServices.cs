@@ -29,6 +29,7 @@ public static partial class AccountingModule
     /// <summary>Development only: pretend Xero and Sage that accept every journal and remember what they were sent. The real adapters need each package's developer account.</summary>
     public static IServiceCollection AddDevAccountingExporters(this IServiceCollection services)
     {
+        if (services.Any(d => d.ServiceType == typeof(IAccountingExporter))) return services;   // a real package is configured: no pretend ones beside it
         services.AddSingleton<IAccountingExporter>(new DevAccountingExporter(Providers.Xero));
         services.AddSingleton<IAccountingExporter>(new DevAccountingExporter(Providers.Sage));
         return services;
@@ -104,7 +105,7 @@ public static class AccountingEndpoints
         api.MapGet("/shops/{shopId:guid}/accounting/mappings", async (Guid shopId, Guid personId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new GetAccountMappings(shopId, personId), ct)));
         api.MapGet("/shops/{shopId:guid}/accounting/export-runs", async (Guid shopId, Guid personId, IDispatcher d, CancellationToken ct) => Reply(await d.Ask(new ListExportRuns(shopId, personId), ct)));
         api.MapPost("/shops/{shopId:guid}/accounting/export-runs/{runId:guid}/retry", async (Guid shopId, Guid runId, RetryRequest req, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new RetryExport(shopId, runId, req), ct)));
-        return api;
+        return api.MapAccountingOAuthEndpoints();
     }
 
     private static IResult Reply<T>(Result<T> result) => result.IsSuccess ? Results.Ok(result.Value) : Results.Problem(title: result.Error!.Message,

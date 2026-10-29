@@ -13,19 +13,37 @@ export const ACCOUNT_KEYS = ["cash", "card_clearing", "customer_credit", "other_
 
 const isPlanError = (e: { code: string } | null) => e?.code === "plan.feature_not_included";
 
-export function Accounting() {
+/** Where the package's sign-in page sent the browser back to: /?accounting=connected, or ?accounting=failed&reason=... Read once, then removed from the address. */
+function returnedFromSignIn(search: string): { outcome: "connected" | "failed"; reason: string } | null {
+  const params = new URLSearchParams(search);
+  const outcome = params.get("accounting");
+  return outcome === "connected" || outcome === "failed" ? { outcome, reason: params.get("reason") ?? "" } : null;
+}
+
+export function Accounting({ goTo = (url: string) => window.location.assign(url), search = typeof window === "undefined" ? "" : window.location.search }: { goTo?: (url: string) => void; search?: string }) {
+  const t = useMessages(messages);
   const [notice, setNotice] = useState("");
+  const [failure, setFailure] = useState("");
+  useEffect(() => {
+    const back = returnedFromSignIn(search);
+    if (!back) return;
+    if (back.outcome === "connected") setNotice(t("signInDone"));
+    else setFailure(back.reason || t("signInFailed"));
+    try { window.history.replaceState(null, "", window.location.pathname); } catch { /* the address stays as it is */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
   return (
     <Stack>
       {notice && <Notice kind="success">{notice}</Notice>}
-      <ConnectCard onNotice={setNotice} />
+      {failure && <Notice kind="danger">{failure}</Notice>}
+      <ConnectCard onNotice={setNotice} goTo={goTo} />
       <MappingsCard onNotice={setNotice} />
       <RunsCard onNotice={setNotice} />
     </Stack>
   );
 }
 
-function ConnectCard({ onNotice }: { onNotice: (s: string) => void }) {
+function ConnectCard({ onNotice, goTo }: { onNotice: (s: string) => void; goTo: (url: string) => void }) {
   const t = useMessages(messages);
   const api = useApi();
   const { personId, shopId } = useSession();
@@ -41,6 +59,14 @@ function ConnectCard({ onNotice }: { onNotice: (s: string) => void }) {
 
   const connect = useAction(() => api.post<Connection>(`/shops/${shopId}/accounting/connections/${provider}`, { personId, authorisationCode: code.trim(), startsOn: startsOn === "" ? null : startsOn }));
   const disconnect = useAction(() => api.delete<unknown>(`/shops/${shopId}/accounting/connection`, { personId }));
+  const signIn = useAction(() => api.get<{ url: string }>(`/shops/${shopId}/accounting/connections/${provider}/authorise`, { personId, ...(startsOn === "" ? {} : { startsOn }) }));
+
+  /** The package's own sign-in page: the server makes the address (with a signed state) and the browser goes there; the package sends it back to the callback, which connects and returns here. */
+  async function startSignIn() {
+    onNotice("");
+    const r = await signIn.run();
+    if (r.ok) goTo(r.value.url);
+  }
 
   async function submit() {
     onNotice("");
@@ -60,19 +86,22 @@ function ConnectCard({ onNotice }: { onNotice: (s: string) => void }) {
     }
   }
 
-  const error = connect.error ?? disconnect.error ?? loadError;
+  const error = connect.error ?? disconnect.error ?? signIn.error ?? loadError;
   const providerName = (p: string) => (p === "sage" ? t("sage") : t("xero"));
   return (
     <Card title={t("connectHeading")}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <Stack>
-          <Notice kind="info">{t("oauthNote")}</Notice>
           <SelectField label={t("provider")} value={provider} onChange={(e) => setProvider(e.target.value)}>
             <option value="xero">{t("xero")}</option>
             <option value="sage">{t("sage")}</option>
           </SelectField>
-          <TextField label={t("code")} value={code} onChange={(e) => setCode(e.target.value)} required autoComplete="off" />
           <TextField label={t("startsOn")} hint={t("startsOnHint")} type="date" value={startsOn} onChange={(e) => setStartsOn(e.target.value)} />
+          <Inline>
+            <Button type="button" disabled={signIn.busy} onClick={() => void startSignIn()}>{t("signInWith", { provider: providerName(provider) })}</Button>
+          </Inline>
+          <p>{t("oauthNote")}</p>
+          <TextField label={t("code")} value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" />
           {error && <Notice kind="danger">{isPlanError(error) ? t("planNote") : error.message}</Notice>}
           {existing.loading && !override && <p>{t("connectionLoading")}</p>}
           {connection && <Notice kind="info">{t("currentConnection", { provider: providerName(connection.provider), tenant: connection.tenantName ? ` (${connection.tenantName})` : "" })}</Notice>}

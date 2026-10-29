@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Accounting.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AccountingDbContext))]
-    [Migration("20261028081038_Initial")]
+    [Migration("20261029122348_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -226,6 +226,34 @@ namespace Accounting.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_export_runs_shop_id_provider_day");
 
                     b.ToTable("export_runs", "accounting");
+                });
+
+            modelBuilder.Entity("Accounting.Infrastructure.ProviderToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<byte[]>("Blob")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("varbinary(4000)")
+                        .HasColumnName("blob");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("provider");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_provider_tokens");
+
+                    b.ToTable("provider_tokens", "accounting");
                 });
 
             modelBuilder.Entity("TillKnowIT.Outbox.OutboxMessage", b =>

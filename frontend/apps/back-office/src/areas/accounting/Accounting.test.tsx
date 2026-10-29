@@ -19,23 +19,57 @@ function fakeGet(mappings: unknown, runs: unknown, connection: unknown = notConn
   return vi.fn(async (path: string) => (path.endsWith("/connection") ? connection : path.endsWith("/mappings") ? mappings : runs) as never);
 }
 
-function mount(api: Partial<Api>) {
-  render(<SessionProvider api={api as Api} initial={session}><Accounting /></SessionProvider>);
+function mount(api: Partial<Api>, props: { goTo?: (url: string) => void; search?: string } = {}) {
+  render(<SessionProvider api={api as Api} initial={session}><Accounting search="" {...props} /></SessionProvider>);
 }
 
 describe("Accounting", () => {
-  it("says the real sign-in is not built, connects with the code and shows the package", async () => {
+  it("connects with a pasted code and shows the package", async () => {
     const post = vi.fn(async () => ok({ id: "c1", provider: "sage", tenantName: "Thandi Trading", connected: true, startsOn: "2026-11-01", connectedAt: "2026-10-29T08:00:00Z" }));
     mount({ get: fakeGet(ok({ mappings: [], missing: [] }), ok([])) as never, post: post as never });
     const user = userEvent.setup();
 
-    expect(screen.getByText(/not built into this screen yet/)).toBeTruthy();
     await user.selectOptions(screen.getByLabelText("Accounting package"), "sage");
     await user.type(screen.getByLabelText("Authorisation code"), "abc123");
     await user.click(screen.getByRole("button", { name: "Connect" }));
 
     await waitFor(() => expect(screen.getByText("Connected to Sage (Thandi Trading).")).toBeTruthy());
     expect(post).toHaveBeenCalledWith("/shops/s1/accounting/connections/sage", { personId: "p1", authorisationCode: "abc123", startsOn: null });
+  });
+
+  it("sends the browser to the package's own sign-in page, with the first day if one was chosen", async () => {
+    const get = vi.fn(async (path: string) => (path.endsWith("/authorise") ? ok({ url: "https://login.xero.com/identity/connect/authorize?state=abc" }) : fakeGet(ok({ mappings: [], missing: [] }), ok([]))(path)));
+    const goTo = vi.fn();
+    mount({ get: get as never }, { goTo });
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText("First day to send (optional)"), "2026-11-01");
+    await user.click(screen.getByRole("button", { name: "Sign in with Xero" }));
+
+    await waitFor(() => expect(goTo).toHaveBeenCalledWith("https://login.xero.com/identity/connect/authorize?state=abc"));
+    expect(get).toHaveBeenCalledWith("/shops/s1/accounting/connections/xero/authorise", { personId: "p1", startsOn: "2026-11-01" });
+  });
+
+  it("shows the server's refusal when the sign-in cannot start, and does not leave the page", async () => {
+    const get = vi.fn(async (path: string) => (path.endsWith("/authorise") ? fail("accounting.oauth_unavailable", "Signing in to this package is not set up here yet.") : fakeGet(ok({ mappings: [], missing: [] }), ok([]))(path)));
+    const goTo = vi.fn();
+    mount({ get: get as never }, { goTo });
+    const user = userEvent.setup();
+
+    await user.selectOptions(screen.getByLabelText("Accounting package"), "sage");
+    await user.click(screen.getByRole("button", { name: "Sign in with Sage" }));
+
+    expect(await screen.findByText("Signing in to this package is not set up here yet.")).toBeTruthy();
+    expect(goTo).not.toHaveBeenCalled();
+  });
+
+  it("tells the owner when the package sent them back connected, or failed", async () => {
+    mount({ get: fakeGet(ok({ mappings: [], missing: [] }), ok([])) as never }, { search: "?accounting=connected" });
+    expect(await screen.findByText(/You are connected/)).toBeTruthy();
+    cleanup();
+
+    mount({ get: fakeGet(ok({ mappings: [], missing: [] }), ok([])) as never }, { search: "?accounting=failed&reason=The%20sign-in%20was%20cancelled." });
+    expect(await screen.findByText("The sign-in was cancelled.")).toBeTruthy();
   });
 
   it("loads the existing connection on open and can disconnect it", async () => {

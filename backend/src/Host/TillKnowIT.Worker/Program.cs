@@ -65,6 +65,8 @@ builder.Services
 // Delivers queued messages. Pretend providers (log only) exist in Development; elsewhere a channel with no
 // real provider fails visibly rather than pretending to send.
 builder.Services.AddMessageSender();
+// A real SMS provider is used when its credentials are configured (Sms:BulkSms:TokenId and Sms:BulkSms:TokenSecret, from the secrets store in production).
+builder.Services.AddBulkSmsIfConfigured(builder.Configuration["Sms:BulkSms:TokenId"], builder.Configuration["Sms:BulkSms:TokenSecret"], builder.Configuration["Sms:BulkSms:BaseUrl"], builder.Configuration["Sms:BulkSms:RoutingGroup"]);
 builder.Services.AddOwnerNotifications();
 builder.Services.AddInvoiceReading();
 builder.Services.AddPaymentRelease();
@@ -74,6 +76,7 @@ builder.Services.AddAppointmentReminders();
 builder.Services.AddWalletJobs();
 builder.Services.AddBillingJobs();
 builder.Services.AddAccountingExports();
+builder.Services.AddAccountingOAuth(AccountingOAuthExtensions.ReadOptions(k => builder.Configuration[k]));
 builder.Services.AddInsightAggregation();
 if (builder.Environment.IsDevelopment())
 {

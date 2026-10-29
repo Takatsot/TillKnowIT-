@@ -41,6 +41,9 @@ builder.Services
     .AddWalletModule(builder.Configuration.GetConnectionString("Wallet") ?? db)
     .AddPaymentsModule(db);
 
+// Real Xero and Sage sign-in and export, for whichever have credentials configured (Accounting:Xero:*, Accounting:Sage:*, Accounting:TokenKey, Accounting:ReturnUrl).
+builder.Services.AddAccountingOAuth(AccountingOAuthExtensions.ReadOptions(k => builder.Configuration[k]));
+
 // A fake VAS partner exists in Development only. Elsewhere airtime and electricity report "not available"
 // until the real partner adapter is registered.
 if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner().AddDevPaymentPartner().AddDevStoredValuePartner().AddDevBillingCharger().AddDevFinancePartner().AddDevAccountingExporters();

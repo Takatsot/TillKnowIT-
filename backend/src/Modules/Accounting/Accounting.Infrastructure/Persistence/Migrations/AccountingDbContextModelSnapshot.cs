@@ -225,6 +225,34 @@ namespace Accounting.Infrastructure.Persistence.Migrations
                     b.ToTable("export_runs", "accounting");
                 });
 
+            modelBuilder.Entity("Accounting.Infrastructure.ProviderToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<byte[]>("Blob")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("varbinary(4000)")
+                        .HasColumnName("blob");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("provider");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_provider_tokens");
+
+                    b.ToTable("provider_tokens", "accounting");
+                });
+
             modelBuilder.Entity("TillKnowIT.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")

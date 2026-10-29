@@ -102,6 +102,21 @@ namespace Accounting.Infrastructure.Persistence.Migrations
                     table.PrimaryKey("pk_outbox_messages", x => x.id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "provider_tokens",
+                schema: "accounting",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    provider = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    blob = table.Column<byte[]>(type: "varbinary(4000)", maxLength: 4000, nullable: false),
+                    updated_at = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_provider_tokens", x => x.id);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "ix_account_mappings_shop_id_key",
                 schema: "accounting",
@@ -148,6 +163,10 @@ namespace Accounting.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "outbox_messages",
+                schema: "accounting");
+
+            migrationBuilder.DropTable(
+                name: "provider_tokens",
                 schema: "accounting");
         }
     }
