@@ -1,4 +1,5 @@
 import { isUuid } from "@tillknowit/domain";
+import { clearDeviceCredential } from "./deviceToken";
 import { loadDeviceConfig, type DeviceConfig } from "./syncRunner";
 
 /** Where the till keeps which shop and till it is. Same key `loadDeviceConfig` reads. */
@@ -30,4 +31,5 @@ export function clearDeviceConfig(): void {
   } catch {
     // Nothing to clear.
   }
+  clearDeviceCredential();
 }

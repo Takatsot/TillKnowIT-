@@ -163,7 +163,7 @@ Gaps fixed since the first screens: the server now lists a shop's staff, devices
 Closed since: sign-in now exists (SMS one-time code, a signed session of 12 hours, every request that names an acting person must carry that person's token; the apps sign in through one shared screen and pick the organisation from the person's memberships). **Switch `Auth:Required` on in staging and production**, and set `Auth:TokenKey`; the till's own calls (device and staff ids, no person) are still trusted by device id and need a device credential later. A voucher, points or wallet payment taken for a sale the cashier then abandons is given back (and retried when the till is offline); points are their own payment method, so a voucher and points can share a sale. The back office lists a shop's usual suppliers; the admin can add and edit single learners.
 
 Still open:
-- The till's server calls are trusted by device and staff id only: a device credential (signed device token) is still to build.
+- Tills now set up with a one-time code and prove themselves with a signed 30-day device token (X-Device-Token), required when `Auth:Required` is on. There is no route to re-issue a lost credential: the till is added again as a new device.
 - Only the SMS code is real sign-in; the SMS provider is a development fake until a real one is connected.
 - No server route removes a usual supplier; card types show by position.
 - Quote "Add to sale" does not mark the quote converted; tables/tickets cannot be loaded into the main sale (the server closes tickets itself).
@@ -179,7 +179,7 @@ Everything below needs a person, an account, a partner or a decision. None of it
 
 1. Start Docker and run the API and Worker against SQL Server: confirms migrations apply, seed loads, the outbox claim query works, cascade paths are accepted, and the check constraint on the insight aggregates is accepted. Nothing has ever run against a real database.
 2. Run the PowerSync-on-SQL-Server spike from ADR 0001 before building the local database and selling screen. Stock transfers and sale uploads are online or upload-batch only until this is decided.
-3. Sign-in is built (SMS code). Turn on `Auth:Required` and set `Auth:TokenKey` in every non-development environment, connect a real SMS provider, and decide how tills prove they are the registered device.
+3. Sign-in is built (SMS code). Turn on `Auth:Required` and set `Auth:TokenKey` in every non-development environment, connect a real SMS provider, and note that tills prove themselves with the setup code and device token.
 
 **Partners and accounts (all connected only to development fakes today)**
 

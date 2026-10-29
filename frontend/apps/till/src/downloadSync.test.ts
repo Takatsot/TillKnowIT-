@@ -3,6 +3,7 @@ import type { Api } from "@tillknowit/api-client";
 import { fail, MemoryOutbox, ok, queueSale, type Result, type SaleUploadDto } from "@tillknowit/domain";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadCatalogue, loadPromotions, type PulledProduct, type ServerPromotion } from "./catalogueStore";
+import { loadDeviceToken, loadEnrolmentCode, saveDeviceToken, saveEnrolmentCode } from "./deviceToken";
 import { loadStatus, pullAll, startDownloadSync, type PullDeps, type PullResult } from "./downloadSync";
 import { MemoryKeyValueStore } from "./localData";
 import { loadPack } from "./packStore";
@@ -68,6 +69,67 @@ const sale = (id: string): SaleUploadDto => ({
 });
 
 beforeEach(() => localStorage.clear());
+
+describe("the till credential", () => {
+  const checkIn = `POST /devices/${DEVICE}/check-in`;
+  const firstBody = (api: Api) => (api.post as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]![1];
+
+  it("gives the setup code on the first check-in, keeps the token it gets back and forgets the code", async () => {
+    saveEnrolmentCode("ABCD-1234");
+    const { all, api } = deps(healthy({ [checkIn]: () => ok({ deviceId: DEVICE, status: "approved", wipeRequested: false, token: "tok-1" }) }));
+
+    await pullAll(all);
+
+    expect(firstBody(api)).toEqual({ enrolmentCode: "ABCD-1234" });
+    expect(loadDeviceToken()).toBe("tok-1");
+    expect(loadEnrolmentCode()).toBeNull();
+  });
+
+  it("sends no code once it has a token, and replaces the token with the fresh one every check-in", async () => {
+    saveDeviceToken("tok-1");
+    saveEnrolmentCode("STALE");
+    const { all, api } = deps(healthy({ [checkIn]: () => ok({ deviceId: DEVICE, status: "approved", wipeRequested: false, token: "tok-2" }) }));
+
+    await pullAll(all);
+
+    expect(firstBody(api)).toBeUndefined();
+    expect(loadDeviceToken()).toBe("tok-2");
+  });
+
+  it.each([["device.enrolment_required", "code"], ["device.credential_required", "again"], ["auth.device_required", "again"]] as const)(
+    "%s means the till must be set up again, downloads nothing and does not touch the sales waiting",
+    async (code, expected) => {
+      const { all, outbox, calls, kv } = deps(healthy({ [checkIn]: () => fail(code, "Refused.") }));
+      await queueSale(outbox, sale("waiting"), now);
+
+      const result = await pullAll(all);
+
+      expect(result.status.credential).toBe(expected);
+      expect(result.retry).toBe("later");
+      expect(calls).toEqual([checkIn]);
+      expect((await outbox.all()).length).toBe(1);
+      expect((await loadStatus(kv)).credential).toBe(expected);
+    },
+  );
+
+  it("treats auth.device_required on a later call the same way", async () => {
+    const { all, outbox } = deps(healthy({ [`GET /shops/${SHOP}/devices/${DEVICE}/staff`]: () => fail("auth.device_required", "Set it up again.") }));
+    await queueSale(outbox, sale("waiting"), now);
+
+    const result = await pullAll(all);
+
+    expect(result.status.credential).toBe("again");
+    expect((await outbox.all()).length).toBe(1);
+  });
+
+  it("is back to ok after a good check-in", async () => {
+    const first = deps(healthy({ [checkIn]: () => fail("device.credential_required", "Refused.") }));
+    await pullAll(first.all);
+    const second = deps(healthy(), { kv: first.kv });
+
+    expect((await pullAll(second.all)).status.credential).toBe("ok");
+  });
+});
 
 describe("pullAll", () => {
   it("downloads staff, products, promotions and the pack, and records when it last worked", async () => {
@@ -263,7 +325,7 @@ describe("wipe request", () => {
 });
 
 describe("startDownloadSync", () => {
-  const result = (retry: PullResult["retry"], wiped = false): PullResult => ({ status: { deviceStatus: "approved", lastSyncAt: null, lastError: null, wipe: "none", waitingSales: 0 }, retry, changed: { staff: false, products: false, promotions: false, pack: false }, wiped, notes: [] });
+  const result = (retry: PullResult["retry"], wiped = false): PullResult => ({ status: { deviceStatus: "approved", lastSyncAt: null, lastError: null, wipe: "none", waitingSales: 0, credential: "ok" }, retry, changed: { staff: false, products: false, promotions: false, pack: false }, wiped, notes: [] });
   const settle = () => new Promise((r) => setTimeout(r, 0));
 
   it("pulls at start, then every interval, and backs off 5, 10 seconds after failures", async () => {

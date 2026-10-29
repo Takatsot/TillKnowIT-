@@ -53,6 +53,9 @@ const en = {
   setupShop: "Shop id",
   setupDevice: "Device id",
   setupJson: "Value for tillknowit.device",
+  setupCode: "Setup code (type it into the till)",
+  setupCodeOnce: "Write this setup code down now. It is not shown again. The till asks for it, together with the shop id and the till id, the first time it is set up.",
+  setupCodeGone: "The setup code was shown once, when this till was added, and cannot be shown again. A till that lost its saved credential cannot be reset: add it again here as a new till, then set it up with the new code.",
   noShop: "Choose a shop first.",
 } as const;
 

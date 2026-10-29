@@ -1,4 +1,5 @@
 import { flushOutbox, outboxCounts, retryDelaySeconds, type Outbox, type SendBatch } from "@tillknowit/domain";
+import { deviceHeaders } from "./deviceToken";
 
 /** Which shop and till this device is. Set when the till is registered and approved; until then sales are kept but nothing is sent. */
 export interface DeviceConfig {
@@ -20,9 +21,9 @@ export function loadDeviceConfig(): DeviceConfig | null {
 }
 
 /** The upload over HTTP. Any answer that is not a success is an error, so the queue keeps what it has and tries again later. */
-export function httpSend(baseUrl = "/api/v1", fetcher: typeof fetch = fetch): SendBatch {
+export function httpSend(baseUrl = "/api/v1", fetcher: typeof fetch = fetch, headers: () => Record<string, string> = deviceHeaders): SendBatch {
   return async (request) => {
-    const response = await fetcher(`${baseUrl}/sync/upload`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request) });
+    const response = await fetcher(`${baseUrl}/sync/upload`, { method: "POST", headers: { "Content-Type": "application/json", ...headers() }, body: JSON.stringify(request) });
     if (!response.ok) throw new Error(`The server answered ${response.status}.`);
     return (await response.json()) as { results: never[] };
   };

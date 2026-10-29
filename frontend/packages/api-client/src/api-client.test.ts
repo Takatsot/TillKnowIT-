@@ -94,3 +94,33 @@ describe("createApi", () => {
     expect((fetcher.mock.calls[4] as unknown as [string, RequestInit])[1].headers).toBeUndefined();
   });
 });
+
+describe("createApi headers option", () => {
+  const headersOf = (fetcher: ReturnType<typeof respond>) => (fetcher.mock.calls[0] as unknown as [string, RequestInit])[1].headers;
+
+  it("adds the extra headers to json, upload and download requests, read fresh each time", async () => {
+    let device = "one";
+    const fetcher = respond(200, {});
+    const api = createApi({ fetcher: fetcher as unknown as typeof fetch, headers: () => ({ "X-Device-Token": device }) });
+
+    await api.get("/a");
+    expect(headersOf(fetcher)).toEqual({ "X-Device-Token": "one" });
+    device = "two";
+    await api.post("/b", { x: 1 });
+    expect((fetcher.mock.calls[1] as unknown as [string, RequestInit])[1].headers).toEqual({ "Content-Type": "application/json", "X-Device-Token": "two" });
+    await api.upload("/c", new FormData());
+    expect((fetcher.mock.calls[2] as unknown as [string, RequestInit])[1].headers).toEqual({ "X-Device-Token": "two" });
+    await api.download("/d");
+    expect((fetcher.mock.calls[3] as unknown as [string, RequestInit])[1].headers).toEqual({ "X-Device-Token": "two" });
+  });
+
+  it("keeps the bearer token alongside them and sends nothing extra when there are none", async () => {
+    const both = respond(200, {});
+    await createApi({ fetcher: both as unknown as typeof fetch, getToken: () => "abc", headers: () => ({ "X-Device-Token": "t" }) }).get("/a");
+    expect(headersOf(both)).toEqual({ "X-Device-Token": "t", Authorization: "Bearer abc" });
+
+    const none = respond(200, {});
+    await createApi({ fetcher: none as unknown as typeof fetch, headers: () => ({}) }).get("/a");
+    expect(headersOf(none)).toBeUndefined();
+  });
+});

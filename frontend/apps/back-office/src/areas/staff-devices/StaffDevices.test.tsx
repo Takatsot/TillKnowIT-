@@ -98,7 +98,7 @@ describe("Staff and tills", () => {
   it("registers a till, shows its tillknowit.device value, approves it and wipes it after confirming", async () => {
     const s = server();
     const post = vi.fn(async (path: string) => {
-      if (path.endsWith("/devices")) { s.state.devices.push({ deviceId: "d1", name: "Counter 1", status: "pending", lastSeenAt: null, wipeRequested: false }); return ok({ deviceId: "d1" }); }
+      if (path.endsWith("/devices")) { s.state.devices.push({ deviceId: "d1", name: "Counter 1", status: "pending", lastSeenAt: null, wipeRequested: false }); return ok({ deviceId: "d1", enrolmentCode: "WXYZ-4321" }); }
       if (path === "/devices/d1/approve") s.state.devices[0]!.status = "approved";
       if (path === "/devices/d1/wipe") s.state.devices[0]!.wipeRequested = true;
       return ok(undefined);
@@ -110,6 +110,8 @@ describe("Staff and tills", () => {
     await user.click(screen.getByRole("button", { name: "Register till" }));
     expect(await screen.findByText("Set up the till Counter 1")).toBeTruthy();
     expect(screen.getByText('{"shopId":"s1","deviceId":"d1"}')).toBeTruthy();
+    expect(screen.getByText("WXYZ-4321")).toBeTruthy();
+    expect(screen.getByText(/Write this setup code down now. It is not shown again./)).toBeTruthy();
     expect(post).toHaveBeenCalledWith("/shops/s1/devices", { name: "Counter 1" });
     expect(await screen.findByText("Waiting for approval")).toBeTruthy();
 
@@ -131,6 +133,8 @@ describe("Staff and tills", () => {
 
     await user.click(await screen.findByRole("button", { name: "Show setup for Counter 2" }));
     expect(screen.getByText('{"shopId":"s1","deviceId":"d7"}')).toBeTruthy();
+    expect(screen.getByText(/cannot be shown again/)).toBeTruthy();
+    expect(screen.getByText(/cannot be reset: add it again/)).toBeTruthy();
   });
 
   it("shows the server's message when registering fails", async () => {

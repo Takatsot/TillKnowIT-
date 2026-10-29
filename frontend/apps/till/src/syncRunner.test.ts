@@ -142,4 +142,16 @@ describe("device config and the http send", () => {
     const bad = (async () => new Response("no", { status: 413 })) as unknown as typeof fetch;
     await expect(httpSend("/api/v1", bad)({ shopId: "s", deviceId: "d", sales: [] })).rejects.toThrow("413");
   });
+
+  it("sends the stored device token with the upload, read at the time of each send", async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ results: [] }), { status: 200 }));
+    const send = httpSend("/api/v1", fetcher as unknown as typeof fetch);
+    const headers = (n: number) => (fetcher.mock.calls[n] as unknown as [string, { headers: Record<string, string> }])[1].headers;
+
+    await send({ shopId: "s", deviceId: "d", sales: [] });
+    expect(headers(0)).toEqual({ "Content-Type": "application/json" });
+    localStorage.setItem("tillknowit.deviceToken", "tok-9");
+    await send({ shopId: "s", deviceId: "d", sales: [] });
+    expect(headers(1)).toEqual({ "Content-Type": "application/json", "X-Device-Token": "tok-9" });
+  });
 });

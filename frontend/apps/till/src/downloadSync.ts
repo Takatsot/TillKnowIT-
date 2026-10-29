@@ -3,6 +3,7 @@ import { outboxCounts, retryDelaySeconds, type Outbox, type Result } from "@till
 import { applyProductPull, productsAsOf, savePromotions, type ProductPull, type ServerPromotion } from "./catalogueStore";
 import type { KeyValueStore } from "./localData";
 import { chooseIncomingPack, clearPack, loadPack, mapPack, savePack, type ServerPack } from "./packStore";
+import { clearEnrolmentCode, loadDeviceToken, loadEnrolmentCode, saveDeviceToken } from "./deviceToken";
 import { clearDeviceConfig } from "./registration";
 import { clearPinStates, loadStaff, mapStaff, saveStaff, type ServerStaff, type StaffRecord } from "./staffStore";
 import type { DeviceConfig } from "./syncRunner";
@@ -23,9 +24,11 @@ export interface PullStatus {
   /** "waiting": the owner asked for a wipe but sales are still waiting to be sent, so nothing was cleared yet. */
   wipe: "none" | "waiting" | "done";
   waitingSales: number;
+  /** "ok", or the till must be set up again: "code" (it has no setup code to trade for a credential) or "again" (its credential is missing, lost or refused). */
+  credential: "ok" | "code" | "again";
 }
 
-export const initialStatus: PullStatus = { deviceStatus: "unknown", lastSyncAt: null, lastError: null, wipe: "none", waitingSales: 0 };
+export const initialStatus: PullStatus = { deviceStatus: "unknown", lastSyncAt: null, lastError: null, wipe: "none", waitingSales: 0, credential: "ok" };
 
 export interface PullResult {
   status: PullStatus;
@@ -55,6 +58,10 @@ const STATUS_KEY = "sync.status";
 export async function loadStatus(kv: KeyValueStore): Promise<PullStatus> {
   return { ...initialStatus, ...((await kv.get<Partial<PullStatus>>(STATUS_KEY)) ?? {}) };
 }
+
+/** The server will not accept this till until it is set up again. Never a reason to touch the sales queue. */
+const credentialProblem = (code: string): PullStatus["credential"] | null =>
+  code === "device.enrolment_required" ? "code" : code === "device.credential_required" || code === "auth.device_required" ? "again" : null;
 
 const isTransient = (code: string): boolean => code === "network.unreachable" || /^http\.5/.test(code) || code === "http.429" || code === "http.408";
 
@@ -87,11 +94,24 @@ export async function pullAll(deps: PullDeps): Promise<PullResult> {
   };
 
   // ---- 1. who are we to the server, and has the owner asked for a wipe ----
-  const checkIn: Result<{ status: string; wipeRequested: boolean }> = await api.post(`/devices/${device.deviceId}/check-in`);
+  // The very first check-in gives the setup code; after that the token (sent by the api as X-Device-Token) is the proof, and a fresh one comes back each time.
+  const code = loadDeviceToken() === null ? loadEnrolmentCode() : null;
+  const checkIn: Result<{ status: string; wipeRequested: boolean; token?: string | null }> = await api.post(`/devices/${device.deviceId}/check-in`, code ? { enrolmentCode: code } : undefined);
   if (!checkIn.ok) {
+    const problem = credentialProblem(checkIn.code);
+    if (problem) {
+      status = { ...status, credential: problem, lastError: checkIn.message };
+      return finish("later");
+    }
     status = { ...status, lastError: checkIn.message };
     return finish(isTransient(checkIn.code) ? "backoff" : "later");
   }
+
+  if (checkIn.value.token) {
+    saveDeviceToken(checkIn.value.token);
+    clearEnrolmentCode();
+  }
+  status = { ...status, credential: "ok" };
 
   if (checkIn.value.wipeRequested) {
     await deps.flush?.();
@@ -119,9 +139,11 @@ export async function pullAll(deps: PullDeps): Promise<PullResult> {
   if (deviceStatus !== "approved") return finish(deviceStatus === "pending" ? "soon" : "later");
 
   let transientProblem: string | null = null;
+  let credentialLost: string | null = null;
   const part = <T>(result: Result<T>, label: string): T | null => {
     if (result.ok) return result.value;
-    if (isTransient(result.code)) transientProblem ??= result.message;
+    if (result.code === "auth.device_required") credentialLost ??= result.message;
+    else if (isTransient(result.code)) transientProblem ??= result.message;
     else notes.push(`${label}: ${result.code}`);
     return null;
   };
@@ -169,6 +191,11 @@ export async function pullAll(deps: PullDeps): Promise<PullResult> {
     }
   } else notes.push("promotions: no staff on this till yet");
 
+  if (credentialLost) {
+    // Sales waiting stay where they are; only the setup needs doing again.
+    status = { ...status, credential: "again", lastError: credentialLost };
+    return finish("later");
+  }
   if (transientProblem) {
     status = { ...status, lastError: transientProblem };
     return finish("backoff");

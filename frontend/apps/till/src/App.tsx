@@ -15,6 +15,7 @@ import { loadPack } from "./packStore";
 import { sendPendingReleases } from "./pendingReleases";
 import { sendPendingSerials } from "./pendingSerials";
 import { PinUnlock } from "./PinUnlock";
+import { deviceHeaders } from "./deviceToken";
 import { RegisterScreen } from "./RegisterScreen";
 import { SellScreen } from "./SellScreen";
 import { loadCatalogue, loadPromotions } from "./catalogueStore";
@@ -74,7 +75,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   const [pull, setPull] = useState<PullStatus>(initialStatus);
   const kv = useMemo(() => services?.kv ?? new IndexedDbKeyValueStore(), [services?.kv]);
   const outbox = useMemo(() => new BookkeepingOutbox(services?.outbox ?? new IndexedDbOutbox(), kv), [services?.outbox, kv]);
-  const send = useMemo(() => services?.send ?? httpSend(), [services?.send]);
+  const send = useMemo(() => services?.send ?? httpSend("/api/v1", fetch, deviceHeaders), [services?.send]);
   const sync = useRef<SyncHandle | null>(null);
   const download = useRef<DownloadSyncHandle | null>(null);
   const bridge = useRef<SaleBridge | null>(null);
@@ -82,7 +83,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   userRef.current = user;
   const online = useOnline();
   const [tab, setTab] = useState("sell");
-  const api = useMemo(() => services?.api ?? createApi(), [services?.api]);
+  const api = useMemo(() => services?.api ?? createApi({ headers: deviceHeaders }), [services?.api]);
   const hardware = useMemo<TillHardware>(() => services?.hardware ?? {}, [services?.hardware]);
   const [pack, setPack] = useState(() => loadPack(device?.shopId ?? ""));
   const features = useMemo(() => new Features(pack), [pack]);
@@ -184,8 +185,10 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
 
   const registered = device !== null;
   const needsRegistration = !registered && !(import.meta.env.DEV && skipped);
+  // The server refused this till's credential: show the set-up form (sales stay queued, and keep being counted in the header).
+  const needsSetupAgain = registered && pull.credential !== "ok";
 
-  const banner = !registered ? null : pull.wipe === "waiting"
+  const banner = !registered || needsSetupAgain ? null : pull.wipe === "waiting"
     ? <Notice kind="warning">{x("banner.wipeWaiting", { count: pull.waitingSales })}</Notice>
     : pull.deviceStatus === "pending" ? <Notice kind="warning">{x("banner.pending")}</Notice>
     : pull.deviceStatus === "disabled" ? <Notice kind="danger">{x("banner.disabled")}</Notice>
@@ -218,6 +221,12 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
         {banner && <div className={styles.banner}>{banner}</div>}
         {needsRegistration ? (
           <RegisterScreen language={language} onRegistered={(d) => { setDevice(d); setPack(loadPack(d.shopId)); }} onSkip={import.meta.env.DEV ? () => setSkipped(true) : undefined} />
+        ) : needsSetupAgain && device ? (
+          <RegisterScreen
+            language={language}
+            again={{ reason: pull.credential === "code" ? "code" : "again", shopId: device.shopId, deviceId: device.deviceId, waiting: counts.waiting }}
+            onRegistered={(d) => { setDevice(d); setPull((p) => ({ ...p, credential: "ok", lastError: null })); }}
+          />
         ) : user ? (
           <>
             <div className={styles.welcome}>

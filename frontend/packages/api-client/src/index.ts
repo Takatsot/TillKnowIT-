@@ -11,6 +11,8 @@ export interface ApiOptions {
   fetcher?: typeof fetch;
   /** The signed-in person's access token, read on every request. When it returns a token, `Authorization: Bearer <token>` is added. */
   getToken?: () => string | null | undefined;
+  /** Extra headers read on every request (JSON, upload and download), for example a till's `X-Device-Token`. Authorization and Content-Type win if they clash. */
+  headers?: () => Record<string, string>;
 }
 
 export interface Download {
@@ -57,7 +59,8 @@ export function createApi(options: ApiOptions = {}): Api {
 
   function authHeaders(): Record<string, string> {
     const token = options.getToken?.();
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    const extra = options.headers?.() ?? {};
+    return token ? { ...extra, Authorization: `Bearer ${token}` } : { ...extra };
   }
 
   async function send(method: string, path: string, query?: Query, body?: unknown): Promise<Response | null> {

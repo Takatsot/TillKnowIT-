@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { Api } from "@tillknowit/api-client";
-import { fail, hashPin, MemoryOutbox, ok, type Result, type SendBatch, type UploadRequest } from "@tillknowit/domain";
+import { fail, hashPin, MemoryOutbox, ok, queueSale, type Result, type SendBatch, type UploadRequest } from "@tillknowit/domain";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -49,6 +49,7 @@ function services(routes: Record<string, Route> = {}) {
 async function registerThisTill(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByRole("textbox", { name: "Shop number" }), SHOP);
   await user.type(screen.getByRole("textbox", { name: "Till number" }), DEVICE);
+  await user.type(screen.getByRole("textbox", { name: "Setup code" }), "ABCD-1234");
   await user.click(screen.getByRole("button", { name: "Register till" }));
 }
 
@@ -142,6 +143,41 @@ describe("App", () => {
     const before = (api.post as unknown as { mock: { calls: unknown[] } }).mock.calls.length;
     await user.click(screen.getByRole("button", { name: "Update now" }));
     await waitFor(() => expect((api.post as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBeGreaterThan(before));
+  });
+
+  it("shows 'Set this till up again' when the server refuses the credential, keeps the queued sales, and takes a new code", async () => {
+    let refuse = true;
+    const { parts, api, raw } = services({
+      [`POST /devices/${DEVICE}/check-in`]: () => (refuse ? fail("device.credential_required", "This till must sign in with its saved credential.") : ok({ deviceId: DEVICE, status: "approved", wipeRequested: false, token: "tok-2" })),
+    });
+    parts.send = async () => { throw new Error("offline"); };   // the sale must still be waiting
+    await queueSale(raw, { id: "waiting-1", staffId: "m-thandi", soldAt: "2026-10-26T08:00:00.000Z", paymentMethodCode: "cash", totalCents: 100, vatCents: 13, tenderedCents: null, changeCents: null, accountId: null, lines: [], payments: null, tipCents: 0, customerId: null }, new Date("2026-10-26T08:00:00Z"));
+    localStorage.setItem("tillknowit.device", JSON.stringify({ shopId: SHOP, deviceId: DEVICE }));
+    const user = userEvent.setup();
+    render(<App services={parts} />);
+
+    expect(await screen.findByRole("heading", { name: "Set this till up again" }, { timeout: 4000 })).toBeTruthy();
+    expect(screen.getByText(/The owner must add the till again/)).toBeTruthy();
+    expect((screen.getByRole("textbox", { name: "Shop number" }) as HTMLInputElement).value).toBe(SHOP);
+    expect((await raw.all()).length).toBe(1);
+
+    refuse = false;
+    await user.type(screen.getByRole("textbox", { name: "Setup code" }), "NEW-CODE");
+    await user.click(screen.getByRole("button", { name: "Set up till again" }));
+    await waitFor(() => expect(screen.queryByRole("heading", { name: "Set this till up again" })).toBeNull(), { timeout: 4000 });
+    const posts = (api.post as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+    expect(posts[posts.length - 1]).toEqual([`/devices/${DEVICE}/check-in`, { enrolmentCode: "NEW-CODE" }]);
+    expect(localStorage.getItem("tillknowit.deviceToken")).toBe("tok-2");
+    expect(localStorage.getItem("tillknowit.enrolmentCode")).toBeNull();
+    expect((await raw.all()).length).toBe(1);
+  });
+
+  it("asks for the setup code in plain words when the server says it is required", async () => {
+    const { parts } = services({ [`POST /devices/${DEVICE}/check-in`]: () => fail("device.enrolment_required", "Enter the setup code.") });
+    localStorage.setItem("tillknowit.device", JSON.stringify({ shopId: SHOP, deviceId: DEVICE }));
+    render(<App services={parts} />);
+
+    expect(await screen.findByText(/Enter the code the owner was shown/, {}, { timeout: 4000 })).toBeTruthy();
   });
 
   it("clears the till and goes back to registration when the owner asks for a wipe", async () => {

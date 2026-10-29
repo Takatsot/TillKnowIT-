@@ -116,11 +116,13 @@ function DevicesCard() {
   const list = useLoad(() => (shopId === "" ? Promise.resolve({ ok: true as const, value: [] as DeviceRow[] }) : api.get<DeviceRow[]>(`/shops/${shopId}/devices`, { callerPersonId: personId })), [shopId, personId]);
   const rows = list.data ?? [];
   const [setupFor, setSetupFor] = useState<string | null>(null);
+  /** The setup code is shown once, straight after registering. It lives only in this component's state: the server never gives it again. */
+  const [code, setCode] = useState<{ deviceId: string; value: string } | null>(null);
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
   const [confirming, setConfirming] = useState<string | null>(null);
 
-  const register = useAction(() => api.post<{ deviceId: string }>(`/shops/${shopId}/devices`, { name: name.trim() }));
+  const register = useAction(() => api.post<{ deviceId: string; enrolmentCode: string }>(`/shops/${shopId}/devices`, { name: name.trim() }));
   const act = useAction((path: string) => api.post<void>(path));
 
   async function submit() {
@@ -128,6 +130,7 @@ function DevicesCard() {
     const r = await register.run();
     if (r.ok) {
       setSetupFor(r.value.deviceId);
+      setCode({ deviceId: r.value.deviceId, value: r.value.enrolmentCode });
       list.reload();
       setNote(t("registered", { name: name.trim() }));
       setName("");
@@ -179,7 +182,7 @@ function DevicesCard() {
               cell: (d) => (
                 <Inline>
                   {d.status === "pending" && <Button disabled={act.busy} onClick={() => void approve(d)}>{t("approve", { name: d.name })}</Button>}
-                  <Button variant="quiet" onClick={() => setSetupFor(d.deviceId)}>{t("showSetup", { name: d.name })}</Button>
+                  <Button variant="quiet" onClick={() => { setSetupFor(d.deviceId); setCode(null); }}>{t("showSetup", { name: d.name })}</Button>
                   {confirming === d.deviceId ? (
                     <>
                       <Button variant="secondary" disabled={act.busy} onClick={() => void wipe(d)}>{t("confirmWipe", { name: d.name })}</Button>
@@ -201,7 +204,11 @@ function DevicesCard() {
               <dt>{t("setupShop")}</dt><dd><code>{shopId}</code></dd>
               <dt>{t("setupDevice")}</dt><dd><code>{d.deviceId}</code></dd>
               <dt>{t("setupJson")}</dt><dd><code>{JSON.stringify({ shopId, deviceId: d.deviceId })}</code></dd>
+              {code?.deviceId === d.deviceId && <><dt>{t("setupCode")}</dt><dd><code>{code.value}</code></dd></>}
             </dl>
+            {code?.deviceId === d.deviceId
+              ? <Notice kind="warning">{t("setupCodeOnce")}</Notice>
+              : <Notice kind="info">{t("setupCodeGone")}</Notice>}
           </Card>
         ))}
       </Stack>
