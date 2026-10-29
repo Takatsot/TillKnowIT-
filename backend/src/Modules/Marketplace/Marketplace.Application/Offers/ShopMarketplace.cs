@@ -13,6 +13,7 @@ public interface IShopMarketplaceStore
     Task Add(SharingSetting setting, CancellationToken ct);
     Task<ShopSupplier?> GetShopSupplier(Guid shopId, Guid supplierId, CancellationToken ct);
     Task Add(ShopSupplier shopSupplier, CancellationToken ct);
+    void Remove(ShopSupplier shopSupplier);
     Task<MarketplaceSetting?> GetSetting(string key, CancellationToken ct);
     Task Add(MarketplaceSetting setting, CancellationToken ct);
     Task<Dictionary<string, string>> Settings(CancellationToken ct);
@@ -75,6 +76,24 @@ internal sealed class SetUsualSupplierHandler(IShopMarketplaceStore store, ISupp
             await store.Save(ct);
         }
         return Result<Unit>.Ok(default);
+    }
+}
+
+/// <summary>Takes a supplier off the shop's usual list. Past orders and prices stay; the supplier is simply no longer favoured or shared with.</summary>
+public sealed record RemoveUsualSupplier(Guid ShopId, Guid CallerPersonId, Guid SupplierId) : ICommand<Unit>;
+
+internal sealed class RemoveUsualSupplierHandler(IShopMarketplaceStore store, IOrganisationAccess access) : ICommandHandler<RemoveUsualSupplier, Unit>
+{
+    public async Task<Result<Unit>> Handle(RemoveUsualSupplier c, CancellationToken ct)
+    {
+        if (!await access.Has(c.CallerPersonId, c.ShopId, "shop.settings", ct))
+            return Result<Unit>.Fail("permission.denied", "Only the shop owner can choose usual suppliers.");
+        if (await store.GetShopSupplier(c.ShopId, c.SupplierId, ct) is { } usual)
+        {
+            store.Remove(usual);
+            await store.Save(ct);
+        }
+        return Result<Unit>.Ok(default);   // already not on the list is the same outcome
     }
 }
 

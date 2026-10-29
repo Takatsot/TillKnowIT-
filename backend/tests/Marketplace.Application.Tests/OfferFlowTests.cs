@@ -310,6 +310,7 @@ public class OfferFlowTests
         public Task Add(SharingSetting s, CancellationToken ct) { Sharing.Add(s); return Task.CompletedTask; }
         public Task<ShopSupplier?> GetShopSupplier(Guid shopId, Guid supplierId, CancellationToken ct) => Task.FromResult(ShopSuppliers.FirstOrDefault(s => s.ShopId == shopId && s.SupplierId == supplierId));
         public Task Add(ShopSupplier s, CancellationToken ct) { ShopSuppliers.Add(s); return Task.CompletedTask; }
+        public void Remove(ShopSupplier s) => ShopSuppliers.Remove(s);
         public Task<MarketplaceSetting?> GetSetting(string key, CancellationToken ct) => Task.FromResult(SettingsRows.FirstOrDefault(s => s.Key == key));
         public Task Add(MarketplaceSetting s, CancellationToken ct) { SettingsRows.Add(s); return Task.CompletedTask; }
         public Task<Dictionary<string, string>> Settings(CancellationToken ct) => Task.FromResult(SettingsRows.ToDictionary(s => s.Key, s => s.Value));
@@ -366,6 +367,22 @@ public class OfferFlowTests
         Assert.Equal("supplier.not_found", (await handler.Handle(new SetUsualSupplier(_shop, new(_owner, pending.Id)), default)).Error!.Code);
         Assert.Equal("supplier.not_found", (await handler.Handle(new SetUsualSupplier(_shop, new(_owner, theirs.Id)), default)).Error!.Code);
         Assert.Equal("permission.denied", (await handler.Handle(new SetUsualSupplier(_shop, new(Guid.NewGuid(), trading.Id)), default)).Error!.Code);
+    }
+
+    [Fact]
+    public async Task A_usual_supplier_can_be_removed_by_the_owner_and_removing_twice_is_fine()
+    {
+        var marketplace = new FakeShopMarketplace();
+        var supplierId = Guid.NewGuid();
+        marketplace.ShopSuppliers.Add(new ShopSupplier(_shop, supplierId));
+        var handler = new RemoveUsualSupplierHandler(marketplace, _access);
+
+        Assert.Equal("permission.denied", (await handler.Handle(new RemoveUsualSupplier(_shop, Guid.NewGuid(), supplierId), default)).Error!.Code);
+        Assert.Single(marketplace.ShopSuppliers);
+
+        Assert.True((await handler.Handle(new RemoveUsualSupplier(_shop, _owner, supplierId), default)).IsSuccess);
+        Assert.Empty(marketplace.ShopSuppliers);
+        Assert.True((await handler.Handle(new RemoveUsualSupplier(_shop, _owner, supplierId), default)).IsSuccess);
     }
 
     // ---- settings ----

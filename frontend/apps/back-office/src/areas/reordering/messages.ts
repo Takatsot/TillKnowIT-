@@ -143,6 +143,9 @@ const en = {
   usualEmpty: "You have no usual suppliers yet.",
   usualLastOrder: "last order {date}",
   usualNeverOrdered: "no order yet",
+  usualRemove: "Remove {name} from usual suppliers",
+  usualRemoveLabel: "Remove",
+  usualRemoved: "{name} is no longer a usual supplier.",
 } as const;
 
 export type ReorderingKey = keyof typeof en;

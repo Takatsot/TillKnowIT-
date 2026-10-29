@@ -158,6 +158,18 @@ describe("Reordering", () => {
     expect(get).toHaveBeenCalledWith("/shops/s1/usual-suppliers", { callerPersonId: "p1" });
   });
 
+  it("removes a usual supplier and reloads the list", async () => {
+    const del = vi.fn(async () => ok({}));
+    mount({ get: routes() as never, delete: del as never });
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole("button", { name: "Suppliers and sharing" }));
+    await user.click(await screen.findByRole("button", { name: "Remove Mill Co from usual suppliers" }));
+
+    await waitFor(() => expect(screen.getByText("Mill Co is no longer a usual supplier.")).toBeTruthy());
+    expect(del).toHaveBeenCalledWith("/shops/s1/usual-suppliers/sup2", { callerPersonId: "p1" });
+  });
+
   it("says so when there are no usual suppliers, and shows the server's refusal", async () => {
     mount({ get: routes({ "/shops/s1/usual-suppliers": ok([]) }) as never });
     const user = userEvent.setup();

@@ -72,6 +72,8 @@ internal sealed class ShopMarketplaceStore(MarketplaceDbContext db) : IShopMarke
 
     public async Task Add(ShopSupplier shopSupplier, CancellationToken ct) => await db.Set<ShopSupplier>().AddAsync(shopSupplier, ct);
 
+    public void Remove(ShopSupplier shopSupplier) => db.Set<ShopSupplier>().Remove(shopSupplier);
+
     public Task<MarketplaceSetting?> GetSetting(string key, CancellationToken ct) => db.Set<MarketplaceSetting>().FirstOrDefaultAsync(s => s.Key == key, ct);
 
     public async Task Add(MarketplaceSetting setting, CancellationToken ct) => await db.Set<MarketplaceSetting>().AddAsync(setting, ct);

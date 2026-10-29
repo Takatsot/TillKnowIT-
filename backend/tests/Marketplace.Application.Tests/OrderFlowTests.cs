@@ -50,6 +50,7 @@ public class OrderFlowTests
         public Task Add(SharingSetting s, CancellationToken ct) => Task.CompletedTask;
         public Task<ShopSupplier?> GetShopSupplier(Guid shop, Guid supplier, CancellationToken ct) => Task.FromResult(Usual.FirstOrDefault(u => u.ShopId == shop && u.SupplierId == supplier));
         public Task Add(ShopSupplier s, CancellationToken ct) { Usual.Add(s); return Task.CompletedTask; }
+        public void Remove(ShopSupplier s) => Usual.Remove(s);
         public Task<MarketplaceSetting?> GetSetting(string key, CancellationToken ct) => Task.FromResult<MarketplaceSetting?>(null);
         public Task Add(MarketplaceSetting s, CancellationToken ct) => Task.CompletedTask;
         public Task<Dictionary<string, string>> Settings(CancellationToken ct) => Task.FromResult(new Dictionary<string, string>());
