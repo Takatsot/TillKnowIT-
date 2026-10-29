@@ -50,3 +50,19 @@ export function coverage(language: LanguageCode): Coverage {
 export function staleKeys(language: LanguageCode): string[] {
   return Object.keys(catalogues[language]).filter((k) => !(k in en));
 }
+
+/**
+ * Messages that belong to one screen area (billing, branches...) live next to that area, not in the shared English file. Each area defines its English text
+ * once and any language can be added as data later; a missing text falls back to English, so nothing is ever blank.
+ */
+export type AreaMessages<K extends string> = { en: Readonly<Record<K, string>>; translations?: Partial<Record<LanguageCode, Partial<Record<K, string>>>> };
+
+export function translateArea<K extends string>(area: AreaMessages<K>, language: LanguageCode, key: K, params: Record<string, string | number> = {}): string {
+  const text = area.translations?.[language]?.[key] ?? area.en[key];
+  return text.replace(/\{(\w+)\}/g, (whole, name: string) => (name in params ? String(params[name]) : whole));
+}
+
+/** Which texts of an area still show English in this language. */
+export function areaCoverage<K extends string>(area: AreaMessages<K>, language: LanguageCode): K[] {
+  return (Object.keys(area.en) as K[]).filter((k) => language !== "en" && area.translations?.[language]?.[k] === undefined);
+}

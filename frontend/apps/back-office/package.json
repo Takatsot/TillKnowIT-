@@ -1,0 +1,30 @@
+{
+  "name": "@tillknowit/back-office",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5174",
+    "build": "tsc -p . && vite build",
+    "test": "vitest run",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@tillknowit/api-client": "*",
+    "@tillknowit/app-kit": "*",
+    "@tillknowit/design-system": "*",
+    "@tillknowit/domain": "*",
+    "@tillknowit/i18n": "*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "latest",
+    "jsdom": "^29.1.1",
+    "vite": "^8.3.5"
+  }
+}

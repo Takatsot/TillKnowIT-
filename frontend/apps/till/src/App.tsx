@@ -1,7 +1,13 @@
 import { Button } from "@tillknowit/design-system";
 import { isLanguage, languages, translate, type LanguageCode, type MessageKey } from "@tillknowit/i18n";
 import type { CatalogueItem, PromotionDef } from "@tillknowit/domain";
+import { createApi } from "@tillknowit/api-client";
+import { Features } from "@tillknowit/packs";
+import { translateArea } from "@tillknowit/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { TillContext } from "./feature";
+import { tillFeatures } from "./features";
+import { loadPack } from "./packStore";
 import styles from "./App.module.css";
 import { loadCatalogue, loadPromotions } from "./catalogueStore";
 import { IndexedDbOutbox } from "./indexedDbOutbox";
@@ -47,6 +53,10 @@ export function App() {
   const outbox = useMemo(() => new IndexedDbOutbox(), []);
   const sync = useRef<SyncHandle | null>(null);
   const online = useOnline();
+  const [tab, setTab] = useState("sell");
+  const api = useMemo(() => createApi(), []);
+  const device = useMemo(() => loadDeviceConfig(), []);
+  const features = useMemo(() => new Features(loadPack(device?.shopId ?? "")), [device]);
   const t = (key: MessageKey, params?: Record<string, string | number>) => translate(language, key, params);
 
   useEffect(() => {
@@ -97,7 +107,28 @@ export function App() {
               <strong>{t("till.hello", { name: user.name })}</strong>
               <Button variant="secondary" onClick={() => setUser(null)}>{t("till.lock")}</Button>
             </div>
-            <SellScreen staff={user} language={language} catalogue={catalogue} promotions={promotions} barcodeRules={null} outbox={outbox} onSaleQueued={() => sync.current?.nudge()} />
+            {(() => {
+              const ctx: TillContext = { staff: user, language, features, api, device, online, outbox, catalogue, promotions, hardware: {}, nudgeSync: () => sync.current?.nudge() };
+              const visible = tillFeatures.filter((f) => (f.flag === undefined || features.isOn(f.flag)) && (f.roles === undefined || f.roles.includes(user.role)));
+              const current = visible.find((f) => f.id === tab);
+              return (
+                <>
+                  {visible.length > 0 && (
+                    <nav className={styles.tabs} aria-label={t("app.name")}>
+                      <Button variant={current ? "quiet" : "primary"} onClick={() => setTab("sell")} aria-current={current ? undefined : "page"}>{t("tab.sell")}</Button>
+                      {visible.map((f) => (
+                        <Button key={f.id} variant={current?.id === f.id ? "primary" : "quiet"} disabled={f.requiresOnline && !online} onClick={() => setTab(f.id)} aria-current={current?.id === f.id ? "page" : undefined}>
+                          {translateArea(f.messages, language, f.title)}
+                        </Button>
+                      ))}
+                    </nav>
+                  )}
+                  {current
+                    ? <current.component ctx={ctx} />
+                    : <SellScreen staff={user} language={language} catalogue={catalogue} promotions={promotions} barcodeRules={(() => { const r = features.barcodeRules(); return r.ok ? r.value : null; })()} outbox={outbox} onSaleQueued={() => sync.current?.nudge()} />}
+                </>
+              );
+            })()}
           </>
         ) : staff ? (
           <PinUnlock staff={staff} language={language} onUnlock={setUser} />

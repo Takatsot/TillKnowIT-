@@ -16,6 +16,7 @@ export const en = {
   "till.hello": "Hello, {name}",
   "till.unlocked": "The till is unlocked. Selling comes next.",
   "till.lock": "Lock till",
+  "tab.sell": "Sell",
 
   "status.offline": "Working offline",
   "status.online": "Online",

@@ -11,9 +11,12 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@tillknowit/api-client": "*",
     "@tillknowit/design-system": "*",
     "@tillknowit/domain": "*",
+    "@tillknowit/hardware": "*",
     "@tillknowit/i18n": "*",
+    "@tillknowit/packs": "*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
