@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20261029084341_Initial")]
+    [Migration("20261029094804_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -44,6 +44,14 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("DeviceId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
+
+                    b.Property<DateTimeOffset?>("EnrolledAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("enrolled_at");
+
+                    b.Property<string>("EnrolmentCodeHash")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("enrolment_code_hash");
 
                     b.Property<DateTimeOffset?>("LastSeenAt")
                         .HasColumnType("datetimeoffset")

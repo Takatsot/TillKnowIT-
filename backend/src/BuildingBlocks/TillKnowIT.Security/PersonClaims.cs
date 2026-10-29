@@ -40,4 +40,28 @@ public static class PersonClaims
         found.AddRange(From(element.EnumerateObject().Where(p => p.Value.ValueKind == JsonValueKind.String).Select(p => new KeyValuePair<string, string?>(p.Name, p.Value.GetString()))));
         foreach (var p in element.EnumerateObject().Where(p => p.Value.ValueKind == JsonValueKind.Object)) Collect(p.Value, found, depth + 1);
     }
+
+    /// <summary>The till ids a request names ("deviceId" in the query, route or JSON body), so a till's calls can be checked against its own token.</summary>
+    public static IReadOnlyList<Guid> DevicesFrom(IEnumerable<KeyValuePair<string, string?>> fields) =>
+        fields.Where(f => f.Key.Equals("deviceId", StringComparison.OrdinalIgnoreCase) && Guid.TryParse(f.Value, out _)).Select(f => Guid.Parse(f.Value!)).ToList();
+
+    public static IReadOnlyList<Guid> DevicesFromJson(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return [];
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var found = new List<Guid>();
+            CollectDevices(doc.RootElement, found, 0);
+            return found;
+        }
+        catch (JsonException) { return []; }
+    }
+
+    private static void CollectDevices(JsonElement element, List<Guid> found, int depth)
+    {
+        if (element.ValueKind != JsonValueKind.Object || depth > 1) return;
+        found.AddRange(DevicesFrom(element.EnumerateObject().Where(p => p.Value.ValueKind == JsonValueKind.String).Select(p => new KeyValuePair<string, string?>(p.Name, p.Value.GetString()))));
+        foreach (var p in element.EnumerateObject().Where(p => p.Value.ValueKind == JsonValueKind.Object)) CollectDevices(p.Value, found, depth + 1);
+    }
 }

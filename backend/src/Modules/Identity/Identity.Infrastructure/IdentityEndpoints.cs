@@ -76,7 +76,7 @@ public static class IdentityEndpoints
         {
             var result = await d.Send(new RegisterDevice(shopId, req.Name), ct);
             return result.IsSuccess
-                ? Results.Created($"/api/v1/devices/{result.Value}", new RegisterDeviceResponse(result.Value))
+                ? Results.Created($"/api/v1/devices/{result.Value}", result.Value)
                 : Problem(result);
         });
 
@@ -98,9 +98,9 @@ public static class IdentityEndpoints
             return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
         });
 
-        api.MapPost("/devices/{id:guid}/check-in", async (Guid id, IDispatcher d, CancellationToken ct) =>
+        api.MapPost("/devices/{id:guid}/check-in", async (Guid id, CheckInRequest? req, HttpRequest http, IDispatcher d, CancellationToken ct) =>
         {
-            var result = await d.Send(new CheckInDevice(id), ct);
+            var result = await d.Send(new CheckInDevice(id, req?.EnrolmentCode, http.Headers["X-Device-Token"].ToString()), ct);
             return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
         });
 

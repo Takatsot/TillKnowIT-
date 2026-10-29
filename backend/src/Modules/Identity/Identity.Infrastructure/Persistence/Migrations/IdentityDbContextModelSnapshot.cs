@@ -42,6 +42,14 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("device_id");
 
+                    b.Property<DateTimeOffset?>("EnrolledAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("enrolled_at");
+
+                    b.Property<string>("EnrolmentCodeHash")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("enrolment_code_hash");
+
                     b.Property<DateTimeOffset?>("LastSeenAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("last_seen_at");

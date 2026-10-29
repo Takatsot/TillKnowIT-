@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using TillKnowIT.SharedKernel;
 
 namespace Identity.Domain;
@@ -19,6 +21,36 @@ public sealed class Device : VersionedEntity
     public DeviceStatus Status { get; private set; } = DeviceStatus.Pending;
     public DateTimeOffset? LastSeenAt { get; private set; }
     public bool WipeRequested { get; private set; }
+
+    /// <summary>Only a hash of the one-time code the owner gives the till when setting it up. Once the till has used it, the till proves itself with a signed token instead.</summary>
+    public string? EnrolmentCodeHash { get; private set; }
+    public DateTimeOffset? EnrolledAt { get; private set; }
+
+    public bool IsEnrolled => EnrolledAt is not null;
+
+    private const string CodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    /// <summary>Makes the one-time setup code (shown to the owner once) and keeps its hash.</summary>
+    public string NewEnrolmentCode()
+    {
+        var code = new string(Enumerable.Range(0, 10).Select(_ => CodeAlphabet[RandomNumberGenerator.GetInt32(CodeAlphabet.Length)]).ToArray());
+        EnrolmentCodeHash = HashCode(code);
+        EnrolledAt = null;
+        return code;
+    }
+
+    public static string HashCode(string code) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(code.Trim().ToUpperInvariant().Replace("-", "").Replace(" ", "")))).ToLowerInvariant();
+
+    /// <summary>The till uses its setup code. It works once; after that only the till's signed token gets in.</summary>
+    public Result Enrol(string? code, DateTimeOffset now)
+    {
+        if (IsEnrolled || EnrolmentCodeHash is null || string.IsNullOrWhiteSpace(code)
+            || !CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(HashCode(code)), Encoding.ASCII.GetBytes(EnrolmentCodeHash)))
+            return Result.Fail("device.enrolment_required", "Enter the setup code the owner was shown when this till was added.");
+        EnrolledAt = now;
+        Touch();
+        return Result.Ok();
+    }
 
     /// <summary>The owner approves a pending device. A switched-off device must be registered again.</summary>
     public Result Approve()

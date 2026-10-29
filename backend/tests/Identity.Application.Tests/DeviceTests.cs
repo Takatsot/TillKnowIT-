@@ -21,7 +21,7 @@ public class DeviceTests
     {
         var store = new FakeDeviceStore();
         var result = await new RegisterDeviceHandler(store).Handle(new RegisterDevice(Guid.NewGuid(), "Counter phone"), default);
-        return (store, result.Value);
+        return (store, result.Value!.DeviceId);
     }
 
     [Fact]
