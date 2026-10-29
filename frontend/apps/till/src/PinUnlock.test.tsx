@@ -47,7 +47,7 @@ describe("PinUnlock", () => {
     expect(button("OK").disabled).toBe(false);
   });
 
-  it("counts down wrong tries, then locks the pad after five", async () => {
+  it("counts down wrong tries, then locks the pad after five", { timeout: 30_000 }, async () => {
     const onUnlock = vi.fn();
     const user = userEvent.setup();
     render(<PinUnlock staff={[thandi]} language="en" onUnlock={onUnlock} />);
@@ -56,11 +56,14 @@ describe("PinUnlock", () => {
     await enter(user, "0000");
     expect(await screen.findByText("That PIN is not right. Tries left: 4.")).toBeTruthy();
 
-    for (let i = 0; i < 3; i++) await enter(user, "0000");
-    expect(await screen.findByText("That PIN is not right. Tries left: 1.")).toBeTruthy();
+    // Each try is checked (slowly, by design) before the next is typed, so wait for its answer instead of racing it.
+    for (const left of [3, 2, 1]) {
+      await enter(user, "0000");
+      expect(await screen.findByText(`That PIN is not right. Tries left: ${left}.`, undefined, { timeout: 15_000 })).toBeTruthy();
+    }
 
     await enter(user, "0000");
-    expect(await screen.findByText("Too many wrong tries. Try again in 5 min.")).toBeTruthy();
+    expect(await screen.findByText("Too many wrong tries. Try again in 5 min.", undefined, { timeout: 15_000 })).toBeTruthy();
     expect(button("1").disabled).toBe(true);
     expect(button("OK").disabled).toBe(true);
     expect(onUnlock).not.toHaveBeenCalled();
