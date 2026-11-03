@@ -113,7 +113,7 @@ export function PlansBilling() {
         {!draft && <Button onClick={() => { setNote(""); setProblem({}); setDraft(blank); }}>{t("newPlan")}</Button>}
       </Card>
       {draft && (
-        <Card title={draft.isNew ? t("newPlan") : t("editing", { name: draft.name })}>
+        <Card reveal title={draft.isNew ? t("newPlan") : t("editing", { name: draft.name })}>
           <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
             <Stack>
               <Inline>

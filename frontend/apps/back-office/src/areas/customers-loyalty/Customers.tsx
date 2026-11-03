@@ -164,7 +164,7 @@ function CustomerPanel({ customer, others, caller, onChanged, onMerged, onClose 
   }
 
   return (
-    <Card title={t("editHeading", { name: customer.name })}>
+    <Card reveal title={t("editHeading", { name: customer.name })}>
       <Stack>
         {note && <Notice kind="success">{note}</Notice>}
         <form onSubmit={(e) => { e.preventDefault(); void doSave(); }}>

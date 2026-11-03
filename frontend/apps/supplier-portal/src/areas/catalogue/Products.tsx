@@ -32,7 +32,7 @@ function EditProduct({ product, onDone }: { product: SupplierProduct; onDone: (n
   }
 
   return (
-    <Card title={t("editHeading", { name: product.name })}>
+    <Card reveal title={t("editHeading", { name: product.name })}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <Stack>
           <Inline>

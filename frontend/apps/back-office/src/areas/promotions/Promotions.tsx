@@ -167,7 +167,7 @@ function PromotionForm({ editing, products, callerPersonId, onSaved, onCancel }:
   const amountLabel = d.type === "amount_off" ? t("amount") : d.type === "fixed_price" ? t("amountFixed") : t("amountCombo");
 
   return (
-    <Card title={editing ? t("formEdit") : t("formNew")}>
+    <Card reveal={!!editing} title={editing ? t("formEdit") : t("formNew")}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <Stack>
           <Inline>

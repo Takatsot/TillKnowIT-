@@ -120,7 +120,7 @@ export function Packs() {
         {!draft && <Button onClick={() => { setNote(""); setDraft(blank); }}>{t("newPack")}</Button>}
       </Card>
       {draft && (
-        <Card title={draft.isNew ? t("newPack") : t("editing", { name: draft.name })}>
+        <Card reveal title={draft.isNew ? t("newPack") : t("editing", { name: draft.name })}>
           <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
             <Stack>
               <Inline>

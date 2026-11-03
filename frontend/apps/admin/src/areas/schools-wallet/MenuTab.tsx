@@ -1,5 +1,5 @@
 import { formatRand, parseRandToCents, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, CheckField, Inline, Notice, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, CheckField, Inline, Notice, Reveal, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useEffect, useState } from "react";
 import { messages } from "./messages";
 import type { Break, Menu, MenuItem, School } from "./types";
@@ -123,7 +123,7 @@ function Items({ school, items, reload }: { school: School; items: MenuItem[]; r
         />
         {!draft && <Button onClick={() => { setDone(""); setPriceError(null); setDraft(blank); }}>{t("newItem")}</Button>}
         {draft && (
-          <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+          <Reveal><form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
             <Stack>
               <h3>{draft.id === null ? t("newItem") : t("editingItem", { name: draft.name })}</h3>
               <Inline>
@@ -141,7 +141,7 @@ function Items({ school, items, reload }: { school: School; items: MenuItem[]; r
                 <Button variant="quiet" onClick={() => { save.clear(); setDraft(null); }}>{t("cancel")}</Button>
               </Inline>
             </Stack>
-          </form>
+          </form></Reveal>
         )}
       </Stack>
     </Card>

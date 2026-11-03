@@ -94,7 +94,7 @@ function GroupForm({ editing, products, onSaved, onCancel }: { editing: Modifier
   }
 
   return (
-    <Card title={editing ? t("formEdit") : t("formNew")}>
+    <Card reveal={!!editing} title={editing ? t("formEdit") : t("formNew")}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <Stack>
           <Inline>

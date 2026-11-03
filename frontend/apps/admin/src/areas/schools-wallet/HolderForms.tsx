@@ -86,7 +86,7 @@ export function EditHolderCard({ holder, onSaved, onCancel }: { holder: Holder; 
   }
 
   return (
-    <Card title={t("editHolderHeading", { name: `${holder.firstName} ${holder.lastName}` })}>
+    <Card reveal title={t("editHolderHeading", { name: `${holder.firstName} ${holder.lastName}` })}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <Stack>
           <Inline>

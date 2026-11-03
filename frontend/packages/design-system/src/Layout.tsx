@@ -1,13 +1,35 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import styles from "./Layout.module.css";
 
-export function Card({ title, children }: { title?: string; children: ReactNode }) {
+export function Card({ title, children, reveal = false }: { title?: string; children: ReactNode; reveal?: boolean }) {
+  const box = useRef<HTMLElement>(null);
+  const first = useRef(true);
+  // reveal: a form that only appears when Edit is pressed. A form that changes to "Edit X" often sits below a long list: bring it into view, or the Edit button seems to do nothing.
+  useEffect(() => {
+    if (first.current) { first.current = false; if (!reveal) return; }
+    const el = box.current;
+    if (!el || typeof el.scrollIntoView !== "function") return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 0 || r.top > window.innerHeight * 0.6) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [title]);
   return (
-    <section className={styles.card}>
+    <section ref={box} className={styles.card}>
       {title ? <h2 className={styles.cardTitle}>{title}</h2> : null}
       {children}
     </section>
   );
+}
+
+/** Wraps a form that appears inside a card when Edit is pressed, and brings it into view if it opens off-screen. */
+export function Reveal({ children }: { children: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof el.scrollIntoView !== "function") return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, []);
+  return <div ref={box}>{children}</div>;
 }
 
 /** Messages to people. Errors use role "alert" so they are read out; the rest use "status". */

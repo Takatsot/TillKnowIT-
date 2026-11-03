@@ -96,7 +96,7 @@ function ServiceForm({ editing, onSaved, onCancel }: { editing: Service | null; 
   }
 
   return (
-    <Card title={editing ? t("serviceEdit") : t("serviceNew")}>
+    <Card reveal={!!editing} title={editing ? t("serviceEdit") : t("serviceNew")}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <Stack>
           <Inline>

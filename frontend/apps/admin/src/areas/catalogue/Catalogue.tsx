@@ -1,5 +1,5 @@
 import { formatDate, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, CheckField, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, CheckField, Inline, Notice, Reveal, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { messages, type CatalogueKey } from "./messages";
 
@@ -234,7 +234,7 @@ function Lookups() {
         )}
         {!edit && <Button onClick={() => { setNote(""); setEdit({ isNew: true, code: "", english: "", sort: "", active: true }); }}>{t("newLookup")}</Button>}
         {edit && (
-          <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+          <Reveal><form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
             <Stack>
               <h3>{edit.isNew ? t("newLookup") : t("editing", { code: edit.code })}</h3>
               <Inline>
@@ -249,7 +249,7 @@ function Lookups() {
                 <Button variant="quiet" onClick={() => { save.clear(); setEdit(null); }}>{t("close")}</Button>
               </Inline>
             </Stack>
-          </form>
+          </form></Reveal>
         )}
       </Stack>
     </Card>
