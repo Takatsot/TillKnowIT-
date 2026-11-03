@@ -92,7 +92,7 @@ export function DemandView({ supplierId }: { supplierId: string }) {
       {r.loading && !d ? <p>{t("loading")}</p> : d && (
         <Stack>
           <p>{t("demandIntro", { min: d.minShops })}</p>
-          {d.areas.length === 0 && <p>{t("demandEmpty", { min: d.minShops })}</p>}
+          {d.areas.length === 0 && <EmptyState>{t("demandEmpty", { min: d.minShops })}</EmptyState>}
           {d.areas.map((a) => (
             <section key={a.areaCode} aria-label={t("area", { code: a.areaCode })}>
               <h3>{t("area", { code: a.areaCode })}</h3>

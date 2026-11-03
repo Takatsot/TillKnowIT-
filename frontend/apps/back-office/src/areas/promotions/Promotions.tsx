@@ -1,5 +1,5 @@
 import { formatDate, formatRand, parseRandToCents, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, CheckField, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, CheckField, EmptyState, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { ProductChecks, ProductSelect, useProducts, type ProductRef } from "../selling-common/products";
 import { useTillCaller } from "../selling-common/TillCaller";
@@ -269,7 +269,7 @@ function BasketPreview({ products, deviceId, staffId, ready }: { products: reado
                 <dt>{t("discount")}</dt><dd>{formatRand(result.discountCents)}</dd>
                 <dt>{t("total")}</dt><dd>{formatRand(result.totalCents)}</dd>
               </dl>
-              {result.applied.length === 0 ? <p>{t("noneApplied")}</p> : (
+              {result.applied.length === 0 ? <EmptyState>{t("noneApplied")}</EmptyState> : (
                 <ul aria-label={t("applied")}>{result.applied.map((a) => <li key={a.promotionId}>{t("appliedLine", { name: a.name, amount: formatRand(a.discountCents), times: a.times })}</li>)}</ul>
               )}
             </Stack>

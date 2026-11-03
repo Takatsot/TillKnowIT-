@@ -1,5 +1,5 @@
 import { formatDateTime, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { useProducts, type ProductRef } from "../selling-common/products";
 import { useTillCaller, type TillCaller } from "../selling-common/TillCaller";
@@ -205,7 +205,7 @@ function SendForm({ branches, products, productsFailed, productsError, caller, o
     <Card title={t("trSendHeading")}>
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <Stack>
-          {branches.length === 0 && <p>{t("trNoBranches")}</p>}
+          {branches.length === 0 && <EmptyState>{t("trNoBranches")}</EmptyState>}
           {productsError ? <Notice kind="danger">{productsError}</Notice> : productsFailed && <p>{t("trNoProducts")}</p>}
           <SelectField label={t("trDestination")} value={to} onChange={(e) => setTo(e.target.value)}>
             <option value="">{t("trChoose")}</option>
