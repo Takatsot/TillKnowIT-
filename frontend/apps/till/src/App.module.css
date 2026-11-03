@@ -211,3 +211,11 @@
     padding: var(--space-4);
   }
 }
+
+/* a screen that is one card already: no second frame around it */
+.view:has(> section:only-child) {
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}

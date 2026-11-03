@@ -64,11 +64,12 @@ test("admin: opening a school, its tabs, and a child's cards", async ({ page }) 
 
   await page.getByRole("tab", { name: "Holders" }).click();
   await page.getByRole("button", { name: "Cards for Themba Khumalo" }).click();
-  await expect(page.getByText("No card is linked yet.")).toBeVisible();
-  await page.getByLabel("Card number").fill("04A22B1C");
-  await page.getByLabel("Card name").fill("Blue wristband");
+  // A card can only be linked once, so each run uses a number of its own.
+  await page.getByLabel("Card number").fill(`04${Date.now().toString(16).toUpperCase()}`);
+  const name = `Wristband ${Date.now() % 100000}`;
+  await page.getByLabel("Card name").fill(name);
   await page.getByRole("button", { name: "Link card" }).click();
   await expect(page.getByText("The card is now linked to Themba Khumalo.")).toBeVisible();
-  await expect(page.getByText("Blue wristband").first()).toBeVisible();
+  await expect(page.getByText(name).first()).toBeVisible();
   expect(problems.list).toEqual([]);
 });
