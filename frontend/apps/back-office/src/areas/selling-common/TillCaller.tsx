@@ -40,7 +40,11 @@ export function useTillCaller(): TillCaller {
   const loading = devices.loading || memberships.loading || staff.loading;
   const error = devices.error ?? memberships.error ?? staff.error;
 
-  const card = (
+  // One approved till and the person's own membership: nothing to choose, so a single line says what is being used.
+  const compact = !loading && !error && approved.length === 1 && own !== "";
+  const card = compact ? (
+    <Notice kind="info">{t("compact", { device: approved[0]!.name })}</Notice>
+  ) : (
     <Card title={t("heading")}>
       <Stack>
         <p>{t("hint")}</p>

@@ -2,6 +2,7 @@ import type { AreaMessages } from "@tillknowit/i18n";
 
 const en = {
   heading: "Which till is asking",
+  compact: "Using {device}, acting as yourself.",
   hint: "These routes are asked on behalf of a till and a staff member. Choose an approved till; you act as your own staff membership at this shop.",
   loading: "Loading tills and staff...",
   device: "Till",

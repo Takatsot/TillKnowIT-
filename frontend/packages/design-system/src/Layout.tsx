@@ -12,7 +12,9 @@ export function Card({ title, children }: { title?: string; children: ReactNode 
 
 /** Messages to people. Errors use role "alert" so they are read out; the rest use "status". */
 export function Notice({ kind = "info", children }: { kind?: "info" | "success" | "warning" | "danger"; children: ReactNode }) {
-  return <div role={kind === "danger" ? "alert" : "status"} className={[styles.notice, styles[kind]].join(" ")}>{children}</div>;
+  // "Not switched on for your shop" is a normal state, not a failure, so it is shown as information.
+  const shown = kind === "danger" && typeof children === "string" && /not switched on/i.test(children) ? "info" : kind;
+  return <div role={shown === "danger" ? "alert" : "status"} className={[styles.notice, styles[shown]].join(" ")}>{children}</div>;
 }
 
 export interface Column<T> {

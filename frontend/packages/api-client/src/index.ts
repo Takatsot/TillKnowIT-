@@ -42,10 +42,16 @@ export function queryString(query?: Query): string {
   return parts.length === 0 ? "" : `?${parts.join("&")}`;
 }
 
+/** Shown when a part of the app is not switched on for the shop. The screens show this softly, not as a failure. */
+export const FEATURE_OFF = "This part is not switched on for your shop yet. Change your business type to add it.";
+
 async function problem(response: Response): Promise<{ code: string; message: string }> {
   try {
     const body = (await response.json()) as { code?: string; title?: string; detail?: string };
-    return { code: body.code ?? `http.${response.status}`, message: body.title ?? body.detail ?? `The server answered ${response.status}.` };
+    const code = body.code ?? `http.${response.status}`;
+    // Not an error: the shop's business type simply does not include this part. Say so in plain words (the server's own message names an internal feature code).
+    if (code === "feature.not_enabled") return { code, message: FEATURE_OFF };
+    return { code, message: body.title ?? body.detail ?? `The server answered ${response.status}.` };
   } catch {
     return { code: `http.${response.status}`, message: `The server answered ${response.status}.` };
   }

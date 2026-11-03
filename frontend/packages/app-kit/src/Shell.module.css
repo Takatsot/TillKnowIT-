@@ -249,7 +249,15 @@
 
 .advanced {
   flex-basis: 100%;
-  padding: var(--space-2) 0 0;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.advanced summary {
+  width: fit-content;
+  font-weight: 500;
+  color: var(--color-text-muted);
 }
 
 .advanced form {
@@ -271,10 +279,11 @@
 /* ---- narrow screens: the menu becomes a bar across the top ---- */
 @media (max-width: 52rem) {
   .frame {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .side {
+    min-width: 0;
     position: static;
     height: auto;
     gap: var(--space-3);
@@ -307,14 +316,31 @@
   }
 
   .sideFoot {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
     padding-top: var(--space-3);
+  }
+
+  .person {
+    display: none;
+  }
+
+  .signOut {
+    padding: 0 var(--space-4);
   }
 
   .top {
     position: static;
     padding: var(--space-4);
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .context {
+    min-width: 0;
+    flex-basis: 100%;
   }
 
   .main {

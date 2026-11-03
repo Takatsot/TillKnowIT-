@@ -30,7 +30,7 @@ describe("useTillCaller", () => {
       "/people/p1/memberships": ok([{ membershipId: "mOther", organisationId: "s9" }, { membershipId: "m1", organisationId: "s1" }]),
     });
     expect((await screen.findByTestId("who")).textContent).toBe("d1|m1|true");
-    expect(screen.getByText("You are acting as yourself (staff id m1).")).toBeTruthy();
+    expect(screen.getByText("Using Counter 1, acting as yourself.")).toBeTruthy();   // one till and their own membership: nothing to choose
     expect(get).not.toHaveBeenCalledWith("/shops/s1/staff", expect.anything());
     expect(screen.queryByText("Pending till")).toBeNull();
   });

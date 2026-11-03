@@ -146,6 +146,31 @@ code {
   word-break: break-all;
 }
 
+/* A lone button in a form or stack sits at its natural width instead of stretching across the card. */
+form > button,
+form > .button {
+  justify-self: start;
+}
+
+fieldset {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+legend {
+  padding: 0 var(--space-2);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
 summary {
   cursor: pointer;
   color: var(--color-primary);

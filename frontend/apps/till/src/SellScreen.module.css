@@ -109,6 +109,14 @@
   gap: 2px;
 }
 
+.controls :global(button) {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--color-primary-soft);
+  border-radius: 50%;
+}
+
 /* the running total: the thing the cashier looks at most */
 .totals {
   display: grid;

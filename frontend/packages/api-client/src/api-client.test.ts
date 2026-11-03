@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createApi, queryString } from "./index";
+import { createApi, FEATURE_OFF, queryString } from "./index";
 
 const respond = (status: number, body?: unknown, headers: Record<string, string> = {}) =>
   vi.fn(async () => new Response(body === undefined ? null : JSON.stringify(body), { status, headers }));
@@ -40,6 +40,13 @@ describe("createApi", () => {
     const result = await createApi({ fetcher: respond(403, { title: "Only the owner can add branches.", code: "permission.denied", status: 403 }) as unknown as typeof fetch }).post("/x");
 
     expect(result).toEqual({ ok: false, code: "permission.denied", message: "Only the owner can add branches." });
+  });
+
+  it("says a part that is not switched on for the shop in plain words, not with the internal feature name", async () => {
+    const result = await createApi({ fetcher: respond(403, { title: "'promotions' is not switched on for this shop.", code: "feature.not_enabled", status: 403 }) as unknown as typeof fetch }).get("/x");
+
+    expect(result).toEqual({ ok: false, code: "feature.not_enabled", message: FEATURE_OFF });
+    expect(FEATURE_OFF).not.toContain("promotions");
   });
 
   it("makes a code of its own when the error has no body", async () => {
