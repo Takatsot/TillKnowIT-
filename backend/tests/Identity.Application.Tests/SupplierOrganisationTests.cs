@@ -23,6 +23,7 @@ public class SupplierOrganisationTests
 
         public Task Add(Organisation shop, CancellationToken ct) { Organisations.Add(shop); return Task.CompletedTask; }
         public Task<bool> PersonExists(Guid personId, CancellationToken ct) => Task.FromResult(People.Any(p => p.Id == personId));
+        public Task<Guid?> OwnerRoleId(CancellationToken ct) => Task.FromResult<Guid?>(null);
         public Task<Organisation?> GetShop(Guid id, CancellationToken ct) => Task.FromResult(Organisations.FirstOrDefault(o => o.Id == id));
         public Task<Role?> FindRole(string code, CancellationToken ct) => Task.FromResult(Roles.GetValueOrDefault(code));
         public Task<Person?> FindPersonByPhone(string phone, CancellationToken ct) => Task.FromResult(People.FirstOrDefault(p => p.Phone == phone));

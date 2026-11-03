@@ -3,6 +3,7 @@ using Accounting.Contracts;
 using Accounting.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using TillKnowIT.Dispatching;
@@ -74,7 +75,7 @@ public static class AccountingOAuthExtensions
     /// </summary>
     public static IEndpointRouteBuilder MapAccountingOAuthEndpoints(this IEndpointRouteBuilder api)
     {
-        api.MapGet("/shops/{shopId:guid}/accounting/connections/{provider}/authorise", async (Guid shopId, string provider, Guid personId, DateOnly? startsOn, IDispatcher d, IEnumerable<IAccountingExporter> exporters, OAuthStateSigner? signer, CancellationToken ct) =>
+        api.MapGet("/shops/{shopId:guid}/accounting/connections/{provider}/authorise", async (Guid shopId, string provider, Guid personId, DateOnly? startsOn, IDispatcher d, IEnumerable<IAccountingExporter> exporters, [FromServices] OAuthStateSigner? signer, CancellationToken ct) =>
         {
             var check = await d.Ask(new CheckAccountingConnect(shopId, personId, provider), ct);
             if (!check.IsSuccess)
@@ -86,7 +87,7 @@ public static class AccountingOAuthExtensions
             return Results.Ok(new AuthoriseResponse(exporter.AuthoriseUrl(signer.Create(new(shopId, personId, exporter.Provider, startsOn)))));
         });
 
-        api.MapGet("/accounting/oauth/callback", async (string? code, string? state, string? error, IDispatcher d, OAuthStateSigner? signer, AccountingReturn? back, CancellationToken ct) =>
+        api.MapGet("/accounting/oauth/callback", async (string? code, string? state, string? error, IDispatcher d, [FromServices] OAuthStateSigner? signer, [FromServices] AccountingReturn? back, CancellationToken ct) =>
         {
             static IResult Done(string? url, string outcome, string? reason = null) => url is null
                 ? (outcome == "connected" ? Results.Ok(new { outcome }) : Results.Problem(title: reason ?? "The connection failed.", statusCode: 422))

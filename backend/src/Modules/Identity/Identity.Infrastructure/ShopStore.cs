@@ -9,6 +9,10 @@ internal sealed class ShopStore(IdentityDbContext db) : IShopStore
 {
     public async Task Add(Organisation shop, CancellationToken ct) => await db.Organisations.AddAsync(shop, ct);
 
+    public async Task<Guid?> OwnerRoleId(CancellationToken ct) => await db.Roles.AsNoTracking().Where(r => r.Code == "owner").Select(r => (Guid?)r.Id).FirstOrDefaultAsync(ct);
+
+    public async Task Add(Membership membership, CancellationToken ct) => await db.Memberships.AddAsync(membership, ct);
+
     public Task<bool> PersonExists(Guid personId, CancellationToken ct) => db.People.AnyAsync(p => p.Id == personId, ct);
 
     public Task Save(CancellationToken ct) => db.SaveChangesAsync(ct);

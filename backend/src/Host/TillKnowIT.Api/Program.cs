@@ -58,6 +58,10 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     foreach (var migrator in scope.ServiceProvider.GetServices<IModuleMigrator>())
         await migrator.MigrateAsync();
+
+    // Development only: one person for every role, a shop, a till, a supplier and a school, so every app can be signed in to (see dev-seed.md).
+    if (app.Configuration.GetValue("DevSeed:Enabled", true))
+        await DevSeed.Run(app.Services, app.Environment.ContentRootPath, app.Logger);
 }
 
 app.UseExceptionHandler();

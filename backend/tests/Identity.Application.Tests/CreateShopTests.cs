@@ -10,6 +10,10 @@ public class CreateShopTests
         public List<Organisation> Added { get; } = [];
         public bool Saved { get; private set; }
         public Task Add(Organisation shop, CancellationToken ct) { Added.Add(shop); return Task.CompletedTask; }
+        public Guid OwnerRole { get; } = Guid.NewGuid();
+        public List<Membership> Memberships { get; } = [];
+        public Task<Guid?> OwnerRoleId(CancellationToken ct) => Task.FromResult<Guid?>(OwnerRole);
+        public Task Add(Membership membership, CancellationToken ct) { Memberships.Add(membership); return Task.CompletedTask; }
         public Task<bool> PersonExists(Guid personId, CancellationToken ct) => Task.FromResult(personExists);
         public Task Save(CancellationToken ct) { Saved = true; return Task.CompletedTask; }
     }
@@ -26,6 +30,18 @@ public class CreateShopTests
         Assert.Equal(OrganisationStatus.Pending, shop.Status);
         Assert.Equal(shop.Id, result.Value);
         Assert.True(store.Saved);
+    }
+
+    [Fact]
+    public async Task The_person_who_creates_a_shop_becomes_its_owner()
+    {
+        var store = new FakeStore();
+        var owner = Guid.NewGuid();
+
+        var result = await new CreateShopHandler(store, new FakeLookups()).Handle(new CreateShop(owner, "Mama's Spaza", "jhb", "en"), default);
+
+        var membership = Assert.Single(store.Memberships);
+        Assert.Equal((owner, result.Value, store.OwnerRole), (membership.PersonId, membership.OrganisationId, membership.RoleId));
     }
 
     [Fact]

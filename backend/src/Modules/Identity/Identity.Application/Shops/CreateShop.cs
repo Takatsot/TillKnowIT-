@@ -10,6 +10,8 @@ public interface IShopStore
 {
     Task Add(Organisation shop, CancellationToken ct);
     Task<bool> PersonExists(Guid personId, CancellationToken ct);
+    Task<Guid?> OwnerRoleId(CancellationToken ct);
+    Task Add(Membership membership, CancellationToken ct);
     Task Save(CancellationToken ct);
 }
 
@@ -33,6 +35,8 @@ internal sealed class CreateShopHandler(IShopStore store, Catalogue.Contracts.IL
         // Status starts as pending until a field agent verifies the shop.
         var shop = Organisation.CreateShop(command.Name.Trim(), command.OwnerPersonId, municipality);
         await store.Add(shop, ct);
+        // The person who creates the shop is its owner: without this they would hold no role at it and could not do anything there.
+        if (await store.OwnerRoleId(ct) is { } ownerRole) await store.Add(new Membership(command.OwnerPersonId, shop.Id, ownerRole), ct);
         await store.Save(ct);
         return Result<Guid>.Ok(shop.Id);
     }
