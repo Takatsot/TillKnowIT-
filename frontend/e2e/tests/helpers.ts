@@ -96,3 +96,75 @@ export async function walkTabs(page: Page, where: string, problems: Problems, ph
   expect(problems.list, `${where}`).toEqual([]);
   return clicked;
 }
+
+const SEED = path.join(import.meta.dirname, "..", "..", "..", "backend", "src", "Host", "TillKnowIT.Api", "dev-seed.md");
+
+/** The shop and till the dev seed made. */
+export function seeded() {
+  const md = fs.readFileSync(SEED, "utf8");
+  const shop = md.match(/Shop: .*?id `([^`]+)`/)?.[1];
+  const till = md.match(/Till: .*?id `([^`]+)`/)?.[1];
+  if (!shop || !till) throw new Error("dev-seed.md has no shop and till. Start the API in Development against an empty database.");
+  return { shop, till };
+}
+
+/** The owner chooses a business type for the demo shop through the API (the screen for it is tested on its own). */
+export async function setPack(code: "spaza" | "cafe" | "butchery" | "clothing_hardware" | "salon") {
+  const owner = await sessionFor(PEOPLE.owner);
+  const r = await fetch(`${API}/api/v1/shops/${seeded().shop}/business-pack`, {
+    method: "PUT", headers: { "content-type": "application/json", authorization: `Bearer ${owner.accessToken}` }, body: JSON.stringify({ callerPersonId: owner.personId, packCode: code }),
+  });
+  if (!r.ok) throw new Error(`Could not choose the ${code} pack: ${r.status}`);
+}
+
+/** Registers the demo till in this browser with a fresh setup code, then unlocks it as a staff member. */
+export async function registerTill(page: Page, staff: RegExp = /Sipho/, pin = "4321") {
+  const { shop, till } = seeded();
+  const owner = await sessionFor(PEOPLE.owner);
+  const headers = { authorization: `Bearer ${owner.accessToken}` };
+  const reset = await fetch(`${API}/api/v1/devices/${till}/reset-credential?callerPersonId=${owner.personId}`, { method: "POST", headers });
+  if (!reset.ok) throw new Error(`Could not reset the till's credential: ${reset.status}`);
+  const code = ((await reset.json()) as { enrolmentCode: string }).enrolmentCode;
+  const approved = await fetch(`${API}/api/v1/devices/${till}/approve?callerPersonId=${owner.personId}`, { method: "POST", headers });
+  if (!approved.ok) throw new Error(`Could not approve the till: ${approved.status}`);
+  await page.goto("http://localhost:5173");
+  await page.getByLabel("Shop number").fill(shop);
+  await page.getByLabel("Till number").fill(till);
+  await page.getByLabel("Setup code").fill(code);
+  await page.getByRole("button", { name: "Register till" }).click();
+  await page.getByRole("button", { name: staff }).click();
+  for (const d of pin) await page.getByRole("button", { name: d, exact: true }).click();
+  await page.getByRole("button", { name: "OK" }).click();
+  await expect(page.getByPlaceholder(/Scan or type/)).toBeVisible();
+  await expect(page.getByText(/Updated \d\d:\d\d/)).toBeVisible();
+}
+
+/** Opens each tab of the till, and each part inside it. Returns the tab names. */
+export async function walkTillTabs(page: Page): Promise<string[]> {
+  const tabs = (await page.locator("nav button").allInnerTexts()).map((t) => t.trim());
+  for (const tab of tabs) {
+    const b = page.locator("nav").getByRole("button", { name: tab, exact: true });
+    if (await b.isDisabled()) continue;
+    await b.click();
+    await page.waitForTimeout(600);
+    for (const inner of await tabBar(page)) {
+      const i = page.locator("main").getByRole("button", { name: inner, exact: true }).first();
+      if ((await i.isVisible()) && !(await i.isDisabled())) { await i.click(); await page.waitForTimeout(350); }
+    }
+  }
+  return tabs;
+}
+
+/** Changes how a demo product is sold, through the same screen the owner uses. */
+export async function setSellingOptions(page: Page, product: string, options: { weight?: boolean; serial?: boolean }) {
+  await startSignedIn(page, PEOPLE.owner);
+  await page.goto("http://localhost:5174");
+  await page.locator("nav[aria-label]").first().getByRole("button", { name: "Products and stock", exact: true }).click();
+  await page.getByRole("button", { name: `Edit ${product}`, exact: true }).click();
+  await expect(page.getByText(`How ${product} is sold`)).toBeVisible();
+  const set = async (label: RegExp, on: boolean | undefined) => { if (on !== undefined) await page.getByLabel(label).setChecked(on); };
+  await set(/Sold by weight/, options.weight);
+  await set(/Ask for a serial number/, options.serial);
+  await page.getByRole("button", { name: "Save how it is sold" }).click();
+  await expect(page.getByText(`${product} will now be sold the way you chose.`)).toBeVisible();
+}

@@ -140,7 +140,8 @@ function Book({ ctx, caller, t, services, day, back, booked }: { ctx: TillContex
 
   const service = services.find((s) => s.id === serviceId);
   const allStaff = [...new Set(services.flatMap((s) => s.staffIds))];
-  const providers = service?.staffIds ?? [];
+  // A service with nobody named can be done by anyone: the person at the till is offered, so it can still be booked.
+  const providers = service ? (service.staffIds.length > 0 ? service.staffIds : [ctx.staff.id]) : [];
 
   async function find() {
     const r = await lookup.run(() => findCustomers(ctx.api, caller, search));

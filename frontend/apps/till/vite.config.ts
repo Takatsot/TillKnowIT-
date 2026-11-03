@@ -22,5 +22,5 @@ export default defineConfig({
   ],
   // In development the API runs on its own port; the till talks to /api/v1 and Vite forwards it.
   server: { proxy: { "/api": { target: "http://localhost:5080", changeOrigin: true } } },
-  test: { environment: "node", testTimeout: 30000 },
+  test: { setupFiles: ["./test-setup.ts"], environment: "node", testTimeout: 30000 },
 });

@@ -12,9 +12,12 @@ export interface ProductRef {
   costCents?: number;
   priceCents?: number;
   isActive?: boolean;
+  soldByWeight?: boolean;
+  isAddOn?: boolean;
+  requiresSerial?: boolean;
 }
 
-interface PulledProduct { id: string; name: string; barcode: string | null; categoryCode: string; costCents: number; priceCents: number; isActive: boolean }
+interface PulledProduct { id: string; name: string; barcode: string | null; categoryCode: string; costCents: number; priceCents: number; isActive: boolean; soldByWeight?: boolean; isAddOn?: boolean; requiresSerial?: boolean }
 
 /** The shop's products with prices (GET /shops/{id}/products). Includes inactive products. */
 export function useProducts() {
@@ -23,7 +26,7 @@ export function useProducts() {
   return useLoad(async () => {
     const r = await api.get<PulledProduct[]>(`/shops/${shopId}/products`, { callerPersonId: personId });
     if (!r.ok) return r;
-    return { ok: true as const, value: r.value.map((p): ProductRef => ({ productId: p.id, name: p.name, barcode: p.barcode, categoryCode: p.categoryCode, costCents: p.costCents, priceCents: p.priceCents, isActive: p.isActive })) };
+    return { ok: true as const, value: r.value.map((p): ProductRef => ({ productId: p.id, name: p.name, barcode: p.barcode, categoryCode: p.categoryCode, costCents: p.costCents, priceCents: p.priceCents, isActive: p.isActive, soldByWeight: p.soldByWeight, isAddOn: p.isAddOn, requiresSerial: p.requiresSerial })) };
   }, [shopId, personId]);
 }
 

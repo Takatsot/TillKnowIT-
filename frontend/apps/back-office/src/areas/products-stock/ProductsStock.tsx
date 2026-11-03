@@ -49,7 +49,7 @@ type Errors = Partial<Record<"name" | "category" | "cost" | "price" | "low", str
 export function ProductsStock() {
   const t = useMessages(messages);
   const api = useApi();
-  const { shopId, language } = useSession();
+  const { shopId, language, personId } = useSession();
   const caller = useTillCaller();
   const products = useProducts();
   const [filter, setFilter] = useState<Filter>("all");
@@ -58,6 +58,10 @@ export function ProductsStock() {
   const [draft, setDraft] = useState<Draft>(blank);
   const [errors, setErrors] = useState<Errors>({});
   const [done, setDone] = useState("");
+
+  const [flags, setFlags] = useState({ soldByWeight: false, isAddOn: false, requiresSerial: false });
+  const [flagsDone, setFlagsDone] = useState("");
+  const saveFlags = useAction((id: string) => api.put<unknown>(`/shops/${shopId}/products/${id}/selling-flags`, { callerPersonId: personId, ...flags }));
 
   const save = useAction((body: unknown, id: string | null) => (id ? api.patch<unknown>(`/products/${id}`, body) : api.post<unknown>("/products", body)));
   const set = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }));
@@ -130,6 +134,8 @@ export function ProductsStock() {
                       setDone("");
                       setErrors({});
                       const full = products.data?.find((p) => p.productId === r.productId);
+                      setFlagsDone("");
+                      setFlags({ soldByWeight: full?.soldByWeight ?? false, isAddOn: full?.isAddOn ?? false, requiresSerial: full?.requiresSerial ?? false });
                       setDraft({
                         ...blank, id: r.productId, name: full?.name ?? r.name, barcode: full?.barcode ?? r.barcode ?? "", category: full?.categoryCode ?? "",
                         cost: full?.costCents === undefined ? "" : rands(full.costCents), price: full?.priceCents === undefined ? "" : rands(full.priceCents),
@@ -170,6 +176,21 @@ export function ProductsStock() {
           </Stack>
         </form>
       </Card>
+      {draft.id && (
+        <Card title={t("flagsHeading", { name: draft.name })}>
+          <Stack>
+            <p>{t("flagsHint")}</p>
+            <CheckField label={t("flagWeight")} checked={flags.soldByWeight} onChange={(e) => setFlags({ ...flags, soldByWeight: e.target.checked })} />
+            <CheckField label={t("flagSerial")} checked={flags.requiresSerial} onChange={(e) => setFlags({ ...flags, requiresSerial: e.target.checked })} />
+            <CheckField label={t("flagAddOn")} checked={flags.isAddOn} onChange={(e) => setFlags({ ...flags, isAddOn: e.target.checked })} />
+            {saveFlags.error && <Notice kind="danger">{saveFlags.error.message}</Notice>}
+            {flagsDone && <Notice kind="success">{flagsDone}</Notice>}
+            <div>
+              <Button disabled={saveFlags.busy} onClick={() => void saveFlags.run(draft.id!).then((r) => { if (r.ok) { setFlagsDone(t("flagsSaved", { name: draft.name })); products.reload(); } })}>{t("flagsSave")}</Button>
+            </div>
+          </Stack>
+        </Card>
+      )}
     </Stack>
   );
 }

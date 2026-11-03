@@ -25,6 +25,38 @@ function mount(api: Partial<Api>) {
   render(<SessionProvider api={withCaller(api)} initial={session}><ProductsStock /></SessionProvider>);
 }
 
+describe("ProductsStock selling options", () => {
+  it("shows how an item is sold, changes it, and saves it through the selling-flags route", async () => {
+    const put = vi.fn(async () => ok(undefined));
+    const get = vi.fn(async (path: string) => (path === "/lookups/categories" ? ok(categories) : path === "/shops/s1/products" ? ok([{ ...pulled[0], soldByWeight: false, isAddOn: false, requiresSerial: true }]) : ok([row])));
+    mount({ get: get as never, put: put as never });
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole("button", { name: "Edit Maize meal 5kg" }));
+    expect(await screen.findByText("How Maize meal 5kg is sold")).toBeTruthy();
+    expect((screen.getByLabelText(/Ask for a serial number/) as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByLabelText(/Sold by weight/) as HTMLInputElement).checked).toBe(false);
+
+    await user.click(screen.getByLabelText(/Sold by weight/));
+    await user.click(screen.getByRole("button", { name: "Save how it is sold" }));
+
+    await waitFor(() => expect(put).toHaveBeenCalledWith("/shops/s1/products/pr1/selling-flags", { callerPersonId: "p1", soldByWeight: true, isAddOn: false, requiresSerial: true }));
+    expect(await screen.findByText("Maize meal 5kg will now be sold the way you chose.")).toBeTruthy();
+  });
+
+  it("shows the server's refusal when selling by weight is not switched on", async () => {
+    const put = vi.fn(async () => fail("feature.not_enabled", "This part is not switched on for your shop yet. Change your business type to add it."));
+    mount({ get: getter([row]) as never, put: put as never });
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole("button", { name: "Edit Maize meal 5kg" }));
+    await user.click(await screen.findByLabelText(/Sold by weight/));
+    await user.click(screen.getByRole("button", { name: "Save how it is sold" }));
+
+    expect(await screen.findByText(/not switched on for your shop/)).toBeTruthy();
+  });
+});
+
 describe("ProductsStock", () => {
   it("lists stock with the flag and the suggested order, and filters through the server", async () => {
     const get = getter([row]);

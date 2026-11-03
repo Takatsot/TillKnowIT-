@@ -48,6 +48,13 @@ const en = {
   lowInvalid: "Enter a whole number of units, 0 or more.",
   created: "{name} was added.",
   updated: "{name} was saved.",
+  flagsHeading: "How {name} is sold",
+  flagsHint: "These change how the till sells this item. Selling by weight needs the Butchery business type; serial numbers suit phones and appliances.",
+  flagWeight: "Sold by weight (the price is per kilogram and stock is kept in grams)",
+  flagSerial: "Ask for a serial number when it is sold",
+  flagAddOn: "An extra, only sold together with another item (such as a sauce or milk choice)",
+  flagsSave: "Save how it is sold",
+  flagsSaved: "{name} will now be sold the way you chose.",
 } as const;
 
 export type ProductsStockKey = keyof typeof en;

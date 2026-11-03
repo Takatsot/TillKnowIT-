@@ -66,6 +66,24 @@ describe("appointments feature", () => {
     expect(await screen.findByText(/Booked Haircut for Lerato/)).toBeTruthy();
   });
 
+  it("lets the person at the till book a service nobody is named for, since anyone can do it", async () => {
+    const user = userEvent.setup();
+    const post = vi.fn(async (_p: string, _b?: unknown) => ok(appt()));
+    const anyone = { ...cut, staffIds: [] as string[] };
+    const { ctx } = makeCtx({ flags: ["appointments"], api: { get: fakeGet([], [anyone]) as never, post } as never });
+    render(<Appointments ctx={ctx} />);
+
+    await user.click(await screen.findByRole("button", { name: "Book an appointment" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Service" }), "s1");
+    await user.selectOptions(screen.getByRole("combobox", { name: "With" }), STAFF);
+    await user.type(screen.getByLabelText("Time"), "10:30");
+    await user.type(screen.getByRole("textbox", { name: "Customer name" }), "Lerato");
+    await user.click(screen.getByRole("button", { name: "Book it" }));
+
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    expect(post.mock.calls[0]![1]).toMatchObject({ providerStaffId: STAFF });
+  });
+
   it("shows the server's refusal when the slot is taken", async () => {
     const user = userEvent.setup();
     const post = vi.fn(async () => fail("appointment.conflict", "That person already has an appointment then."));
