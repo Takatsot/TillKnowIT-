@@ -1,6 +1,7 @@
 import { formatDate, formatRand, useAction, useApi, useLoad, useMessages, useSession, type Loaded } from "@tillknowit/app-kit";
 import { Badge, Button, Card, Inline, Notice, Stack, Table } from "@tillknowit/design-system";
 import { useState } from "react";
+import styles from "./Billing.module.css";
 import { messages, type BillingKey } from "./messages";
 
 export interface Plan { id: string; code: string; audience: string; name: string; priceCents: number; isActive: boolean; features: { feature: string; limit: number | null }[] }
@@ -90,24 +91,22 @@ export function Billing() {
       <Card title={t("plansHeading")}>
         {plans.error && <Notice kind="danger">{plans.error.message}</Notice>}
         {plans.loading && !plans.data ? <p>{t("loading")}</p> : activePlans.length === 0 ? <p>{t("plansEmpty")}</p> : (
-          <ul>
+          <ul className={styles.plans}>
             {activePlans.map((p) => {
               const isCurrent = running?.planCode === p.code;
               const verb: BillingKey = !current ? "subscribe" : p.priceCents > current.priceCents ? "upgrade" : "downgrade";
               return (
-                <li key={p.code}>
-                  <Stack>
-                    <strong>{p.name}</strong>
-                    <span>{p.priceCents === 0 ? t("free") : t("perMonth", { price: formatRand(p.priceCents) })}</span>
-                    <ul>
-                      {p.features.map((f) => (
-                        <li key={f.feature}>{featureName(t, f.feature)}: {f.limit === null ? t("unlimited") : t("limit", { n: f.limit })}</li>
-                      ))}
-                    </ul>
-                    {isCurrent ? <Badge>{t("current")}</Badge> : (
-                      <div><Button disabled={subscribe.busy || change.busy} onClick={() => void choose(p)}>{t(verb, { plan: p.name })}</Button></div>
-                    )}
-                  </Stack>
+                <li key={p.code} className={[styles.plan, isCurrent ? styles.current : ""].join(" ")}>
+                  <strong className={styles.name}>{p.name}</strong>
+                  <span className={styles.price}>{p.priceCents === 0 ? t("free") : t("perMonth", { price: formatRand(p.priceCents) })}</span>
+                  <ul className={styles.features}>
+                    {p.features.map((f) => (
+                      <li key={f.feature}>{featureName(t, f.feature)}: {f.limit === null ? t("unlimited") : t("limit", { n: f.limit })}</li>
+                    ))}
+                  </ul>
+                  {isCurrent ? <div><Badge tone="success">{t("current")}</Badge></div> : (
+                    <div><Button disabled={subscribe.busy || change.busy} onClick={() => void choose(p)}>{t(verb, { plan: p.name })}</Button></div>
+                  )}
                 </li>
               );
             })}

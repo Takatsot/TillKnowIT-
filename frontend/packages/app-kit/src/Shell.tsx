@@ -90,7 +90,7 @@ export function Shell({ title, sections }: { title: string; sections: readonly S
     <div className={styles.frame}>
       <aside className={styles.side}>
         <div className={styles.brand}>
-          <BrandLockup inverse />
+          <BrandLockup inverse size={40} />
           <span className={styles.appName}>{title.replace(/^TillKnowIT\s*/, "") || title}</span>
         </div>
         <nav aria-label={title} className={styles.nav}>

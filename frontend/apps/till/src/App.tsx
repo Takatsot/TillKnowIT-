@@ -204,7 +204,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <span className={styles.brand} aria-label={t("app.name")}><BrandLockup inverse size={34} /></span>
+        <span className={styles.brand} aria-label={t("app.name")}><BrandLockup inverse size={40} /></span>
         <span className={online ? styles.online : styles.offline}><i className={styles.pulse} aria-hidden="true" />{online ? t("status.online") : t("status.offline")}</span>
         {counts.waiting > 0 && <span className={styles.offline}>{t("status.waiting", { count: counts.waiting })}</span>}
         {counts.refused > 0 && <span className={styles.offline}>{t("status.refused", { count: counts.refused })}</span>}
@@ -260,7 +260,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
                       ))}
                     </nav>
                   )}
-                  {current && <current.component ctx={ctx} />}
+                  {current && <div className={styles.view}><current.component ctx={ctx} /></div>}
                   {/* The sale in progress stays here, hidden, while another tab is showing, so switching tabs never loses it. */}
                   <div hidden={Boolean(current)}>
                     <SellScreen

@@ -24,7 +24,7 @@ export interface Column<T> {
 }
 
 export function Table<T>({ columns, rows, rowKey, empty }: { columns: readonly Column<T>[]; rows: readonly T[]; rowKey: (row: T) => string; empty?: string }) {
-  if (rows.length === 0 && empty) return <p>{empty}</p>;
+  if (rows.length === 0 && empty) return <EmptyState>{empty}</EmptyState>;
   return (
     <div className={styles.tableWrap}>
       <table className={styles.table}>
@@ -62,4 +62,19 @@ export function Stack({ children }: { children: ReactNode }) {
 
 export function Inline({ children }: { children: ReactNode }) {
   return <div className={styles.inline}>{children}</div>;
+}
+
+/** A friendly "nothing here yet" panel: a small drawing of an empty tray and the words, instead of a bare line of text. */
+export function EmptyState({ children }: { children: ReactNode }) {
+  return (
+    <div className={styles.empty} role="status">
+      <svg width="56" height="56" viewBox="0 0 64 64" aria-hidden="true" className={styles.emptyArt}>
+        <path d="M10 36 18 14h28l8 22v14a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4z" fill="var(--color-primary-soft)" stroke="var(--color-border-strong)" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M10 36h14a8 8 0 0 0 16 0h14" fill="none" stroke="var(--color-border-strong)" strokeWidth="2" strokeLinejoin="round" />
+        <circle cx="46" cy="12" r="3" fill="var(--color-accent)" />
+        <circle cx="16" cy="9" r="2" fill="var(--color-accent)" opacity="0.6" />
+      </svg>
+      <p>{children}</p>
+    </div>
+  );
 }

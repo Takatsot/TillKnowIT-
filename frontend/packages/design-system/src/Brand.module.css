@@ -1,7 +1,6 @@
 .mark {
   display: inline-block;
   flex: none;
-  filter: drop-shadow(0 2px 4px rgba(11, 42, 31, 0.25));
 }
 
 .lockup {
@@ -11,14 +10,20 @@
 }
 
 .name {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-family);
+  font-weight: 800;
+  letter-spacing: -0.015em;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .name b {
-  color: var(--color-accent);
-  font-weight: 700;
+  margin-left: 0.2em;
+  padding: 0.12em 0.3em 0.14em;
+  font-weight: 800;
+  color: #0b2a1f;
+  background: var(--color-accent);
+  border-radius: 0.24em;
 }

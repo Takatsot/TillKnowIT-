@@ -1,0 +1,64 @@
+.plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
+
+.plan:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+}
+
+.current {
+  border-top-color: var(--color-primary);
+  background: linear-gradient(180deg, var(--color-primary-soft), var(--color-surface) 40%);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.features {
+  display: grid;
+  gap: var(--space-2);
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-small);
+}
+
+.features li {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.features li::before {
+  content: "\2713";
+  flex: none;
+  color: var(--color-success);
+  font-weight: 800;
+}

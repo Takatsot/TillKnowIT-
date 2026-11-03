@@ -42,7 +42,7 @@ export function SignIn() {
   return (
     <div className={styles.page}>
       <section className={styles.hero} aria-hidden="true">
-        <BrandLockup size={44} inverse />
+        <BrandLockup size={54} inverse />
         <div className={styles.pitch}>
           <h1>{t("heroBefore")} <em>{t("heroEmphasis")}</em>.</h1>
           <p>{t("heroLead")}</p>

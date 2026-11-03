@@ -28,7 +28,7 @@
 .appName {
   display: block;
   margin-top: var(--space-2);
-  padding-left: calc(36px + var(--space-3));
+  padding-left: calc(40px + var(--space-3));
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
