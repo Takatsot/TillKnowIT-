@@ -1,10 +1,11 @@
-import { Button, Card, Notice, SelectField, TextField } from "@tillknowit/design-system";
+import { BrandLockup, Button, Notice, SelectField, TextField } from "@tillknowit/design-system";
 import { languages, translateArea, isLanguage } from "@tillknowit/i18n";
 import { useEffect, useMemo, useState } from "react";
 import { useLoad } from "./hooks";
 import type { Section } from "./section";
 import { SignIn } from "./SignIn";
 import { isSignedIn, useApi, useSession, useSetSession, useSignOut } from "./session";
+import styles from "./Shell.module.css";
 import { shellText, type ShellKey } from "./shellMessages";
 
 /** One row of GET /people/{personId}/memberships. */
@@ -79,49 +80,69 @@ export function Shell({ title, sections }: { title: string; sections: readonly S
   const missing = open?.needs?.filter((n) => !session[n]) ?? [];
   const Component = open?.component;
 
+  // Apps for people who do not work for a shop or supplier (parents) have nothing to choose here.
+  const needsOrganisation = !ordered.every((s) => s.needs !== undefined && s.needs.length > 0 && s.needs.every((n) => n === "personId"));
+  const name = session.displayName || session.personId;
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
+  const label = (s: Section<string>) => translateArea(s.messages, session.language, s.title);
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "minmax(11rem, 14rem) 1fr", minHeight: "100vh" }}>
-      <nav aria-label={title} style={{ padding: "var(--space-4)", borderRight: "1px solid var(--color-border)", display: "grid", gap: "var(--space-2)", alignContent: "start" }}>
-        <strong>{title}</strong>
-        {ordered.map((s) => (
-          <Button key={s.id} variant={open?.id === s.id ? "primary" : "quiet"} onClick={() => setOpenId(s.id)} aria-current={open?.id === s.id ? "page" : undefined}>
-            {translateArea(s.messages, session.language, s.title)}
-          </Button>
-        ))}
-        <label style={{ display: "grid", gap: "var(--space-1)", fontSize: "var(--font-size-small)" }}>
-          {t("language")}
-          <select value={session.language} onChange={(e) => isLanguage(e.target.value) && setSession({ language: e.target.value })}>
-            {languages.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
-          </select>
-        </label>
-        <div style={{ display: "grid", gap: "var(--space-1)", fontSize: "var(--font-size-small)" }}>
-          <span>{t("signedInAs")}</span>
-          <strong>{session.displayName || session.personId}</strong>
-          <Button variant="secondary" onClick={() => signOut()}>{t("signOut")}</Button>
+    <div className={styles.frame}>
+      <aside className={styles.side}>
+        <div className={styles.brand}>
+          <BrandLockup inverse />
+          <span className={styles.appName}>{title.replace(/^TillKnowIT\s*/, "") || title}</span>
         </div>
-      </nav>
-      <main style={{ padding: "var(--space-6)", display: "grid", gap: "var(--space-4)", alignContent: "start" }}>
-        <Card title={t("workingFor")}>
-          <TextField label={t("signedInAs")} value={session.displayName || session.personId} readOnly />
-          <WorkingFor t={t} />
-          <details>
+        <nav aria-label={title} className={styles.nav}>
+          {ordered.map((s) => (
+            <button key={s.id} type="button" className={styles.navItem} onClick={() => setOpenId(s.id)} aria-current={open?.id === s.id ? "page" : undefined}>
+              <span className={styles.dot} aria-hidden="true" />
+              {label(s)}
+            </button>
+          ))}
+        </nav>
+        <div className={styles.sideFoot}>
+          <label>
+            {t("language")}
+            <select value={session.language} onChange={(e) => isLanguage(e.target.value) && setSession({ language: e.target.value })}>
+              {languages.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
+            </select>
+          </label>
+          <div className={styles.person}>
+            <span className={styles.avatar} aria-hidden="true">{initials}</span>
+            <span className={styles.who}>
+              <small>{t("signedInAs")}</small>
+              <strong>{name}</strong>
+            </span>
+          </div>
+          <button type="button" className={styles.signOut} onClick={() => signOut()}>{t("signOut")}</button>
+        </div>
+      </aside>
+      <div className={styles.content}>
+        <header className={styles.top}>
+          <h1 className={styles.title}>{open ? label(open) : title}</h1>
+          {needsOrganisation && (
+            <div className={styles.context}>
+              <WorkingFor t={t} />
+            </div>
+          )}
+          {needsOrganisation && <details className={styles.advanced}>
             <summary>{t("advanced")}</summary>
             <p>{t("advancedHint")}</p>
-            <form
-              onSubmit={(e) => { e.preventDefault(); setSession(draft); }}
-              style={{ display: "grid", gap: "var(--space-3)", gridTemplateColumns: "repeat(auto-fit, minmax(14rem, 1fr))", alignItems: "end" }}
-            >
+            <form onSubmit={(e) => { e.preventDefault(); setSession(draft); }}>
               <TextField label={t("shopId")} value={draft.shopId} onChange={(e) => setDraft({ ...draft, shopId: e.target.value.trim() })} />
               <TextField label={t("supplierId")} value={draft.supplierOrganisationId} onChange={(e) => setDraft({ ...draft, supplierOrganisationId: e.target.value.trim() })} />
               <TextField label={t("deviceId")} value={draft.deviceId} onChange={(e) => setDraft({ ...draft, deviceId: e.target.value.trim() })} />
               <Button type="submit">{t("save")}</Button>
             </form>
-          </details>
-        </Card>
-        {!Component ? <p>{t("noSections")}</p> : missing.length > 0
-          ? <Notice kind="warning">{t("missing", { what: missing.join(", ") })}</Notice>
-          : <Component />}
-      </main>
+          </details>}
+        </header>
+        <main className={styles.main}>
+          {!Component ? <p>{t("noSections")}</p> : missing.length > 0
+            ? <Notice kind="warning">{t("missing", { what: missing.join(", ") })}</Notice>
+            : <Component />}
+        </main>
+      </div>
     </div>
   );
 }

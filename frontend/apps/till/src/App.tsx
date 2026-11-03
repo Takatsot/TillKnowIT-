@@ -1,4 +1,4 @@
-import { Button, Notice } from "@tillknowit/design-system";
+import { BrandLockup, Button, Notice } from "@tillknowit/design-system";
 import { createApi, type Api } from "@tillknowit/api-client";
 import { fail, flushOutbox, type CatalogueItem, type Outbox, type PromotionDef, type SendBatch } from "@tillknowit/domain";
 import { Features } from "@tillknowit/packs";
@@ -204,8 +204,8 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <strong className={styles.brand}>{t("app.name")}</strong>
-        <span className={online ? styles.online : styles.offline}>{online ? t("status.online") : t("status.offline")}</span>
+        <span className={styles.brand} aria-label={t("app.name")}><BrandLockup inverse size={34} /></span>
+        <span className={online ? styles.online : styles.offline}><i className={styles.pulse} aria-hidden="true" />{online ? t("status.online") : t("status.offline")}</span>
         {counts.waiting > 0 && <span className={styles.offline}>{t("status.waiting", { count: counts.waiting })}</span>}
         {counts.refused > 0 && <span className={styles.offline}>{t("status.refused", { count: counts.refused })}</span>}
         {registered && (
@@ -235,7 +235,10 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
         ) : user ? (
           <>
             <div className={styles.welcome}>
-              <strong>{t("till.hello", { name: user.name })}</strong>
+              <span className={styles.hello}>
+                <span className={styles.avatar} aria-hidden="true">{user.name.trim()[0]?.toUpperCase()}</span>
+                <strong>{t("till.hello", { name: user.name })}</strong>
+              </span>
               <Button variant="secondary" onClick={() => setUser(null)}>{t("till.lock")}</Button>
             </div>
             {(() => {

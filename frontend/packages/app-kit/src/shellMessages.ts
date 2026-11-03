@@ -6,7 +6,8 @@ export type ShellKey =
   | "otp.phone_invalid" | "otp.too_many" | "otp.invalid" | "codeSent"
   | "sessionEnded" | "sessionExpired"
   | "signedInAs" | "signOut" | "workingFor" | "workingForNone" | "membershipsFailed" | "orgShop" | "orgSupplier" | "orgOther"
-  | "advanced" | "advancedHint" | "shopId" | "supplierId" | "deviceId" | "save";
+  | "advanced" | "advancedHint" | "shopId" | "supplierId" | "deviceId" | "save"
+  | "heroBefore" | "heroEmphasis" | "heroLead" | "heroPoint1" | "heroPoint2" | "heroPoint3";
 
 export const shellMessages: AreaMessages<ShellKey> = {
   en: {
@@ -23,6 +24,8 @@ export const shellMessages: AreaMessages<ShellKey> = {
     membershipsFailed: "We could not load your shops and suppliers.", orgShop: "shop", orgSupplier: "supplier", orgOther: "organisation",
     advanced: "Advanced: type ids by hand", advancedHint: "Only for testing. Normally the shop and supplier come from who you work for above.",
     shopId: "Shop id", supplierId: "Supplier organisation id", deviceId: "Device id", save: "Save",
+    heroBefore: "Run your shop with", heroEmphasis: "confidence", heroLead: "Sales, stock, suppliers and customers, in one calm place. It keeps working when the data runs out, too.",
+    heroPoint1: "Sell offline, sync when you are back", heroPoint2: "Know what to reorder, and from whom", heroPoint3: "Built for spaza shops and tuckshops",
   },
 };
 

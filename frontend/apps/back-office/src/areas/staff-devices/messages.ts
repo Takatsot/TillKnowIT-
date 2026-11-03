@@ -8,6 +8,7 @@ const en = {
   phone: "Phone number",
   role: "Role",
   manager: "Manager",
+  owner: "Owner",
   cashier: "Cashier",
   pin: "PIN (4 to 6 digits)",
   pinInvalid: "A PIN is 4 to 6 digits.",

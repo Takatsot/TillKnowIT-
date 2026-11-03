@@ -4,6 +4,9 @@ import { Badge, Button, Card, Inline, Notice, SelectField, Stack, Table, TextFie
 import { useState } from "react";
 import { messages } from "./messages";
 
+/** A role without its own words (field agent, platform admin) shows its code made readable. */
+const humanise = (code: string) => { const text = code.replace(/_/g, " "); return text.charAt(0).toUpperCase() + text.slice(1); };
+
 interface StaffRow { staffId: string; name: string; phone: string; role: string; disabled: boolean }
 interface DeviceRow { deviceId: string; name: string; status: string; lastSeenAt: string | null; wipeRequested: boolean }
 
@@ -89,7 +92,7 @@ function StaffCard() {
           empty={t("staffEmpty")}
           columns={[
             { header: t("colName"), cell: (r) => r.name },
-            { header: t("colRole"), cell: (r) => (r.role === "manager" ? t("manager") : t("cashier")) },
+            { header: t("colRole"), cell: (r) => (r.role === "manager" ? t("manager") : r.role === "cashier" ? t("cashier") : r.role === "owner" ? t("owner") : humanise(r.role)) },
             { header: t("colStatus"), cell: (r) => <Badge>{r.disabled ? t("disabled") : t("active")}</Badge> },
             { header: t("colId"), cell: (r) => <code>{r.staffId}</code> },
             {

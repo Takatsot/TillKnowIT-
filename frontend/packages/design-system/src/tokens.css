@@ -1,17 +1,45 @@
-/* Design tokens. Components only use these, never raw colours or sizes. */
+/* Design tokens. Components only use these, never raw colours or sizes.
+   The look: warm paper, deep forest green, a touch of brass gold, serif headings. Classic, calm, and a little lively. */
 :root {
-  /* Colour */
-  --color-bg: #f7f7f4;
-  --color-surface: #ffffff;
-  --color-text: #1b1f1d;
-  --color-text-muted: #55605b;
-  --color-border: #c9d0cb;
-  --color-primary: #0b6b4a;
-  --color-primary-hover: #095a3e;
-  --color-on-primary: #ffffff;
+  /* Colour: surfaces */
+  --color-bg: #f4efe3;
+  --color-bg-accent: #ebe4d1;
+  --color-surface: #fffdf7;
+  --color-surface-2: #faf6ea;
+  --color-text: #1e2b25;
+  --color-text-muted: #5b6a62;
+  --color-border: #e0d8c3;
+  --color-border-strong: #c9bfa3;
+
+  /* Colour: brand */
+  --color-primary: #0f5c40;
+  --color-primary-hover: #0a4630;
+  --color-primary-soft: #dcebe2;
+  --color-on-primary: #fffdf7;
+  --color-accent: #c0912f;
+  --color-accent-soft: #f6e9c8;
+  --color-ink: #0b2a1f;           /* the deep green of the side menu and hero panels */
+  --color-ink-2: #11402f;
+  --color-on-ink: #f3ecd8;
+  --color-on-ink-muted: #b9c7bd;
+
+  /* Colour: meaning */
+  --color-success: #1d7a4b;
+  --color-success-soft: #dff1e5;
   --color-danger: #b3261e;
-  --color-warning-bg: #fff4d6;
+  --color-danger-soft: #fbe4e1;
+  --color-warning: #8a5a00;
+  --color-warning-bg: #fdf0cc;
+  --color-info: #1d5f8a;
+  --color-info-soft: #e1eef7;
   --color-focus: #1a5fd0;
+
+  /* Depth and motion */
+  --shadow-1: 0 1px 2px rgba(30, 43, 37, 0.06), 0 1px 1px rgba(30, 43, 37, 0.04);
+  --shadow-2: 0 6px 18px rgba(30, 43, 37, 0.09), 0 2px 4px rgba(30, 43, 37, 0.05);
+  --shadow-3: 0 16px 40px rgba(11, 42, 31, 0.18), 0 4px 10px rgba(11, 42, 31, 0.08);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --speed: 160ms;
 
   /* Size. Touch targets are at least 48px (WCAG 2.2 AA, spec). */
   --touch-target: 48px;
@@ -21,29 +49,48 @@
   --space-4: 16px;
   --space-6: 24px;
   --space-8: 32px;
-  --radius: 12px;
+  --radius: 14px;
+  --radius-sm: 10px;
 
   /* Type uses rem so it follows the user's text size up to 200%. */
-  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-size-base: 1.125rem;
-  --font-size-small: 0.9375rem;
-  --font-size-large: 1.5rem;
+  --font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-size-base: 1.0625rem;
+  --font-size-small: 0.9rem;
+  --font-size-large: 1.4rem;
   --font-size-xlarge: 2rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #121614;
-    --color-surface: #1c221f;
-    --color-text: #eef1ef;
-    --color-text-muted: #aab4ae;
-    --color-border: #3a443f;
-    --color-primary: #4fc79a;
-    --color-primary-hover: #6fd6af;
-    --color-on-primary: #08130e;
-    --color-danger: #ff8a80;
-    --color-warning-bg: #3d3414;
+    --color-bg: #0f1512;
+    --color-bg-accent: #16201b;
+    --color-surface: #18211d;
+    --color-surface-2: #1d2823;
+    --color-text: #eef1ec;
+    --color-text-muted: #a9b6ae;
+    --color-border: #2c3a33;
+    --color-border-strong: #3f5148;
+    --color-primary: #55c79a;
+    --color-primary-hover: #77d6b0;
+    --color-primary-soft: #1b3a2e;
+    --color-on-primary: #07130d;
+    --color-accent: #e0b556;
+    --color-accent-soft: #3a3115;
+    --color-ink: #08120e;
+    --color-ink-2: #0e1f18;
+    --color-success: #6fd6a0;
+    --color-success-soft: #173326;
+    --color-danger: #ff8f84;
+    --color-danger-soft: #3a1c19;
+    --color-warning: #f0c36a;
+    --color-warning-bg: #3a3014;
+    --color-info: #8cc4ec;
+    --color-info-soft: #14283a;
     --color-focus: #8ab4ff;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 6px 18px rgba(0, 0, 0, 0.45);
+    --shadow-3: 0 16px 40px rgba(0, 0, 0, 0.55);
   }
 }
 
@@ -53,15 +100,88 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   font-family: var(--font-family);
   font-size: var(--font-size-base);
+  line-height: 1.5;
   color: var(--color-text);
   background: var(--color-bg);
+  background-image: radial-gradient(1200px 500px at 85% -10%, var(--color-bg-accent), transparent 70%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.005em;
+  line-height: 1.2;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin: var(--space-3) 0 var(--space-1);
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+code {
+  padding: 1px 6px;
+  font-size: 0.9em;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+summary {
+  cursor: pointer;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
 }
 
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

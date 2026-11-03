@@ -5,57 +5,127 @@
 }
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-6);
+  color: var(--color-on-ink);
+  background:
+    radial-gradient(500px 120px at 0% 0%, rgba(192, 145, 47, 0.16), transparent 70%),
+    linear-gradient(180deg, var(--color-ink-2), var(--color-ink));
+  border-bottom: 3px solid var(--color-accent);
+  box-shadow: var(--shadow-2);
 }
 
 .brand {
   margin-right: auto;
-  font-size: var(--font-size-large);
 }
 
 .online,
 .offline {
-  padding: var(--space-1) var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px var(--space-3);
   border-radius: 999px;
   font-size: var(--font-size-small);
+  font-weight: 600;
 }
 
 .online {
-  border: 1px solid var(--color-border);
-  color: var(--color-text-muted);
+  color: var(--color-on-ink);
+  background: rgba(243, 236, 216, 0.1);
+  border: 1px solid rgba(243, 236, 216, 0.2);
 }
 
 .offline {
-  background: var(--color-warning-bg);
+  color: #4a3200;
+  background: #f6d77a;
+  border: 1px solid #e0b84a;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #55d89c;
+  box-shadow: 0 0 0 0 rgba(85, 216, 156, 0.7);
+  animation: ping 2.4s ease-out infinite;
+}
+
+.offline .pulse {
+  background: #b3261e;
+  animation: none;
+}
+
+@keyframes ping {
+  70% { box-shadow: 0 0 0 8px rgba(85, 216, 156, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(85, 216, 156, 0); }
+}
+
+.header :global(button) {
+  color: var(--color-on-ink);
+}
+
+.header :global(button:hover:not(:disabled)) {
+  background: rgba(243, 236, 216, 0.12);
 }
 
 .language select {
-  min-height: var(--touch-target);
+  min-height: 2.5rem;
   padding: 0 var(--space-3);
   font: inherit;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius);
+  color: var(--color-on-ink);
+  background: rgba(243, 236, 216, 0.08);
+  border: 1px solid rgba(243, 236, 216, 0.24);
+  border-radius: var(--radius-sm);
+}
+
+.language select option {
+  color: #1e2b25;
 }
 
 .main {
   display: grid;
   align-items: start;
-  padding: var(--space-6) var(--space-4);
+  align-content: start;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  animation: rise 260ms var(--ease) both;
 }
 
 .welcome {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-4);
-  justify-items: center;
-  text-align: center;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 64rem;
+  width: 100%;
+  margin: 0 auto var(--space-4);
+}
+
+.hello {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: linear-gradient(135deg, #e4c06a, var(--color-accent));
+  border-radius: 50%;
+  box-shadow: var(--shadow-1);
 }
 
 .visuallyHidden {
@@ -67,15 +137,56 @@
   white-space: nowrap;
 }
 
+/* the tabs read as one segmented control */
 .tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 4px;
   justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto var(--space-4);
+  padding: 5px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: var(--shadow-1);
+}
+
+.tabs :global(button) {
+  min-height: 2.75rem;
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
 }
 
 .banner {
   width: 100%;
   max-width: 40rem;
   margin: 0 auto var(--space-4);
+}
+
+@media (max-width: 40rem) {
+  .header {
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+@media (max-width: 40rem) {
+  .brand {
+    flex: 1 0 auto;
+  }
+
+  .welcome {
+    flex-wrap: nowrap;
+  }
+
+  .tabs {
+    width: 100%;
+  }
+
+  .tabs :global(button) {
+    flex: 1 1 auto;
+    padding: var(--space-1) var(--space-3);
+  }
 }

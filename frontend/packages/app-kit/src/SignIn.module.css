@@ -1,0 +1,160 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ---- the welcome panel ---- */
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: var(--space-8) clamp(var(--space-6), 5vw, 4.5rem);
+  overflow: hidden;
+  color: var(--color-on-ink);
+  background:
+    radial-gradient(700px 420px at 90% 0%, rgba(192, 145, 47, 0.2), transparent 70%),
+    radial-gradient(600px 500px at 0% 100%, rgba(85, 199, 154, 0.16), transparent 70%),
+    linear-gradient(160deg, var(--color-ink-2), var(--color-ink));
+}
+
+/* a quiet awning-stripe pattern, like a shopfront */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -2rem -10%;
+  height: 9rem;
+  background: repeating-linear-gradient(90deg, rgba(246, 233, 200, 0.1) 0 3rem, rgba(246, 233, 200, 0.02) 3rem 6rem);
+  transform: skewY(-3deg);
+  pointer-events: none;
+}
+
+.pitch {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 30rem;
+  animation: rise 500ms var(--ease) both;
+}
+
+.pitch h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4.2vw, 3.1rem);
+  line-height: 1.1;
+  color: var(--color-on-ink);
+}
+
+.pitch h1 em {
+  font-style: italic;
+  color: var(--color-accent);
+}
+
+.pitch p {
+  font-size: 1.1rem;
+  color: var(--color-on-ink-muted);
+}
+
+.points {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.points li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-on-ink);
+}
+
+.points li::before {
+  content: "\2713";
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--color-ink);
+  background: var(--color-accent);
+  border-radius: 50%;
+}
+
+.foot {
+  position: relative;
+  z-index: 1;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--color-on-ink-muted);
+}
+
+/* ---- the form ---- */
+.side {
+  display: grid;
+  place-items: center;
+  padding: var(--space-8) var(--space-6);
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 28rem;
+  animation: pop 380ms var(--ease) both;
+}
+
+.language {
+  display: grid;
+  gap: var(--space-1);
+  justify-self: end;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.language select {
+  min-height: 2.5rem;
+  padding: 0 var(--space-3);
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.card {
+  box-shadow: var(--shadow-3);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (max-width: 52rem) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .pitch p,
+  .points,
+  .foot {
+    display: none;
+  }
+
+  .pitch h1 {
+    font-size: 1.7rem;
+  }
+}

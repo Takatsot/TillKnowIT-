@@ -13,6 +13,8 @@ using TillKnowIT.Dispatching;
 using TillKnowIT.SharedKernel;
 using Wallet.Application;
 using Wallet.Contracts;
+using ShopCore.Application.Sync;
+using ShopCore.Contracts;
 
 /// <summary>
 /// Development only: one person for every role, a verified shop with a till, a verified supplier, and a school with a child linked to a parent, so every app can be signed in to.
@@ -69,11 +71,39 @@ internal static class DevSeed
 
         // Staff who use the till with a PIN.
         Ok(await dispatcher.Send(new AddStaff(shop, "Thandi Mokoena", "0825550002", "cashier", "1234"), ct), "add cashier");
-        Ok(await dispatcher.Send(new AddStaff(shop, "Sipho Zulu", "0825550003", "manager", "4321"), ct), "add manager");
+        var manager = Ok(await dispatcher.Send(new AddStaff(shop, "Sipho Zulu", "0825550003", "manager", "4321"), ct), "add manager");
 
         // A till, approved, with its one-time setup code.
         var till = Ok(await dispatcher.Send(new RegisterDevice(shop, "Counter till", people[Owner.Phone].Id), ct), "register till");
         Ok(await dispatcher.Send(new ApproveDevice(till.DeviceId, people[Owner.Phone].Id), ct), "approve till");
+
+        // Some stock to sell, so the till and the reports have something to show.
+        var now = DateTimeOffset.UtcNow;
+        (string Name, string Barcode, string Category, long Cost, long Price, int Low, int Qty)[] stock =
+        [
+            ("White bread 700g", "6001234500011", "bread_bakery", 1450, 1899, 10, 40),
+            ("Full cream milk 1L", "6001234500028", "dairy_eggs", 1590, 1999, 12, 30),
+            ("Eggs tray of 18", "6001234500035", "dairy_eggs", 4200, 5499, 5, 12),
+            ("Maize meal 5kg", "6001234500042", "groceries", 5800, 7499, 6, 20),
+            ("Sunflower oil 750ml", "6001234500059", "groceries", 4100, 5299, 6, 18),
+            ("Coca-Cola 330ml can", "6001234500066", "drinks", 950, 1399, 24, 72),
+            ("Simba chips 120g", "6001234500073", "snacks_sweets", 1150, 1599, 12, 36),
+            ("Lux soap bar", "6001234500080", "toiletries", 650, 999, 8, 25),
+            ("Sunlight dish liquid 750ml", "6001234500097", "household", 2300, 3199, 6, 3),
+            ("Rama margarine 500g", "6001234500103", "dairy_eggs", 2900, 3899, 6, 14),
+        ];
+        var products = new List<ProductUpload>();
+        var movements = new List<StockMovementUpload>();
+        foreach (var p in stock)
+        {
+            var id = Guid.CreateVersion7();
+            products.Add(new ProductUpload(id, manager, null, p.Name, p.Barcode, p.Category, p.Cost, p.Price, p.Low, null, true, now));
+            movements.Add(new StockMovementUpload(Guid.CreateVersion7(), manager, id, "receive", p.Qty, now, null, p.Cost, null, "Mahlangu Wholesale", "DEV-001"));
+        }
+        var uploaded = Ok(await dispatcher.Send(new UploadBatch(new SyncUploadRequest(shop, till.DeviceId, null, null, null, products)), ct), "upload products");
+        if (uploaded.Results.Any(r => r.Status == UploadStatus.Rejected)) throw new InvalidOperationException($"Dev seed: products rejected: {string.Join("; ", uploaded.Results.Where(r => r.Status == UploadStatus.Rejected).Select(r => r.Message))}");
+        var received = Ok(await dispatcher.Send(new UploadBatch(new SyncUploadRequest(shop, till.DeviceId, null, movements, null)), ct), "receive stock");
+        if (received.Results.Any(r => r.Status == UploadStatus.Rejected)) throw new InvalidOperationException($"Dev seed: stock rejected: {string.Join("; ", received.Results.Where(r => r.Status == UploadStatus.Rejected).Select(r => r.Message))}");
 
         // A verified supplier that delivers to Johannesburg.
         var supplier = Ok(await dispatcher.Send(new ApplyAsSupplier(new ApplyAsSupplierRequest(people[Supplier.Phone].Id, "Mahlangu Wholesale", null, "Sello Mahlangu", "0825550006", null, null,

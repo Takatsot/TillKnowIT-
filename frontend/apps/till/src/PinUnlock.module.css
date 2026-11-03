@@ -4,13 +4,24 @@
   justify-items: center;
   width: 100%;
   max-width: 24rem;
-  margin: 0 auto;
+  margin: var(--space-6) auto 0;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) + 6px);
+  box-shadow: var(--shadow-3);
+  animation: pop 320ms var(--ease) both;
 }
 
 .title {
   margin: 0;
   font-size: var(--font-size-large);
   text-align: center;
+  color: var(--color-ink-2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .title { color: var(--color-text); }
 }
 
 .people {
@@ -25,32 +36,36 @@
 .person {
   width: 100%;
   min-height: 4rem;
+  font-family: var(--font-display);
   font-size: var(--font-size-large);
 }
 
 .dots {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-4);
   min-height: var(--touch-target);
   align-items: center;
 }
 
 .dot,
 .dotFilled {
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid var(--color-text);
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid var(--color-primary);
   border-radius: 50%;
+  transition: background var(--speed) var(--ease), transform var(--speed) var(--ease);
 }
 
 .dotFilled {
-  background: var(--color-text);
+  background: var(--color-primary);
+  transform: scale(1.12);
 }
 
 .message {
   min-height: 3rem;
   margin: 0;
   color: var(--color-danger);
+  font-weight: 600;
   text-align: center;
 }
 
@@ -62,8 +77,10 @@
 }
 
 .key {
-  min-height: 4rem;
-  font-size: var(--font-size-large);
+  min-height: 4.25rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  border-radius: var(--radius);
 }
 
 .notice {
@@ -71,6 +88,7 @@
   margin: var(--space-8) auto;
   padding: var(--space-4);
   background: var(--color-warning-bg);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 35%, transparent);
   border-radius: var(--radius);
   text-align: center;
 }

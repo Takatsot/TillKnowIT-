@@ -39,8 +39,19 @@ export function Table<T>({ columns, rows, rowKey, empty }: { columns: readonly C
   );
 }
 
-export function Badge({ children }: { children: ReactNode }) {
-  return <span className={styles.badge}>{children}</span>;
+/** A small status pill. `tone` colours it by meaning; without one it is neutral. */
+export function Badge({ children, tone }: { children: ReactNode; tone?: "success" | "warning" | "danger" | "info" }) {
+  const shown = tone ?? (typeof children === "string" ? toneOf(children) : undefined);
+  return <span className={[styles.badge, shown ? styles[`tone-${shown}`] : ""].filter(Boolean).join(" ")}>{children}</span>;
+}
+
+/** Common status words get their colour without every screen choosing one. Anything else stays neutral. */
+function toneOf(text: string): "success" | "warning" | "danger" | "info" | undefined {
+  const word = text.trim().toLowerCase();
+  if (/^(active|approved|paid|connected|sent|verified|done|working|delivered|succeeded|received|open|trading|on)$/.test(word)) return "success";
+  if (/^(pending|waiting|waiting for approval|draft|partly paid|in progress|wiping|wipe requested|queued|new)$/.test(word)) return "warning";
+  if (/^(blocked|failed|disabled|switched off|refused|cancelled|canceled|expired|suspended|overdue|rejected|off)$/.test(word)) return "danger";
+  return undefined;
 }
 
 export function Stack({ children }: { children: ReactNode }) {
