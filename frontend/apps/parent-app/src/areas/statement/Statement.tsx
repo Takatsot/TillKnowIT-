@@ -1,5 +1,5 @@
 import { formatDateTime, formatRand, saveFile, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Notice, SelectField, Stack } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Notice, SelectField, Stack } from "@tillknowit/design-system";
 import qrcode from "qrcode-generator";
 import { useEffect, useState } from "react";
 import { ChildScope, itemStyle, listStyle, mutedStyle } from "../../shared/ChildScope";
@@ -110,7 +110,7 @@ function Lines({ child }: { child: Child }) {
         </>
       )}
       {!list.data && !list.error && <p>{t("loading")}</p>}
-      {list.data && list.data.length === 0 && <p>{t("empty")}</p>}
+      {list.data && list.data.length === 0 && <EmptyState>{t("empty")}</EmptyState>}
       {list.data && list.data.length > 0 && (
         <ul style={listStyle}>
           {[...list.data].reverse().map((l, i) => (
@@ -168,7 +168,7 @@ function Cards({ child }: { child: Child }) {
         </>
       )}
       {!tokens.data && !tokens.error && <p>{t("loading")}</p>}
-      {tokens.data && tokens.data.length === 0 && <p>{t("noCards")}</p>}
+      {tokens.data && tokens.data.length === 0 && <EmptyState>{t("noCards")}</EmptyState>}
       {tokens.data && tokens.data.length > 0 && (
         <ul style={listStyle}>
           {tokens.data.map((c, n) => (

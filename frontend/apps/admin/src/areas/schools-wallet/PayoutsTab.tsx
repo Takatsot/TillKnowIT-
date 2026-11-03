@@ -1,5 +1,5 @@
 import { formatDate, formatRand, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Inline, Notice, Stack, Table, TextField, TextAreaField } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Inline, Notice, Stack, Table, TextAreaField, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { messages, type SchoolsKey } from "./messages";
 import type { Payout, Reconciliation, RunPayouts, ShopSales } from "./types";
@@ -102,7 +102,7 @@ function ShopSalesCard({ defaultShopId }: { defaultShopId: string }) {
                   { header: t("owed"), cell: (s) => formatRand(s.owedToShopCents), align: "right" },
                 ]}
               />
-              {summary.payouts.length === 0 ? <p>{t("noPayouts")}</p> : <PayoutTable rows={summary.payouts} />}
+              {summary.payouts.length === 0 ? <EmptyState>{t("noPayouts")}</EmptyState> : <PayoutTable rows={summary.payouts} />}
             </Stack>
           )}
         </Stack>

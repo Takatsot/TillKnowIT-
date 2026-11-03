@@ -1,5 +1,5 @@
 import { formatRand, useAction, useApi, useLoad, useMessages, useSession, useSetSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, CheckField, Inline, Notice, Stack, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, CheckField, EmptyState, Inline, Notice, Stack, TextField } from "@tillknowit/design-system";
 import { useEffect, useState } from "react";
 import { dayCodes } from "../../shared/days";
 import { readSupplierId, saveSupplierId, useSupplierLookup } from "../../shared/SupplierGate";
@@ -28,7 +28,7 @@ function SupplierDetails({ supplierId }: { supplierId: string }) {
       {d.rejectionReason && <Notice kind="warning">{t("rejection", { reason: d.rejectionReason })}</Notice>}
       <p>{t("minOrder")}: {formatRand(d.minOrderCents)} | {t("deliveryFee")}: {formatRand(d.deliveryFeeCents)} | {t("paymentTerms")}: {d.paymentTerms}</p>
       <h3>{t("areas")}</h3>
-      {d.areas.length === 0 ? <p>{t("noAreas")}</p> : <ul>{d.areas.map((a) => <li key={a.municipalityCode}>{a.municipalityCode}: {a.days.join(", ")}</li>)}</ul>}
+      {d.areas.length === 0 ? <EmptyState>{t("noAreas")}</EmptyState> : <ul>{d.areas.map((a) => <li key={a.municipalityCode}>{a.municipalityCode}: {a.days.join(", ")}</li>)}</ul>}
     </Stack>
   );
 }
@@ -72,7 +72,7 @@ export function Application() {
   return (
     <Stack>
       <Card title={t("detailsHeading")}>
-        {supplierId === "" ? <p>{t("noSupplier")}</p> : <SupplierDetails supplierId={supplierId} />}
+        {supplierId === "" ? <EmptyState>{t("noSupplier")}</EmptyState> : <SupplierDetails supplierId={supplierId} />}
         <form onSubmit={(e) => { e.preventDefault(); const v = draftId.trim(); if (v) { saveSupplierId(v); setSupplierId(v); } }}>
           <Inline>
             <TextField label={t("supplierId")} hint={t("supplierIdHint")} value={draftId} onChange={(e) => setDraftId(e.target.value)} />

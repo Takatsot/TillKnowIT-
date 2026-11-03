@@ -1,4 +1,4 @@
-import { Button, Card, Inline, Notice, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Button, Card, EmptyState, Inline, Notice, Stack, Table, TextField } from "@tillknowit/design-system";
 import { formatRand, newId } from "@tillknowit/domain";
 import { useState } from "react";
 import type { TillContext } from "../../feature";
@@ -68,7 +68,7 @@ function TablesBody({ ctx, caller }: { ctx: TillContext; caller: Caller }) {
         {plan.loading || tickets.loading ? <p>{kit("kit.loading")}</p> : null}
 
         {view === "floor" ? (
-          tables.length === 0 && !plan.loading ? <p>{t("floor.empty")}</p> : (
+          tables.length === 0 && !plan.loading ? <EmptyState>{t("floor.empty")}</EmptyState> : (
             <ul className={styles.floor} aria-label={t("view.floor")}>
               {tables.map((tb) => {
                 const there = ticketsOn(tb.id);

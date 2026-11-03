@@ -1,4 +1,4 @@
-import { Button, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Button, EmptyState, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { creditPaymentRecord, formatRand, isSaleEntry, newId, parseRandToCents, queueBuilt, type CreditEntryDto } from "@tillknowit/domain";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useBusy, useT } from "../../coreKit";
@@ -89,7 +89,7 @@ export function CoreCredit({ ctx }: { ctx: TillContext }) {
   return (
     <Stack>
       {message && <Notice kind={message.kind}>{message.text}</Notice>}
-      {accounts === null ? null : accounts.length === 0 ? <p>{t("empty")}</p> : (
+      {accounts === null ? null : accounts.length === 0 ? <EmptyState>{t("empty")}</EmptyState> : (
         <>
           {cached && <p>{ctx.online ? t("unreachable") : t("offlineCopy")}</p>}
           <TextField label={t("find")} value={filter} onChange={(e) => setFilter(e.target.value)} />

@@ -24,6 +24,7 @@ builder.Services.AddEncryptedLocalFileStore(builder.Configuration["Storage:Root"
 builder.Services.AddSlipOptions(builder.Configuration["Slips:BaseUrl"], builder.Configuration["Slips:SigningKey"]);
 builder.Services.AddOpenApi();
 builder.Services.AddIdentityAuth(builder.Configuration, builder.Environment.IsDevelopment());
+builder.Services.AddExceptionHandler<BadRequestHandler>();
 builder.Services.AddProblemDetails();
 builder.Services
     .AddIdentityModule(db)

@@ -1,5 +1,5 @@
 import { useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Inline, Notice, Stack } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Inline, Notice, Stack } from "@tillknowit/design-system";
 import { useState } from "react";
 import { messages, type BusinessPackKey } from "./messages";
 
@@ -37,7 +37,7 @@ export function BusinessPack() {
       {current.data && (
         <Card title={t("currentHeading")}>
           <p><strong>{current.data.packName}</strong> <Badge>{t("currentVersion", { version: current.data.packVersion })}</Badge></p>
-          {current.data.features.length === 0 ? <p>{t("currentNone")}</p> : (
+          {current.data.features.length === 0 ? <EmptyState>{t("currentNone")}</EmptyState> : (
             <ul>{current.data.features.map((f) => <li key={f.flag}>{feature(f.flag)}</li>)}</ul>
           )}
         </Card>
@@ -48,7 +48,7 @@ export function BusinessPack() {
           {loading && <p>{t("loading")}</p>}
           {choose.error && <Notice kind="danger">{choose.error.message}</Notice>}
           {done && <Notice kind="success">{done}</Notice>}
-          {packs.data && packs.data.length === 0 && <p>{t("empty")}</p>}
+          {packs.data && packs.data.length === 0 && <EmptyState>{t("empty")}</EmptyState>}
           {(packs.data ?? []).map((p) => {
             const isCurrent = current.data?.packCode === p.code;
             return (
@@ -56,7 +56,7 @@ export function BusinessPack() {
                 <Stack>
                   {p.description && <p>{p.description}</p>}
                   <p>{t("features")}</p>
-                  {p.features.length === 0 ? <p>{t("noFeatures")}</p> : <ul>{p.features.map((f) => <li key={f.flag}>{feature(f.flag)}</li>)}</ul>}
+                  {p.features.length === 0 ? <EmptyState>{t("noFeatures")}</EmptyState> : <ul>{p.features.map((f) => <li key={f.flag}>{feature(f.flag)}</li>)}</ul>}
                   <Inline>
                     {isCurrent && <Badge>{t("chosenBadge")}</Badge>}
                     <Button disabled={isCurrent || choose.busy} onClick={() => void pick(p)}>{t("choose", { name: p.name })}</Button>

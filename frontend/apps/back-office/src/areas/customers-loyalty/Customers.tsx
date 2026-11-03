@@ -1,6 +1,6 @@
 import { newId } from "@tillknowit/domain";
 import { formatDateTime, formatRand, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, CheckField, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, CheckField, EmptyState, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import type { TillCaller } from "../selling-common/TillCaller";
 import { messages } from "./messages";
@@ -221,7 +221,7 @@ function CustomerPanel({ customer, others, caller, onChanged, onMerged, onClose 
 
         <h3>{t("mergeHeading")}</h3>
         <p>{t("mergeHint", { name: customer.name })}</p>
-        {others.length === 0 ? <p>{t("mergeNone")}</p> : (
+        {others.length === 0 ? <EmptyState>{t("mergeNone")}</EmptyState> : (
           <Inline>
             <SelectField label={t("mergeSource")} value={source} onChange={(e) => setSource(e.target.value)}>
               <option value="">{t("mergeChoose")}</option>

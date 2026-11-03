@@ -1,4 +1,9 @@
+import { af } from "./af";
 import { en, type MessageKey } from "./en";
+import { st } from "./st";
+import { tn } from "./tn";
+import { xh } from "./xh";
+import { zu } from "./zu";
 
 export type { MessageKey };
 
@@ -21,9 +26,9 @@ export type LanguageCode = (typeof languages)[number]["code"];
 
 type Catalogue = Partial<Record<MessageKey, string>>;
 
-// Translations are added by translators, one file per language. Until a key is translated the
+// Translations are added by translators, one file per language. zu, xh, st, tn and af are first drafts awaiting review by first-language speakers. Until a key is translated the
 // app shows the English text, so nothing is ever blank. `coverage` reports what is still missing.
-const catalogues: Record<LanguageCode, Catalogue> = { en, zu: {}, xh: {}, st: {}, tn: {}, af: {}, nso: {}, ts: {}, ve: {}, nr: {}, ss: {} };
+const catalogues: Record<LanguageCode, Catalogue> = { en, zu, xh, st, tn, af, nso: {}, ts: {}, ve: {}, nr: {}, ss: {} };
 
 export const isLanguage = (code: string): code is LanguageCode => code in catalogues;
 

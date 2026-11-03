@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { coverage, isLanguage, languages, staleKeys, translate } from "./index";
+import { en, type MessageKey } from "./en";
 
 describe("translate", () => {
   it("fills in parameters", () => {
@@ -7,7 +8,8 @@ describe("translate", () => {
   });
 
   it("falls back to English for untranslated keys, never blank", () => {
-    expect(translate("zu", "till.lock")).toBe("Lock till");
+    expect(translate("nso", "till.lock")).toBe("Lock till");   // no draft for Sepedi yet
+    expect(translate("zu", "till.lock")).toBe("Vala i-till");
   });
 
   it("leaves unknown placeholders visible instead of hiding them", () => {
@@ -29,6 +31,20 @@ describe("translation coverage", () => {
 
   it("no language has keys English does not have", () => {
     for (const { code } of languages) expect(staleKeys(code)).toEqual([]);
+  });
+
+  it("a translation keeps every {placeholder} of the English text, so no amount, name or count is lost", () => {
+    for (const { code } of languages) {
+      for (const key of Object.keys(en) as MessageKey[]) {
+        const wanted = (en[key].match(/\{\w+\}/g) ?? []).sort();
+        const given = (translate(code, key).match(/\{\w+\}/g) ?? []).sort();
+        expect(given, `${code} ${key}`).toEqual(wanted);
+      }
+    }
+  });
+
+  it("the first drafts cover everything the till shows", () => {
+    for (const code of ["zu", "xh", "st", "tn", "af"] as const) expect(coverage(code).missing, code).toEqual([]);
   });
 
   // The definition of done says no untranslated text in any of the eleven languages.

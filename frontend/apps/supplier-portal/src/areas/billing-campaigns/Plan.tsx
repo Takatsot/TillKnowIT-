@@ -1,5 +1,5 @@
 import { formatDate, formatRand, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Inline, Notice, Stack, Table } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Inline, Notice, Stack, Table } from "@tillknowit/design-system";
 import { useState } from "react";
 import { messages, type BillingKey } from "./messages";
 
@@ -30,7 +30,7 @@ export function Plan() {
       {note && <Notice kind="success">{note}</Notice>}
       <Card title={t("subHeading")}>
         {sub.error && !noSub && <Notice kind="danger">{sub.error.message}</Notice>}
-        {noSub && <p>{t("noSub")}</p>}
+        {noSub && <EmptyState>{t("noSub")}</EmptyState>}
         {sub.loading && !sub.data && !sub.error && <p>{t("loading")}</p>}
         {sub.data && (
           <Stack>

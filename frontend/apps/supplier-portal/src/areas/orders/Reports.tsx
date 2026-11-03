@@ -1,5 +1,5 @@
 import { saveFile, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Button, Card, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Button, Card, EmptyState, Inline, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { messages } from "./messages";
 
@@ -61,7 +61,7 @@ export function Ratings({ supplierId }: { supplierId: string }) {
   return (
     <Card title={t("ratingsHeading")}>
       {r.error && <Notice kind="danger">{r.error.message}</Notice>}
-      {r.loading && !d ? <p>{t("loading")}</p> : d && (d.count === 0 ? <p>{t("ratingsNone")}</p> : (
+      {r.loading && !d ? <p>{t("loading")}</p> : d && (d.count === 0 ? <EmptyState>{t("ratingsNone")}</EmptyState> : (
         <Stack>
           <p>{t("ratingsCount", { count: d.count })}</p>
           {d.averageScore === null ? <p>{t("ratingsNotEnough")}</p> : (

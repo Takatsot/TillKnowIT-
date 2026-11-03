@@ -1,5 +1,5 @@
 import { useApi, useLoad, useSession } from "@tillknowit/app-kit";
-import { CheckField, SelectField } from "@tillknowit/design-system";
+import { CheckField, EmptyState, SelectField } from "@tillknowit/design-system";
 import { useMessages } from "@tillknowit/app-kit";
 import { messages } from "./messages";
 
@@ -42,7 +42,7 @@ export function ProductChecks({ legend, selected, onChange, products }: { legend
   return (
     <fieldset>
       <legend>{legend}</legend>
-      {products.length === 0 ? <p>{t("productsEmpty")}</p> : products.map((p) => (
+      {products.length === 0 ? <EmptyState>{t("productsEmpty")}</EmptyState> : products.map((p) => (
         <CheckField key={p.productId} label={p.name} checked={selected.includes(p.productId)}
           onChange={(e) => onChange(e.target.checked ? [...selected, p.productId] : selected.filter((x) => x !== p.productId))} />
       ))}

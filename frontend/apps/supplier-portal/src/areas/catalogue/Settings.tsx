@@ -1,5 +1,5 @@
 import { formatRand, parseRandToCents, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Button, Card, CheckField, Inline, Notice, SelectField, Stack, TextField } from "@tillknowit/design-system";
+import { Button, Card, CheckField, EmptyState, Inline, Notice, SelectField, Stack, TextField } from "@tillknowit/design-system";
 import { useEffect, useState } from "react";
 import { dayCodes } from "../../shared/days";
 import { messages } from "./messages";
@@ -30,7 +30,7 @@ export function Areas({ supplierId }: { supplierId: string }) {
       {supplier.loading && !supplier.data ? <p>{t("loading")}</p> : (
         <form onSubmit={(e) => { e.preventDefault(); void save.run().then((r) => setSaved(r.ok)); }}>
           <Stack>
-            {areas.length === 0 && <p>{t("noAreaYet")}</p>}
+            {areas.length === 0 && <EmptyState>{t("noAreaYet")}</EmptyState>}
             {areas.map((a, i) => (
               <fieldset key={i}>
                 <legend>{t("days")}</legend>

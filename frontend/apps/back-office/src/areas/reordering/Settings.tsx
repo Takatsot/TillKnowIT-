@@ -1,5 +1,5 @@
 import { formatDate, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Button, Card, Inline, Notice, SelectField, Stack } from "@tillknowit/design-system";
+import { Button, Card, EmptyState, Inline, Notice, SelectField, Stack } from "@tillknowit/design-system";
 import { useEffect, useState } from "react";
 import { messages } from "./messages";
 
@@ -58,7 +58,7 @@ export function Settings() {
         <Stack>
           <p>{t("usualHint")}</p>
           {usualList.error && <Notice kind="danger">{usualList.error.message}</Notice>}
-          {usualList.loading ? <p role="status">{t("usualLoading")}</p> : usualList.data && usualList.data.length === 0 ? <p>{t("usualEmpty")}</p> : (
+          {usualList.loading ? <p role="status">{t("usualLoading")}</p> : usualList.data && usualList.data.length === 0 ? <EmptyState>{t("usualEmpty")}</EmptyState> : (
             <ul aria-label={t("usualHeading")}>
               {(usualList.data ?? []).map((s) => (
                 <li key={s.supplierId}>

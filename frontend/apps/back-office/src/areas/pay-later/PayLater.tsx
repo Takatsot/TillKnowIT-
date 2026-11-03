@@ -1,5 +1,5 @@
 import { formatDate, formatDateTime, formatRand, parseRandToCents, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { messages } from "./messages";
 
@@ -186,7 +186,7 @@ function DrawCard({ applications, draws, onDone }: { applications: CreditApplica
   return (
     <Card title={t("drawHeading")}>
       <Stack>
-        {applications.length === 0 ? <p>{t("noApproved")}</p> : (
+        {applications.length === 0 ? <EmptyState>{t("noApproved")}</EmptyState> : (
           <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
             <Stack>
               <SelectField label={t("drawApplication")} value={applicationId} onChange={(e) => setApplicationId(e.target.value)}>
@@ -198,7 +198,7 @@ function DrawCard({ applications, draws, onDone }: { applications: CreditApplica
                 {unpaid.map((o) => <option key={o.id} value={o.id}>{t("drawOrderOption", { supplier: o.supplierName, reference: o.reference, total: formatRand(o.totalCents) })}</option>)}
               </SelectField>
               {orders.error && <Notice kind="danger">{orders.error.message}</Notice>}
-              {!orders.loading && !orders.error && unpaid.length === 0 && <p>{t("noUnpaidOrders")}</p>}
+              {!orders.loading && !orders.error && unpaid.length === 0 && <EmptyState>{t("noUnpaidOrders")}</EmptyState>}
               <div><Button type="submit" disabled={draw.busy || applicationId === "" || orderId === ""}>{t("draw")}</Button></div>
             </Stack>
           </form>

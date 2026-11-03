@@ -1,4 +1,4 @@
-import { Badge, Button, Notice, Stack, TextField } from "@tillknowit/design-system";
+import { Badge, Button, EmptyState, Notice, Stack, TextField } from "@tillknowit/design-system";
 import { isUuid, newId, type CatalogueItem } from "@tillknowit/domain";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ProductPicker, useBusy, useT, wholeNumber, type Translate } from "../../coreKit";
@@ -61,12 +61,12 @@ export function CoreTransfers({ ctx }: { ctx: TillContext }) {
         {(["incoming", "sent", "send"] as const).map((m) => <Button key={m} variant={mode === m ? "primary" : "secondary"} aria-pressed={mode === m} onClick={() => { setMode(m); setMessage(null); }}>{t(`mode.${m}`)}</Button>)}
       </div>
       {message && <Notice kind={message.kind}>{message.text}</Notice>}
-      {mode === "incoming" && (transfers === null ? <p>{t("loading")}</p> : incoming.length === 0 ? <p>{t("incoming.empty")}</p> : (
+      {mode === "incoming" && (transfers === null ? <p>{t("loading")}</p> : incoming.length === 0 ? <EmptyState>{t("incoming.empty")}</EmptyState> : (
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--space-4)" }}>
           {incoming.map((x) => <li key={x.id}><TransferCard ctx={ctx} t={t} transfer={x} side="incoming" caller={caller} onDone={async (m) => { setMessage(m); await load(); }} /></li>)}
         </ul>
       ))}
-      {mode === "sent" && (transfers === null ? <p>{t("loading")}</p> : sent.length === 0 ? <p>{t("sent.empty")}</p> : (
+      {mode === "sent" && (transfers === null ? <p>{t("loading")}</p> : sent.length === 0 ? <EmptyState>{t("sent.empty")}</EmptyState> : (
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--space-4)" }}>
           {sent.map((x) => <li key={x.id}><TransferCard ctx={ctx} t={t} transfer={x} side="sent" caller={caller} onDone={async (m) => { setMessage(m); await load(); }} /></li>)}
         </ul>
@@ -162,7 +162,7 @@ function SendForm({ ctx, t, caller, onDone }: { ctx: TillContext; t: Translate<T
     <Stack>
       <TextField label={t("toShop")} autoComplete="off" value={toShop} onChange={(e) => setToShop(e.target.value)} />
       <ProductPicker catalogue={ctx.catalogue} label={t("find")} notFound={t("notFound")} onPick={add} />
-      {lines.length === 0 ? <p>{t("empty")}</p> : (
+      {lines.length === 0 ? <EmptyState>{t("empty")}</EmptyState> : (
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--space-3)" }}>
           {lines.map((l) => (
             <li key={l.item.id} style={{ display: "grid", gap: "var(--space-2)", gridTemplateColumns: "1fr auto" }}>

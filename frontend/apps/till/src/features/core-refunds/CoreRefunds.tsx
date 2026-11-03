@@ -1,4 +1,4 @@
-import { Badge, Button, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, EmptyState, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { cancellationRecord, creditCancelRecord, formatRand, newId, queueBuilt, refundRecord } from "@tillknowit/domain";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ManagerApproval, useBusy, useT, wholeNumber, type Translate } from "../../coreKit";
@@ -61,7 +61,7 @@ export function CoreRefunds({ ctx }: { ctx: TillContext }) {
   return (
     <Stack>
       {notice && <Notice kind="success">{notice}</Notice>}
-      {sales === null ? null : sales.length === 0 ? <p>{t("empty")}</p> : (
+      {sales === null ? null : sales.length === 0 ? <EmptyState>{t("empty")}</EmptyState> : (
         <>
           <TextField label={t("find")} value={filter} onChange={(e) => setFilter(e.target.value)} />
           <Table

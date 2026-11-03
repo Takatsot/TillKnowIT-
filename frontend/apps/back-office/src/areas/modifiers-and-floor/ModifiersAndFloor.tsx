@@ -1,5 +1,5 @@
 import { formatRand, parseRandToCents, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Button, Card, CheckField, Inline, Notice, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Button, Card, CheckField, EmptyState, Inline, Notice, Stack, Table, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { ProductChecks, ProductSelect, useProducts, type ProductRef } from "../selling-common/products";
 import { useTillCaller, type TillCaller } from "../selling-common/TillCaller";
@@ -142,7 +142,7 @@ function AttachForm({ caller, productId, groups }: { caller: TillCaller; product
   return (
     <Stack>
       {current.error && <Notice kind="danger">{current.error.message}</Notice>}
-      {groups.length === 0 ? <p>{t("attachNone")}</p> : (
+      {groups.length === 0 ? <EmptyState>{t("attachNone")}</EmptyState> : (
         <fieldset>
           <legend>{t("attachLegend")}</legend>
           {groups.map((g) => (
@@ -269,7 +269,7 @@ function FloorEditor({ initial }: { initial: FloorTable[] }) {
   return (
     <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
       <Stack>
-        {tables.length === 0 && <p>{t("floorEmpty")}</p>}
+        {tables.length === 0 && <EmptyState>{t("floorEmpty")}</EmptyState>}
         {tables.map((x, n) => (
           <Inline key={n}>
             <TextField label={`${t("tableArea")} ${n + 1}`} value={x.area} onChange={(e) => edit(n, { area: e.target.value })} />

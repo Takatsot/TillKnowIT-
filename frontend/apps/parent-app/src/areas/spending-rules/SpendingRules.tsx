@@ -1,5 +1,5 @@
 import { formatRand, parseRandToCents, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Button, Card, CheckField, Notice, SelectField, Stack, TextField } from "@tillknowit/design-system";
+import { Button, Card, CheckField, EmptyState, Notice, SelectField, Stack, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { ChildScope, itemStyle, listStyle, mutedStyle } from "../../shared/ChildScope";
 import type { Child, Menu, Restriction, Wallet } from "../../shared/types";
@@ -101,7 +101,7 @@ function Blocks({ child, wallet, onSaved }: { child: Child; wallet: Wallet; onSa
   return (
     <Card title={t("blockHeading", { name: child.name })}>
       <p style={mutedStyle}>{t("blockMeans")}</p>
-      {wallet.restrictions.length === 0 ? <p>{t("noBlocks")}</p> : (
+      {wallet.restrictions.length === 0 ? <EmptyState>{t("noBlocks")}</EmptyState> : (
         <ul style={listStyle}>
           {wallet.restrictions.map((r) => (
             <li key={`${r.kind}:${r.key}`} style={itemStyle}>

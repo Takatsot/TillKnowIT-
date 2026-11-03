@@ -1,5 +1,5 @@
 import { formatDate, formatRand, useAction, useApi, useLoad, useMessages, useSession, type Loaded } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Inline, Notice, Stack, Table } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Inline, Notice, Stack, Table } from "@tillknowit/design-system";
 import { useState } from "react";
 import styles from "./Billing.module.css";
 import { messages, type BillingKey } from "./messages";
@@ -72,7 +72,7 @@ export function Billing() {
         <Stack>
           {sub.loading && !sub.data && !sub.error && <p>{t("loading")}</p>}
           {sub.error && !noSubscription && <Notice kind="danger">{sub.error.message}</Notice>}
-          {noSubscription && <p>{t("noSubscription")}</p>}
+          {noSubscription && <EmptyState>{t("noSubscription")}</EmptyState>}
           {subscription && (
             <>
               <p><strong>{t("planName")}:</strong> {current?.name ?? subscription.planCode} <Badge>{statusLabel(subscription.status)}</Badge></p>
@@ -90,7 +90,7 @@ export function Billing() {
 
       <Card title={t("plansHeading")}>
         {plans.error && <Notice kind="danger">{plans.error.message}</Notice>}
-        {plans.loading && !plans.data ? <p>{t("loading")}</p> : activePlans.length === 0 ? <p>{t("plansEmpty")}</p> : (
+        {plans.loading && !plans.data ? <p>{t("loading")}</p> : activePlans.length === 0 ? <EmptyState>{t("plansEmpty")}</EmptyState> : (
           <ul className={styles.plans}>
             {activePlans.map((p) => {
               const isCurrent = running?.planCode === p.code;

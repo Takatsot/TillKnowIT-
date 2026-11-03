@@ -1,5 +1,5 @@
 import { formatDate, formatDateTime, formatRand, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, Notice, SelectField, Stack, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Notice, SelectField, Stack, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { ChildScope, itemStyle, listStyle, mutedStyle, type ChildContext } from "../../shared/ChildScope";
 import type { Menu, PreOrder } from "../../shared/types";
@@ -61,7 +61,7 @@ function Body({ ctx }: { ctx: ChildContext }) {
           </>
         )}
         {!menu.data && !menu.error && <p>{t("loading")}</p>}
-        {menu.data && (menu.data.breaks.length === 0 || items.length === 0) && <p>{t("noMenu")}</p>}
+        {menu.data && (menu.data.breaks.length === 0 || items.length === 0) && <EmptyState>{t("noMenu")}</EmptyState>}
         {menu.data && menu.data.breaks.length > 0 && items.length > 0 && (
           <form onSubmit={(e) => { e.preventDefault(); void submit(); }}>
             <Stack>
@@ -99,7 +99,7 @@ function Body({ ctx }: { ctx: ChildContext }) {
           </>
         )}
         {!orders.data && !orders.error && <p>{t("loading")}</p>}
-        {orders.data && orders.data.length === 0 && <p>{t("listEmpty")}</p>}
+        {orders.data && orders.data.length === 0 && <EmptyState>{t("listEmpty")}</EmptyState>}
         {orders.data && orders.data.length > 0 && (
           <ul style={listStyle}>
             {orders.data.map((o) => (

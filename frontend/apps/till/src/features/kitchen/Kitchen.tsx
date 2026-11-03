@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Inline, Notice, SelectField, Stack, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Inline, Notice, SelectField, Stack, TextField } from "@tillknowit/design-system";
 import { newId } from "@tillknowit/domain";
 import { useEffect, useState } from "react";
 import type { TillContext } from "../../feature";
@@ -73,7 +73,7 @@ function Board({ ctx, caller, t, setInfo }: { ctx: TillContext; caller: Caller; 
       <Inline><Button variant="secondary" onClick={orders.reload}>{t("board.refresh")}</Button></Inline>
       <ErrorNotice error={orders.error ?? action.error} t={kit} />
       {orders.loading && orders.data === null ? <p>{kit("kit.loading")}</p> : null}
-      {!orders.loading && !orders.error && list.length === 0 ? <p>{t("board.empty")}</p> : null}
+      {!orders.loading && !orders.error && list.length === 0 ? <EmptyState>{t("board.empty")}</EmptyState> : null}
       <div className={styles.board}>
         {columns.map((col) => {
           const here = list.filter((o) => o.status === col.status);

@@ -1,5 +1,5 @@
 import { formatRand, useAction, useApi, useLoad, useMessages, useSession } from "@tillknowit/app-kit";
-import { Badge, Button, Card, CheckField, Notice, Stack, TextField } from "@tillknowit/design-system";
+import { Badge, Button, Card, CheckField, EmptyState, Notice, Stack, TextField } from "@tillknowit/design-system";
 import { useState } from "react";
 import { bigStyle, itemStyle, listStyle, mutedStyle } from "../../shared/ChildScope";
 import type { Child } from "../../shared/types";
@@ -37,7 +37,7 @@ export function Children() {
           </>
         )}
         {!list.data && !list.error && <p>{t("loading")}</p>}
-        {list.data && list.data.length === 0 && <p>{t("empty")}</p>}
+        {list.data && list.data.length === 0 && <EmptyState>{t("empty")}</EmptyState>}
         {list.data && list.data.length > 0 && (
           <ul style={listStyle}>
             {list.data.map((c) => (

@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Inline, Notice, SelectField, Stack } from "@tillknowit/design-system";
+import { Badge, Button, Card, EmptyState, Inline, Notice, SelectField, Stack } from "@tillknowit/design-system";
 import { useState } from "react";
 import type { TillContext } from "../../feature";
 import { ErrorNotice, useAction, useKitT, type Caller, type Translate } from "../till-kit/kit";
@@ -139,7 +139,7 @@ export function TicketPanel({ ctx, caller, ticket: initial, tables, others, t, c
               </SelectField>
               <Button variant="secondary" onClick={() => void move()} disabled={action.busy}>{t("ticket.moveButton")}</Button>
             </Inline>
-            {others.length === 0 ? <p>{t("ticket.mergeNone")}</p> : (
+            {others.length === 0 ? <EmptyState>{t("ticket.mergeNone")}</EmptyState> : (
               <Inline>
                 <SelectField label={t("ticket.merge")} value={otherId} onChange={(e) => setOtherId(e.target.value)}>
                   <option value="">{t("ticket.mergeChoose")}</option>

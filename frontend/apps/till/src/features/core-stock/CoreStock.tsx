@@ -1,4 +1,4 @@
-import { Badge, Button, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
+import { Badge, Button, EmptyState, Notice, SelectField, Stack, Table, TextField } from "@tillknowit/design-system";
 import { countAdjustment, formatRand, isSaleEntry, newId, parseRandToCents, queueBuilt, receiptMovements, stockMovementRecord, type CatalogueItem } from "@tillknowit/domain";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ProductPicker, useBusy, useT, wholeNumber, type Translate } from "../../coreKit";
@@ -62,7 +62,7 @@ export function CoreStock({ ctx }: { ctx: TillContext }) {
 }
 
 function StockList({ t, copy, online, onRefresh }: { t: Translate<StockKey>; copy: StockCopy | null; online: boolean; onRefresh: () => void }) {
-  if (!copy || copy.rows.length === 0) return <p>{t("list.empty")}</p>;
+  if (!copy || copy.rows.length === 0) return <EmptyState>{t("list.empty")}</EmptyState>;
   const rows = [...copy.rows].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
   return (
     <Stack>
@@ -148,7 +148,7 @@ function Receive({ ctx, t, onSaved }: { ctx: TillContext; t: Translate<StockKey>
   return (
     <Stack>
       <ProductPicker catalogue={ctx.catalogue} label={t("find")} notFound={t("notFound")} onPick={add} />
-      {lines.length === 0 ? <p>{t("receive.empty")}</p> : (
+      {lines.length === 0 ? <EmptyState>{t("receive.empty")}</EmptyState> : (
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--space-3)" }}>
           {lines.map((l) => (
             <li key={l.item.id} style={{ display: "grid", gap: "var(--space-2)", gridTemplateColumns: "1fr 1fr auto" }}>

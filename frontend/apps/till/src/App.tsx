@@ -225,7 +225,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
       <main className={styles.main}>
         {banner && <div className={styles.banner}>{banner}</div>}
         {needsRegistration ? (
-          <RegisterScreen language={language} onRegistered={(d) => { setDevice(d); setPack(loadPack(d.shopId)); }} onSkip={import.meta.env.DEV ? () => setSkipped(true) : undefined} />
+          <RegisterScreen language={language} onRegistered={(d) => { setDevice(d); setPack(loadPack(d.shopId)); void reload(); }}   /* the example staff shown before registering must not stay on screen */ onSkip={import.meta.env.DEV ? () => setSkipped(true) : undefined} />
         ) : needsSetupAgain && device ? (
           <RegisterScreen
             language={language}
