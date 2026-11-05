@@ -65,3 +65,42 @@ test("pressing Edit on the last product brings the edit form into view", async (
   await expect(heading).toBeVisible();
   await expect(heading).toBeInViewport({ timeout: 5000 });
 });
+
+test("parent app: add money for a child in test mode, then see it on the statement", async ({ page }) => {
+  const problems = watchProblems(page);
+  await startSignedIn(page, PEOPLE.parent);
+  await page.goto("http://localhost:5177");
+  const menu = page.locator("nav[aria-label]").first();
+  await expect(page.getByText("Themba Khumalo").first()).toBeVisible();
+
+  await menu.getByRole("button", { name: "Add money", exact: true }).click();
+  await page.getByLabel("Amount in rand").first().fill("50");
+  await page.getByRole("button", { name: "Add money", exact: true }).last().click();
+  await expect(page.getByText(/Waiting for payment|Money added|Money arrived/).first()).toBeVisible();
+
+  await menu.getByRole("button", { name: "Statement", exact: true }).click();
+  await expect(page.getByText("What was bought and added")).toBeVisible();
+  await page.getByRole("button", { name: "Show QR code" }).click();
+  await expect(page.getByText(/Works until/)).toBeVisible();
+  expect(problems.list).toEqual([]);
+});
+
+test("supplier portal: a discount deal is posted and can be cancelled", async ({ page }) => {
+  const problems = watchProblems(page);
+  await startSignedIn(page, PEOPLE.supplier);
+  await page.goto("http://localhost:5175");
+  await page.locator("nav[aria-label]").first().getByRole("button", { name: "Deals", exact: true }).click();
+  const title = `Deal ${stamp()}`;
+  await page.getByLabel("Title", { exact: true }).fill(title);
+  await page.getByLabel("Product", { exact: true }).selectOption({ index: 1 });
+  await page.getByLabel(/Percent off/).fill("10");
+  const day = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10) + "T09:00";
+  await page.getByLabel("Starts").fill(day(-1));
+  await page.getByLabel("Ends").fill(day(14));
+  await page.getByLabel(/^Areas/).fill("jhb");
+  await page.getByRole("button", { name: "Post deal" }).click();
+  await expect(page.getByText(`${title} was posted.`)).toBeVisible();
+  await page.getByRole("button", { name: `Cancel ${title}` }).click();
+  await expect(page.getByText(`${title} was cancelled.`)).toBeVisible();
+  expect(problems.list).toEqual([]);
+});
