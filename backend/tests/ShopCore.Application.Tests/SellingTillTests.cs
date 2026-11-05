@@ -250,6 +250,23 @@ public class QuoteFlowTests
     }
 
     [Fact]
+    public async Task A_quote_whose_sale_was_given_up_is_open_again_but_one_turned_into_a_ticket_is_not()
+    {
+        var call = new TillCall(_w.TillA, _w.Cashier);
+        var quote = (await Create()).Value!;
+        Assert.Equal("quote.not_in_sale", (await _w.Quotes.Handle(new ReopenQuote(_w.Shop, quote.Id, call), default)).Error!.Code);   // still open: nothing to give back
+        Assert.True((await _w.Quotes.Handle(new MarkQuoteInSale(_w.Shop, quote.Id, call), default)).IsSuccess);
+        Assert.True((await _w.Quotes.Handle(new ReopenQuote(_w.Shop, quote.Id, call), default)).IsSuccess);
+        Assert.Equal("open", (await _w.Quotes.Handle(new ListQuotes(_w.Shop, _w.TillA, _w.Cashier), default)).Value!.Single().Status);
+        Assert.True((await _w.Quotes.Handle(new MarkQuoteInSale(_w.Shop, quote.Id, call), default)).IsSuccess);   // and it can be used again
+
+        var other = (await Create(number: "Q-2")).Value!;
+        Assert.True((await _w.Quotes.Handle(new ConvertQuote(_w.Shop, other.Id, call), default)).IsSuccess);
+        Assert.Equal("quote.not_in_sale", (await _w.Quotes.Handle(new ReopenQuote(_w.Shop, other.Id, call), default)).Error!.Code);
+        Assert.Equal("quote.not_found", (await _w.Quotes.Handle(new ReopenQuote(_w.Shop, Guid.NewGuid(), call), default)).Error!.Code);
+    }
+
+    [Fact]
     public async Task Quotes_need_their_pack_feature_and_valid_dates()
     {
         Assert.Equal("quote.expiry_invalid", (await Create(null, Today.AddDays(-1))).Error!.Code);

@@ -221,11 +221,12 @@ public sealed record ListQuotes(Guid ShopId, Guid DeviceId, Guid StaffId) : IQue
 public sealed record GetQuotePdf(Guid ShopId, Guid QuoteId, Guid DeviceId, Guid StaffId) : IQuery<ReportFile>;
 public sealed record ConvertQuote(Guid ShopId, Guid QuoteId, TillCall Call) : ICommand<TicketResponse>;
 public sealed record MarkQuoteInSale(Guid ShopId, Guid QuoteId, TillCall Call) : ICommand<Unit>;
+public sealed record ReopenQuote(Guid ShopId, Guid QuoteId, TillCall Call) : ICommand<Unit>;
 public sealed record CancelQuote(Guid ShopId, Guid QuoteId, TillCall Call) : ICommand<Unit>;
 
 internal sealed class QuoteHandlers(ISellingStore store, ITillAccessChecker tills, IFeatureGate gate, TimeProvider clock)
     : ICommandHandler<CreateQuoteCommand, QuoteResponse>, IQueryHandler<ListQuotes, List<QuoteResponse>>, IQueryHandler<GetQuotePdf, ReportFile>,
-      ICommandHandler<ConvertQuote, TicketResponse>, ICommandHandler<MarkQuoteInSale, Unit>, ICommandHandler<CancelQuote, Unit>
+      ICommandHandler<ConvertQuote, TicketResponse>, ICommandHandler<MarkQuoteInSale, Unit>, ICommandHandler<ReopenQuote, Unit>, ICommandHandler<CancelQuote, Unit>
 {
     private Task<Result> Allowed(Guid shop, Guid device, Guid staff, CancellationToken ct) => SellingAccess.TillAndFeature(tills, gate, shop, device, staff, "sale.create", "quotes", ct);
 
@@ -301,6 +302,19 @@ internal sealed class QuoteHandlers(ISellingStore store, ITillAccessChecker till
         if (quote is null) return Result<Unit>.Fail("quote.not_found", "Quote not found.");
         var converted = quote.ConvertToSale(BusinessDay.Of(clock.GetUtcNow()));
         if (!converted.IsSuccess) return Result<Unit>.Fail(converted.Error!.Code, converted.Error.Message);
+        await store.Save(ct);
+        return Result<Unit>.Ok(default);
+    }
+
+    /// <summary>The cashier gave up the sale the quote's goods were on: the quote can be used again.</summary>
+    public async Task<Result<Unit>> Handle(ReopenQuote c, CancellationToken ct)
+    {
+        var allowed = await Allowed(c.ShopId, c.Call.DeviceId, c.Call.StaffId, ct);
+        if (!allowed.IsSuccess) return Result<Unit>.Fail(allowed.Error!.Code, allowed.Error.Message);
+        var quote = await store.GetQuote(c.ShopId, c.QuoteId, ct);
+        if (quote is null) return Result<Unit>.Fail("quote.not_found", "Quote not found.");
+        var reopened = quote.ReopenFromSale();
+        if (!reopened.IsSuccess) return Result<Unit>.Fail(reopened.Error!.Code, reopened.Error.Message);
         await store.Save(ct);
         return Result<Unit>.Ok(default);
     }

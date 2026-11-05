@@ -100,9 +100,15 @@ test.describe.serial("a cafe: the business type switches on tables, tickets, the
     await expect(line).toBeVisible();
     await expect(line).toContainText("R 18,99");
     await page.getByRole("button", { name: "Clear sale" }).click();
+    // Giving the sale up unpaid puts the ticket back, with the same goods.
     await page.locator("nav").getByRole("button", { name: "Tables", exact: true }).click();
     await page.getByRole("button", { name: "Open tickets" }).click();
-    await expect(page.getByText("Takeaway 12")).toHaveCount(0);
+    await expect(page.getByText("Takeaway 12").first()).toBeVisible();
+    await page.getByText("Takeaway 12").first().click();
+    await expect(page.getByText("White bread 700g").first()).toBeVisible();
+    await page.getByRole("button", { name: "Void ticket" }).click();
+    await page.getByRole("button", { name: "Yes, void it" }).click();
+    await expect(page.getByText("The ticket was voided.")).toBeVisible();
 
     // A second ticket is paid for in cash.
     await page.getByRole("button", { name: "New ticket without a table" }).click();

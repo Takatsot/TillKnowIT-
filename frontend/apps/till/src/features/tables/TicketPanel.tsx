@@ -1,3 +1,4 @@
+import { newId } from "@tillknowit/domain";
 import { Badge, Button, Card, EmptyState, Inline, Notice, SelectField, Stack } from "@tillknowit/design-system";
 import { useState } from "react";
 import type { TillContext } from "../../feature";
@@ -91,6 +92,13 @@ export function TicketPanel({ ctx, caller, ticket: initial, tables, others, t, c
     if (!added.ok) return setInfo(t("ticket.toSaleFailed", { name: added.name, message: added.message }));
     const r = await action.run(() => ctx.api.post<void>(`${base(caller)}/${ticket.id}/void`, pair(caller)));
     if (r.ok) {
+      // If the sale is given up unpaid, the ticket comes back as a new one with the same label, table and goods.
+      const { label, tableId: table } = ticket;
+      const goods = lines;
+      ctx.sale?.borrowed(async () => {
+        await ctx.api.post<TicketResponse>(base(caller), { ...pair(caller), id: newId(), label, tableId: table, lines: goods });
+        changed();
+      });
       changed();
       leave(t("ticket.toSaleDone", { label: ticket.label }));
       ctx.openSell?.();

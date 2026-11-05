@@ -73,6 +73,15 @@ public sealed class Quote : VersionedEntity
         return Result.Ok();
     }
 
+    /// <summary>The sale the goods were put on was given up before it was paid: the quote is open again. Only a quote moved to the main sale (not onto a ticket) can come back.</summary>
+    public Result ReopenFromSale()
+    {
+        if (Status != QuoteStatus.Converted || TicketId is not null) return Result.Fail("quote.not_in_sale", "This quote was not moved to a sale.");
+        Status = QuoteStatus.Open;
+        Touch();
+        return Result.Ok();
+    }
+
     public Result Cancel()
     {
         if (Status != QuoteStatus.Open) return Result.Fail("quote.not_open", "This quote is no longer open.");

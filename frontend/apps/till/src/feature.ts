@@ -50,6 +50,8 @@ export interface SaleBridge {
   addProduct(productId: string, quantity?: number): Result<void>;
   /** Attach the sale to a customer (loyalty), or detach with null. The name is only for showing who is attached. */
   setCustomer(customerId: string | null, name?: string): void;
+  /** Goods taken from a quote or ticket were put on the sale: if the sale is given up before it is paid, this puts the quote or ticket back. Forgotten once the sale is paid. */
+  borrowed(restore: () => Promise<void>): void;
 }
 
 /**

@@ -76,6 +76,7 @@ internal static class SellingEndpoints
         });
         api.MapPost("/shops/{shopId:guid}/quotes/{id:guid}/convert", async (Guid shopId, Guid id, TillCall call, IDispatcher d, CancellationToken ct) => Reply(await d.Send(new ConvertQuote(shopId, id, call), ct)));
         api.MapPost("/shops/{shopId:guid}/quotes/{id:guid}/to-sale", async (Guid shopId, Guid id, TillCall call, IDispatcher d, CancellationToken ct) => Done(await d.Send(new MarkQuoteInSale(shopId, id, call), ct)));
+        api.MapPost("/shops/{shopId:guid}/quotes/{id:guid}/reopen", async (Guid shopId, Guid id, TillCall call, IDispatcher d, CancellationToken ct) => Done(await d.Send(new ReopenQuote(shopId, id, call), ct)));
         api.MapPost("/shops/{shopId:guid}/quotes/{id:guid}/cancel", async (Guid shopId, Guid id, TillCall call, IDispatcher d, CancellationToken ct) => Done(await d.Send(new CancelQuote(shopId, id, call), ct)));
 
         // ---- lay-by ----

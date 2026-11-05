@@ -185,6 +185,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
     addLine: (line) => bridge.current?.addLine(line) ?? fail("sale.screen_missing", "The sell screen is not ready."),
     addProduct: (id, quantity) => bridge.current?.addProduct(id, quantity) ?? fail("sale.screen_missing", "The sell screen is not ready."),
     setCustomer: (id, name) => bridge.current?.setCustomer(id, name),
+    borrowed: (restore) => bridge.current?.borrowed(restore),
   }), []);
   const onBridge = useCallback((b: SaleBridge | null) => { bridge.current = b; }, []);
 

@@ -52,7 +52,10 @@ function QuotesBody({ ctx, caller }: { ctx: TillContext; caller: Caller }) {
     // The goods are on the sale now; marking the quote converted needs the server, and its failure must not undo the sale.
     const marked = await ctx.api.post<void>(`/shops/${caller.shopId}/quotes/${q.id}/to-sale`, who(caller));
     setInfo(t(marked.ok ? "addToSale.done" : "addToSale.notMarked", { number: q.number }));
-    if (marked.ok) quotes.reload();
+    if (marked.ok) {
+      quotes.reload();
+      ctx.sale?.borrowed(async () => { await ctx.api.post<void>(`/shops/${caller.shopId}/quotes/${q.id}/reopen`, who(caller)); });
+    }
     ctx.openSell?.();
   };
   const cancel = async (q: Quote) => {

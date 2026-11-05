@@ -71,6 +71,13 @@ test.describe.serial("business type flows", () => {
     await expect(page.getByText(/saved\./)).toBeVisible();
     await expect(page.getByText(who)).toBeVisible();
 
+    // Put the quote's goods on the sale, then give the sale up unpaid: the quote can be used again.
+    await page.getByRole("button", { name: /^Add Q.* to the sale on the till$/ }).first().click();
+    await expect(page.locator("li:visible", { hasText: "Maize meal 5kg" })).toBeVisible();
+    await page.getByRole("button", { name: "Clear sale" }).click();
+    await page.locator("nav").getByRole("button", { name: "Quotes", exact: true }).click();
+    await expect(page.getByRole("button", { name: /^Add Q.* to the sale on the till$/ }).first()).toBeVisible();
+
     await page.locator("nav").getByRole("button", { name: "Lay-by", exact: true }).click();
     await page.getByRole("button", { name: "Start a lay-by" }).first().click();
     await page.getByRole("textbox", { name: "Customer name" }).fill(who);

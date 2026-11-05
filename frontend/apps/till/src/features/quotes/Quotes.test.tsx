@@ -104,7 +104,8 @@ describe("quote to the sale on the till", () => {
     const addLine = vi.fn(() => ok(undefined));
     const openSell = vi.fn();
     const post = vi.fn(async (_path: string, _body?: unknown) => ok(undefined));
-    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote(), quote({ id: "q2", number: "Q-2", status: "converted" })])), post } as never, sale: { addLine, addProduct: vi.fn(), setCustomer: vi.fn() }, openSell });
+    const borrowed = vi.fn();
+    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote(), quote({ id: "q2", number: "Q-2", status: "converted" })])), post } as never, sale: { addLine, addProduct: vi.fn(), setCustomer: vi.fn(), borrowed }, openSell });
     render(<Quotes ctx={ctx} />);
 
     await user.click(await screen.findByRole("button", { name: "Add Q-1 to the sale on the till" }));
@@ -114,12 +115,16 @@ describe("quote to the sale on the till", () => {
     expect(post).toHaveBeenCalledWith(`/shops/${SHOP}/quotes/q1/to-sale`, expect.objectContaining({ deviceId: DEVICE, staffId: STAFF }));
     expect(await screen.findByText(/Q-1 was added to the sale and is now marked/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Add Q-2 to the sale on the till" })).toBeNull();
+
+    // If the sale is given up unpaid, the till calls the function it was handed, and the quote is opened again.
+    await (borrowed.mock.calls[0]![0] as () => Promise<void>)();
+    expect(post).toHaveBeenCalledWith(`/shops/${SHOP}/quotes/q1/reopen`, expect.objectContaining({ deviceId: DEVICE, staffId: STAFF }));
   });
 
   it("says which item could not be added and stays on the quotes tab", async () => {
     const user = userEvent.setup();
     const openSell = vi.fn();
-    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote()])) as never }, sale: { addLine: vi.fn(() => fail("sale.screen_missing", "The sell screen is not ready.")), addProduct: vi.fn(), setCustomer: vi.fn() }, openSell });
+    const { ctx } = makeCtx({ flags: ["quotes"], api: { get: vi.fn(async () => ok([quote()])) as never }, sale: { addLine: vi.fn(() => fail("sale.screen_missing", "The sell screen is not ready.")), addProduct: vi.fn(), setCustomer: vi.fn(), borrowed: vi.fn() }, openSell });
     render(<Quotes ctx={ctx} />);
 
     await user.click(await screen.findByRole("button", { name: "Add Q-1 to the sale on the till" }));

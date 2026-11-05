@@ -139,7 +139,7 @@ describe("customer to the sale on the till", () => {
     const user = userEvent.setup();
     const setCustomer = vi.fn();
     const openSell = vi.fn();
-    const { ctx } = makeCtx({ flags: ["customers"], api: { get: vi.fn(async () => ok([anele])) as never }, sale: { addLine: vi.fn(), addProduct: vi.fn(), setCustomer }, openSell });
+    const { ctx } = makeCtx({ flags: ["customers"], api: { get: vi.fn(async () => ok([anele])) as never }, sale: { addLine: vi.fn(), addProduct: vi.fn(), setCustomer, borrowed: vi.fn() }, openSell });
     render(<Customers ctx={ctx} />);
     await user.type(screen.getByRole("textbox", { name: /Find a customer/ }), "082123");
     await user.click(screen.getByRole("button", { name: "Find" }));

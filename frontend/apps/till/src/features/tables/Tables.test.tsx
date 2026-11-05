@@ -96,7 +96,7 @@ describe("tables feature", () => {
     const post = vi.fn(async () => ok(undefined));
     const addLine = vi.fn(() => ok(undefined));
     const openSell = vi.fn();
-    const { ctx } = makeCtx({ flags, api: { get, post } as never, sale: { addLine, addProduct: vi.fn(), setCustomer: vi.fn() }, openSell });
+    const { ctx } = makeCtx({ flags, api: { get, post } as never, sale: { addLine, addProduct: vi.fn(), setCustomer: vi.fn(), borrowed: vi.fn() }, openSell });
     render(<Tables ctx={ctx} />);
 
     await user.click(await screen.findByRole("button", { name: /Table T4, Open/ }));

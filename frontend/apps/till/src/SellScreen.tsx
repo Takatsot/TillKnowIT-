@@ -157,6 +157,10 @@ export function SellScreen({
     return catalogue.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 6);
   }, [entry, catalogue]);
 
+  // Quotes and tickets whose goods are on this sale: put back if the sale is given up, forgotten once it is paid.
+  const restores = useRef<Array<() => Promise<void>>>([]);
+  const putBack = () => { const all = restores.current; restores.current = []; for (const r of all) void r(); };
+
   // Other tabs put things in the sale through this. It works on the latest basket, not the one this render saw.
   useEffect(() => {
     if (!onBridge) return;
@@ -181,6 +185,7 @@ export function SellScreen({
         setBasket({ ...basketRef.current, customerId });
         setCustomerName(customerId ? name ?? "" : "");
       },
+      borrowed: (restore) => { restores.current.push(restore); },
     });
     return () => onBridge(null);
   }, [onBridge, catalogue]);
@@ -351,6 +356,7 @@ export function SellScreen({
       return setMessage([problem(sale.code), gave].filter(Boolean).join(" "));
     }
     await queueSale(outbox, sale.value, now);
+    restores.current = [];
     if (kv) await dropHeldRelease(kv, { saleId });
     saleIdRef.current = null;
     attemptRefs.current.clear();
@@ -913,7 +919,7 @@ export function SellScreen({
       </dl>
 
       <div className={styles.row}>
-        <Button variant="quiet" disabled={basket.entries.length === 0} onClick={() => { const taken = parts; setBasket(emptyBasket); setMessage(""); setCustomerName(""); setPriceFor(null); setParts([]); setOnlineForm(null); void giveBack(taken).then((w) => { if (w) setMessage(w); }); saleIdRef.current = null; }}>{t("sell.cancelSale")}</Button>
+        <Button variant="quiet" disabled={basket.entries.length === 0} onClick={() => { putBack(); const taken = parts; setBasket(emptyBasket); setMessage(""); setCustomerName(""); setPriceFor(null); setParts([]); setOnlineForm(null); void giveBack(taken).then((w) => { if (w) setMessage(w); }); saleIdRef.current = null; }}>{t("sell.cancelSale")}</Button>
         <Button disabled={basket.entries.length === 0} onClick={startPay}>{t("sell.pay")} {rand(summary.dueCents)}</Button>
       </div>
     </section>
