@@ -64,7 +64,7 @@ function WorkingFor({ t }: { t: (k: ShellKey, p?: Record<string, string | number
 }
 
 /** The frame every app uses: sign-in, then a menu of the app's sections, the language choice and who the person is working for. */
-export function Shell({ title, sections }: { title: string; sections: readonly Section<string>[] }) {
+export function Shell({ title, sections, signUp = false }: { title: string; sections: readonly Section<string>[]; /** Offer "I am new here" on the sign-in screen: only for apps where a new person can start by making a shop. */ signUp?: boolean }) {
   const session = useSession();
   const setSession = useSetSession();
   const signOut = useSignOut();
@@ -74,7 +74,7 @@ export function Shell({ title, sections }: { title: string; sections: readonly S
   const [draft, setDraft] = useState({ shopId: session.shopId, supplierOrganisationId: session.supplierOrganisationId, deviceId: session.deviceId });
   useEffect(() => { setDraft({ shopId: session.shopId, supplierOrganisationId: session.supplierOrganisationId, deviceId: session.deviceId }); }, [session.shopId, session.supplierOrganisationId, session.deviceId]);
 
-  if (!isSignedIn(session)) return <SignIn />;
+  if (!isSignedIn(session)) return <SignIn signUp={signUp} />;
 
   const open = ordered.find((s) => s.id === openId) ?? ordered[0];
   const missing = open?.needs?.filter((n) => !session[n]) ?? [];

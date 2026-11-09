@@ -66,6 +66,26 @@ describe("Shell sign-in", () => {
     expect(JSON.parse(localStorage.getItem("tillknowit.session") ?? "{}")).toMatchObject({ token: "tok", personId: "p1", displayName: "Thandi Nkosi" });
   });
 
+  it("offers sign-up only where the app asks for it, and then sends the name and language with the number", async () => {
+    const post = vi.fn(async () => ok({ message: "sent", devCode: "123456" }));
+    render(<SessionProvider api={{ post } as unknown as Api} initial={signedOut}><Shell title="Test" sections={[section]} signUp /></SessionProvider>);
+    const user = userEvent.setup();
+
+    expect(screen.queryByLabelText("Your name")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "I am new here: create an account" }));
+    await user.type(screen.getByLabelText("Your cell phone number"), "0821234567");
+    expect((screen.getByRole("button", { name: "Send me a code" }) as HTMLButtonElement).disabled).toBe(true);   // a name is needed
+    await user.type(screen.getByLabelText("Your name"), "  Nomsa  ");
+    await user.click(screen.getByRole("button", { name: "Send me a code" }));
+
+    expect(post).toHaveBeenCalledWith("/auth/otp/request", { phone: "0821234567", signUpName: "Nomsa", language: "en" });
+  });
+
+  it("has no sign-up option in apps that do not ask for it", () => {
+    mount({}, signedOut);
+    expect(screen.queryByRole("button", { name: "I am new here: create an account" })).toBeNull();
+  });
+
   it("does not show a development notice when the server sends no dev code", async () => {
     mount({ post: vi.fn(async () => ok({ message: "sent" })) as never }, signedOut);
     const user = userEvent.setup();

@@ -16,6 +16,8 @@ public class SetupTests
         public int Saves { get; private set; }
         public Task<Organisation?> GetShop(Guid shopId, CancellationToken ct) => Task.FromResult(Shop);
         public Task<List<SetupStep>> Steps(Guid shopId, CancellationToken ct) => Task.FromResult(Done.ToList());
+        public Task<List<PendingShopResponse>> PendingShops(CancellationToken ct) => Task.FromResult(Shop is null ? [] : new List<PendingShopResponse> { new(_shop, Shop.Name, null, Done.Count, SetupChecklist.Items.Length) });
+        private readonly Guid _shop = Guid.NewGuid();
         public Task Add(SetupStep step, CancellationToken ct) { Done.Add(step); return Task.CompletedTask; }
         public Task Save(CancellationToken ct) { Saves++; return Task.CompletedTask; }
     }
@@ -107,6 +109,18 @@ public class SetupTests
 
         Assert.True(done.IsSuccess);
         Assert.Equal(OrganisationStatus.Verified, _store.Shop.Status);
+    }
+
+    [Fact]
+    public async Task A_field_agent_sees_the_shops_waiting_and_how_far_each_has_got_and_nobody_else_does()
+    {
+        await Complete().Handle(new CompleteSetupStep(_shop, _agent, "device_check", null), default);
+        var handler = new ListPendingShopsHandler(_store, _permissions);
+
+        var seen = await handler.Handle(new ListPendingShops(_agent), default);
+        var row = Assert.Single(seen.Value!);
+        Assert.Equal((1, 7), (row.StepsDone, row.StepsTotal));
+        Assert.Equal("permission.denied", (await handler.Handle(new ListPendingShops(Guid.NewGuid()), default)).Error!.Code);
     }
 
     [Fact]

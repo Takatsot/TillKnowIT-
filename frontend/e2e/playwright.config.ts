@@ -13,7 +13,7 @@ function chromePath(): string | undefined {
 }
 
 const apps = [
-  ["till", 5173], ["back-office", 5174], ["supplier-portal", 5175], ["admin", 5176], ["parent-app", 5177], ["insights-portal", 5178],
+  ["till", 5173], ["back-office", 5174], ["supplier-portal", 5175], ["admin", 5176], ["parent-app", 5177], ["insights-portal", 5178], ["field-agent", 5179],
 ] as const;
 
 export default defineConfig({

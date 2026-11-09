@@ -15,7 +15,7 @@ on the build machine. The first real run is the first item on the hand-over list
 
 | Story | State | Notes |
 | --- | --- | --- |
-| E1-1 Sign up, create shop | Partly | Create shop (pending until verified) done. OTP sign-in blocked on Entra External ID and an SMS provider. |
+| E1-1 Sign up, create shop | Done (SMS provider not live) | A new person signs up on the back-office sign-in screen with a name and cell number; the code sent by SMS proves the number (the server makes the person only for a sign-up request, and a number that already has an account just signs that person in). Back office, "Getting started": the new owner makes the shop (name, municipality, language), then sees the setup steps and "waiting for verification" until a field agent verifies it. SMS goes through the BulkSMS provider, never run against the live service. Open: anyone can ask for a code for any number (five an hour per number), so bulk SMS cost needs a per-address limit before launch. |
 | E1-2 Staff and PINs | Done | PBKDF2 PINs, add/update/disable. |
 | E1-3 Devices | Done | Register, approve, wipe, check-in. |
 | E1-4 PIN unlock offline | Done | Server check and till screen, lockout 5 tries / 5 minutes. |
@@ -39,7 +39,7 @@ on the build machine. The first real run is the first item on the hand-over list
 | E11-1 Daily summary | Done | Sent once a day after 19:00 shop time to every verified shop, by WhatsApp or email. |
 | E11-2 Loss alerts | Done | Cancellations per hour and short cash-ups, levels from shop settings with defaults; plus a 48-hour offline-till alert. All sent once (dedupe keys). Push needs the owner app; WhatsApp/SMS/email providers are not connected. |
 | E12-1 Six languages | Partly | Structure and English done; translations need translators. |
-| E13-1 Field agent setup | Partly | The seven-step checklist, step completion, and verify (all steps needed, permission checked) are done on the server. The field agent app itself is not built. |
+| E13-1 Field agent setup | Done | The seven-step checklist, step completion and verify are on the server (permission checked), with a list of shops waiting (`GET /shops/pending-verification`). The field agent app (`apps/field-agent`, port 5179) lists those shops with their progress, ticks off each step with an optional note, and verifies a finished shop. Not in the app: taking the document photos and loading the catalogue from the field agent's phone (the agent marks those steps done after doing them in the back office); the steps are marked, not checked by the system. |
 | E14-1, E14-2 Founding suppliers | Covered by Phase 2 | The supplier catalogue, orders by app, WhatsApp or email, and the usual supplier were built in Phase 2 (M1 to M3); no separate Phase 1 feature remains. |
 
 ## Phase 2: supplier marketplace
@@ -147,14 +147,15 @@ Backend and engines. The screens, hardware adapters and kitchen view are front-e
 
 ## Screens
 
-Six apps, each built from small areas that follow `frontend/SCREENS.md`. All talk to the real routes through one typed API client and are tested against fake APIs only: **no screen has been run against a live server or looked at in a browser**.
+Seven apps, each built from small areas that follow `frontend/SCREENS.md`. All talk to the real routes through one typed API client and are tested against fake APIs only: **no screen has been run against a live server or looked at in a browser**.
 
 | App | Areas |
 | --- | --- |
 | Till (`apps/till`) | Register this till and download staff, products, promotions and the pack; selling with tips, split pay, credit, customer, scale, slip print, drawer; refunds and cancels, cash-up, credit payments, stock receive/count/write-off, transfers; tickets and tables, kitchen, quotes, lay-by, vouchers, customers and loyalty, appointments, serial numbers, school wallet payment. Everything the till writes goes through the offline queue. |
-| Back office (`apps/back-office`) | Stock and products, reordering and group deals, reports and the owner dashboard, credit book, compliance and setup checklist, staff and tills, business type, promotions, modifiers/variants/floor plan, services and appointments, customers/vouchers/quotes/lay-by, branches with manager access and transfers, billing, accounting, pay-later, insights opt-in and partner access, buying groups. |
+| Back office (`apps/back-office`) | Getting started (a new owner makes the shop and follows its setup), stock and products, reordering and group deals, reports and the owner dashboard, credit book, compliance and setup checklist, staff and tills, business type, promotions, modifiers/variants/floor plan, services and appointments, customers/vouchers/quotes/lay-by, branches with manager access and transfers, billing, accounting, pay-later, insights opt-in and partner access, buying groups. |
 | Supplier portal | Application, catalogue and import, orders and statements, deals and group deals, plan, invoices and sponsored campaigns. |
 | Insights portal | Area trend reports and plan. |
+| Field agent (`apps/field-agent`) | Shops waiting for setup, the seven-step checklist, verify. |
 | Platform admin | Packs, plans, suppliers and ranking settings, disputes and reconciliation, schools and wallet, partner API clients, catalogue suggestions and lookups. |
 | Parent app | Children, top-ups, spending rules, statement and QR, pre-orders, requests. |
 

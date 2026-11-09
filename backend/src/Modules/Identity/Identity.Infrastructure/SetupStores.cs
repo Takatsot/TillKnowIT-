@@ -12,6 +12,14 @@ internal sealed class SetupStore(IdentityDbContext db) : ISetupStore
 
     public Task<List<SetupStep>> Steps(Guid shopId, CancellationToken ct) => db.Set<SetupStep>().AsNoTracking().Where(s => s.ShopId == shopId).ToListAsync(ct);
 
+    public async Task<List<PendingShopResponse>> PendingShops(CancellationToken ct)
+    {
+        var shops = await db.Organisations.AsNoTracking().Where(o => o.Type == OrganisationType.Shop && o.Status == OrganisationStatus.Pending).Select(o => new { o.Id, o.Name, o.MunicipalityCode }).ToListAsync(ct);
+        var ids = shops.Select(s => s.Id).ToList();
+        var counts = await db.Set<SetupStep>().AsNoTracking().Where(s => ids.Contains(s.ShopId)).GroupBy(s => s.ShopId).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(g => g.Key, g => g.N, ct);
+        return shops.Select(s => new PendingShopResponse(s.Id, s.Name, s.MunicipalityCode, counts.GetValueOrDefault(s.Id), SetupChecklist.Items.Length)).ToList();
+    }
+
     public async Task Add(SetupStep step, CancellationToken ct) => await db.Set<SetupStep>().AddAsync(step, ct);
 
     public Task Save(CancellationToken ct) => db.SaveChangesAsync(ct);

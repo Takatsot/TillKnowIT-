@@ -7,7 +7,7 @@ import { sections } from "./sections";
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
     <SessionProvider>
-      <Shell title="TillKnowIT Back office" sections={sections} />
+      <Shell title="TillKnowIT Back office" sections={sections} signUp />
     </SessionProvider>
   </StrictMode>,
 );

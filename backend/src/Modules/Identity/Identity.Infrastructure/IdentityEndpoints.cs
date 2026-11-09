@@ -119,6 +119,12 @@ public static class IdentityEndpoints
         api.MapGet("/people/{personId:guid}/memberships", async (Guid personId, IDispatcher d, CancellationToken ct) =>
             Results.Ok((await d.Ask(new ListMemberships(personId), ct)).Value));
 
+        api.MapGet("/shops/pending-verification", async (Guid agentPersonId, IDispatcher d, CancellationToken ct) =>
+        {
+            var result = await d.Ask(new ListPendingShops(agentPersonId), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : Problem(result);
+        });
+
         api.MapGet("/shops/{shopId:guid}/setup", async (Guid shopId, IDispatcher d, CancellationToken ct) =>
         {
             var result = await d.Ask(new GetSetupChecklist(shopId), ct);

@@ -4,7 +4,7 @@ These click through every app in a real browser (Playwright) against the real AP
 
 What they check:
 
-- every menu section of the back office, supplier portal, admin, parent app and insights portal, and every tab inside each, at desktop and phone width: nothing throws, nothing draws blank, nothing runs off the side;
+- every menu section of the back office, supplier portal, admin, parent app, insights portal and field agent app, and every tab inside each, at desktop and phone width: nothing throws, nothing draws blank, nothing runs off the side;
 - the till: register with the one-time setup code, a wrong PIN, sell by barcode, take cash, and that the sale reaches the server; every tab opens; it fits a phone;
 - signing in through the real sign-in screen.
 

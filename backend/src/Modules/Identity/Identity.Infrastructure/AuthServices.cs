@@ -22,6 +22,8 @@ internal sealed class AuthStore(IdentityDbContext db) : IAuthStore
         return rows.Count == 1 ? new PersonRef(rows[0].Id, rows[0].DisplayName, rows[0].Phone, rows[0].PreferredLanguage) : null;   // two people on one number: nobody signs in until that is sorted out
     }
 
+    public void AddPerson(Person person) => db.People.Add(person);
+
     public void Add(OtpChallenge challenge) => db.Set<OtpChallenge>().Add(challenge);
 
     public Task<OtpChallenge?> LatestOpen(string phoneKey, DateTimeOffset now, CancellationToken ct) =>

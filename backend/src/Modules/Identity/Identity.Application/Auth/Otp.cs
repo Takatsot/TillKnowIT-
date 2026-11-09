@@ -15,6 +15,7 @@ public interface IAuthStore
 {
     Task<PersonRef?> PersonByPhone(string phoneKey, CancellationToken ct);
     void Add(OtpChallenge challenge);
+    void AddPerson(Person person);
     Task<OtpChallenge?> LatestOpen(string phoneKey, DateTimeOffset now, CancellationToken ct);
     Task<int> RequestedSince(string phoneKey, DateTimeOffset since, CancellationToken ct);
     Task Save(CancellationToken ct);
@@ -28,6 +29,7 @@ internal sealed class OtpHandlers(IAuthStore store, IMessageQueue queue, IDestin
     : ICommandHandler<RequestOtp, RequestOtpResponse>, ICommandHandler<VerifyOtp, SessionResponse>
 {
     public const int MaxRequestsPerHour = 5;
+    private static readonly HashSet<string> Languages = ["en", "zu", "xh", "st", "tn", "af", "nso", "ts", "ve", "nr", "ss"];
     private const string Message = "If that number is registered, a code has been sent to it.";
 
     /// <summary>The last nine digits, so +27 82 123 4567, 0821234567 and 27821234567 are one number.</summary>
@@ -48,6 +50,16 @@ internal sealed class OtpHandlers(IAuthStore store, IMessageQueue queue, IDestin
             return Result<RequestOtpResponse>.Fail("otp.too_many", "Too many codes asked for. Try again in an hour.");
 
         var person = await store.PersonByPhone(key, ct);
+        if (person is null && !string.IsNullOrWhiteSpace(c.Request.SignUpName))
+        {
+            // Sign-up: a person is made for the number. They cannot do anything until the code sent to it is entered.
+            var name = c.Request.SignUpName.Trim();
+            if (name.Length > 100) return Result<RequestOtpResponse>.Fail("person.name_invalid", "Your name is too long.");
+            var language = c.Request.Language is { } l && Languages.Contains(l) ? l : "en";
+            var created = new Person(name, checkedPhone.Value!, language);
+            store.AddPerson(created);
+            person = new PersonRef(created.Id, created.DisplayName, created.Phone, created.PreferredLanguage);
+        }
         if (person is null) return Result<RequestOtpResponse>.Ok(new(Message, null));   // no hint that there is no such account
 
         var (challenge, code) = OtpChallenge.Issue(person.Id, key, now);

@@ -11,6 +11,7 @@ export const PEOPLE = {
   admin: "0825550005",
   supplier: "0825550006",
   parent: "0825550007",
+  agent: "0825550004",
 } as const;
 
 export interface Answer { accessToken: string; expiresAt: string; personId: string; displayName: string; language: string }

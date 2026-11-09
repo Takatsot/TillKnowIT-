@@ -8,6 +8,7 @@ const apps = [
   { name: "admin", url: "http://localhost:5176", phone: PEOPLE.admin },
   { name: "parent app", url: "http://localhost:5177", phone: PEOPLE.parent },
   { name: "insights portal", url: "http://localhost:5178", phone: PEOPLE.supplier },
+  { name: "field agent", url: "http://localhost:5179", phone: PEOPLE.agent },
 ] as const;
 
 for (const app of apps) {

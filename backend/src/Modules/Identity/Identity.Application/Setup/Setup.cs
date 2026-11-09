@@ -9,6 +9,7 @@ public interface ISetupStore
 {
     Task<Organisation?> GetShop(Guid shopId, CancellationToken ct);
     Task<List<SetupStep>> Steps(Guid shopId, CancellationToken ct);
+    Task<List<PendingShopResponse>> PendingShops(CancellationToken ct);
     Task Add(SetupStep step, CancellationToken ct);
     Task Save(CancellationToken ct);
 }
@@ -69,6 +70,19 @@ internal sealed class GetSetupChecklistHandler(ISetupStore store) : IQueryHandle
             .Select(i => done.TryGetValue(i, out var s) ? new SetupStepResponse(i, true, s.CompletedAt, s.Note) : new SetupStepResponse(i, false, null, null))
             .ToList();
         return Result<SetupChecklistResponse>.Ok(new SetupChecklistResponse(steps, steps.All(s => s.Done), shop.Status.ToString().ToLowerInvariant()));
+    }
+}
+
+/// <summary>E13-1: the shops a field agent still has to set up and verify, fewest steps done last.</summary>
+public sealed record ListPendingShops(Guid AgentPersonId) : IQuery<List<PendingShopResponse>>;
+
+internal sealed class ListPendingShopsHandler(ISetupStore store, IPermissionChecker permissions) : IQueryHandler<ListPendingShops, List<PendingShopResponse>>
+{
+    public async Task<Result<List<PendingShopResponse>>> Handle(ListPendingShops q, CancellationToken ct)
+    {
+        if (!await permissions.Has(q.AgentPersonId, "shop.setup", ct))
+            return Result<List<PendingShopResponse>>.Fail("permission.denied", "Only a field agent can see the shops waiting for setup.");
+        return Result<List<PendingShopResponse>>.Ok((await store.PendingShops(ct)).OrderByDescending(s => s.StepsDone).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).ToList());
     }
 }
 

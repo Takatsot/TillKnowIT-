@@ -27,7 +27,7 @@ internal static class DevSeed
     private sealed record Who(string Name, string Phone, string Role, string Apps);
 
     private static readonly Who Owner = new("Nomsa Dlamini", OwnerPhone, "Shop owner", "Back office");
-    private static readonly Who Agent = new("Pieter Botha", "+27825550004", "Field agent", "(sets up and verifies shops)");
+    private static readonly Who Agent = new("Pieter Botha", "+27825550004", "Field agent", "Field agent app (http://localhost:5179)");
     private static readonly Who Admin = new("Alice Admin", "+27825550005", "Platform admin", "Admin");
     private static readonly Who Supplier = new("Sello Mahlangu", "+27825550006", "Supplier admin", "Supplier portal, Insights portal");
     private static readonly Who Parent = new("Lerato Khumalo", "+27825550007", "Parent", "Parent app");

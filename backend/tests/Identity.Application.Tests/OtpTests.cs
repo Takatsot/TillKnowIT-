@@ -16,6 +16,7 @@ public class OtpTests
         public List<OtpChallenge> Challenges { get; } = [];
         public Task<PersonRef?> PersonByPhone(string key, CancellationToken ct) => Task.FromResult(People.Count(p => OtpHandlers.PhoneKey(p.Phone) == key) == 1 ? People.First(p => OtpHandlers.PhoneKey(p.Phone) == key) : null);
         public void Add(OtpChallenge c) => Challenges.Add(c);
+        public void AddPerson(Person p) => People.Add(new PersonRef(p.Id, p.DisplayName, p.Phone, p.PreferredLanguage));
         public Task<OtpChallenge?> LatestOpen(string key, DateTimeOffset now, CancellationToken ct) => Task.FromResult(Challenges.Where(c => c.PhoneKey == key && c.IsOpen(now)).OrderByDescending(c => c.CreatedAt).FirstOrDefault());
         public Task<int> RequestedSince(string key, DateTimeOffset since, CancellationToken ct) => Task.FromResult(Challenges.Count(c => c.PhoneKey == key && c.CreatedAt >= since));
         public Task Save(CancellationToken ct) => Task.CompletedTask;
@@ -61,6 +62,39 @@ public class OtpTests
         Assert.Equal(_thandi.Id.ToString(), ExpiringToken.Verify(Key, session.AccessToken, _clock.GetUtcNow()));
         Assert.Equal(_clock.GetUtcNow().AddHours(12), session.ExpiresAt);
         Assert.Equal("otp.invalid", (await Handlers().Handle(new VerifyOtp(new("0821234567", code)), default)).Error!.Code);   // used up
+    }
+
+    [Fact]
+    public async Task Someone_new_signs_up_by_giving_their_name_and_the_code_proves_the_number_is_theirs()
+    {
+        var asked = (await Handlers().Handle(new RequestOtp(new("0839999999", "  Nomsa  ", "zu")), default)).Value!;
+
+        Assert.NotNull(asked.DevCode);
+        var person = _store.People.Single(p => p.DisplayName == "Nomsa");
+        Assert.Equal("zu", person.Language);
+        Assert.Equal("zu", Assert.Single(_sms.Sent).Language);
+        var session = (await Handlers().Handle(new VerifyOtp(new("0839999999", asked.DevCode!)), default)).Value!;
+        Assert.Equal(person.Id, session.PersonId);
+    }
+
+    [Fact]
+    public async Task Signing_up_with_a_number_that_already_belongs_to_someone_only_signs_that_person_in()
+    {
+        var asked = (await Handlers().Handle(new RequestOtp(new("0821234567", "Someone Else")), default)).Value!;
+
+        Assert.Single(_store.People);
+        var session = (await Handlers().Handle(new VerifyOtp(new("0821234567", asked.DevCode!)), default)).Value!;
+        Assert.Equal((_thandi.Id, "Thandi"), (session.PersonId, session.DisplayName));
+    }
+
+    [Fact]
+    public async Task A_sign_up_with_an_unknown_language_uses_english_and_an_overlong_name_is_refused()
+    {
+        await Handlers().Handle(new RequestOtp(new("0839999999", "Nomsa", "klingon")), default);
+        Assert.Equal("en", _store.People.Single(p => p.DisplayName == "Nomsa").Language);
+
+        var long_ = await Handlers().Handle(new RequestOtp(new("0838888888", new string('x', 101))), default);
+        Assert.Equal("person.name_invalid", long_.Error!.Code);
     }
 
     [Fact]

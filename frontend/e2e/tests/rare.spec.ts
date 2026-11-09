@@ -58,6 +58,8 @@ test("pressing Edit on the last product brings the edit form into view", async (
   await page.goto("http://localhost:5174");
   await page.locator("nav[aria-label]").first().getByRole("button", { name: "Products and stock", exact: true }).click();
   const edits = page.getByRole("button", { name: /^Edit .+/ });
+  await expect(edits.first()).toBeVisible();
+  await page.waitForTimeout(1000);   // the list may still be settling; the last button must be the final one
   await edits.last().scrollIntoViewIfNeeded();
   const name = ((await edits.last().getAttribute("aria-label")) ?? "").replace(/^Edit /, "");
   await edits.last().click();
