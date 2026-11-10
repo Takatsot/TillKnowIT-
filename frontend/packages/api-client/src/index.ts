@@ -45,7 +45,14 @@ export function queryString(query?: Query): string {
 /** Shown when a part of the app is not switched on for the shop. The screens show this softly, not as a failure. */
 export const FEATURE_OFF = "This part is not switched on for your shop yet. Change your business type to add it.";
 
+/** Shown when the app was published without an API address, so its requests land on the page's own host (which only serves files). */
+export const NO_API_CONFIGURED = "This copy of the app has no server connected yet, so it cannot sign in. Ask whoever published it to set the API address.";
+
 async function problem(response: Response): Promise<{ code: string; message: string }> {
+  if ((response.status === 404 || response.status === 405) && API_BASE === "/api/v1") {
+    const fromHtmlHost = !(response.headers.get("content-type") ?? "").includes("json");
+    if (fromHtmlHost) return { code: "api.not_configured", message: NO_API_CONFIGURED };
+  }
   try {
     const body = (await response.json()) as { code?: string; title?: string; detail?: string };
     const code = body.code ?? `http.${response.status}`;
