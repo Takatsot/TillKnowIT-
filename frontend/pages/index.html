@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TillKnowIT demo</title>
+    <style>
+      :root { --bg: #f6f4ee; --ink: #12261d; --card: #ffffff; --line: #d9d4c4; --green: #0b2a1f; --brass: #b8892b; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #0e1a14; --ink: #eef0e8; --card: #16261d; --line: #2b3d33; --green: #d8e8dc; --brass: #d9a94a; } }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, "Segoe UI", sans-serif; line-height: 1.5; }
+      main { max-width: 760px; margin: 0 auto; padding: 32px 16px 56px; }
+      h1 { margin: 0 0 4px; font-size: 1.9rem; color: var(--green); }
+      .lead { margin: 0 0 24px; opacity: 0.85; }
+      .warn { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--brass); padding: 12px 14px; border-radius: 8px; margin-bottom: 24px; }
+      ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+      a.app { display: block; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; color: inherit; text-decoration: none; }
+      a.app:hover, a.app:focus-visible { border-color: var(--brass); outline: none; }
+      a.app strong { display: block; color: var(--green); }
+      table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.95rem; }
+      th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+      h2 { margin-top: 32px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>TillKnowIT</h1>
+      <p class="lead">A point of sale for spaza shops and tuckshops. This is a demo with made-up shops and people.</p>
+      <p class="warn"><strong>Demo only.</strong> Do not type real customer or business information here. The demo server may take up to a minute to wake up the first time you sign in. The sign-in code is shown on the screen because no SMS is sent.</p>
+      <ul>
+        <li><a class="app" href="back-office/"><strong>Back office</strong>For shop owners: products, stock, staff, reports, getting started.</a></li>
+        <li><a class="app" href="till/"><strong>Till</strong>The cashier's screen. Set the till up with the codes the owner gets in Staff and tills.</a></li>
+        <li><a class="app" href="supplier-portal/"><strong>Supplier portal</strong>Catalogue, orders and deals.</a></li>
+        <li><a class="app" href="admin/"><strong>Admin</strong>For the platform team: schools, wallets, plans, catalogue lists.</a></li>
+        <li><a class="app" href="parent-app/"><strong>Parent app</strong>See a child's wallet and add money.</a></li>
+        <li><a class="app" href="insights-portal/"><strong>Insights portal</strong>Area trends for suppliers.</a></li>
+        <li><a class="app" href="field-agent/"><strong>Field agent</strong>Set up and verify new shops.</a></li>
+      </ul>
+      <h2>Demo people</h2>
+      <p>Enter the phone number on the sign-in screen. The code appears under the box.</p>
+      <table>
+        <tr><th>Who</th><th>Phone</th><th>Use it in</th></tr>
+        <tr><td>Nomsa Dlamini (shop owner)</td><td>082 555 0001</td><td>Back office</td></tr>
+        <tr><td>Pieter Botha (field agent)</td><td>082 555 0004</td><td>Field agent</td></tr>
+        <tr><td>Alice Admin (platform admin)</td><td>082 555 0005</td><td>Admin</td></tr>
+        <tr><td>Sello Mahlangu (supplier)</td><td>082 555 0006</td><td>Supplier portal, Insights portal</td></tr>
+        <tr><td>Lerato Khumalo (parent)</td><td>082 555 0007</td><td>Parent app</td></tr>
+      </table>
+    </main>
+  </body>
+</html>

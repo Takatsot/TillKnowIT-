@@ -59,8 +59,18 @@ async function problem(response: Response): Promise<{ code: string; message: str
 
 const headersOrUndefined = (h: Record<string, string>) => (Object.keys(h).length === 0 ? undefined : h);
 
+/**
+ * Where the API is. In development the dev server forwards /api/v1 to the API; when the apps are hosted somewhere else (GitHub Pages), the build is given
+ * the API's address in VITE_API_URL (for example https://tillknowit-api.example.com), and the path is added here.
+ */
+export const API_BASE: string = (() => {
+  const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+  const host = (env?.["VITE_API_URL"] ?? "").trim().replace(/\/$/, "");
+  return `${host}/api/v1`;
+})();
+
 export function createApi(options: ApiOptions = {}): Api {
-  const base = (options.baseUrl ?? "/api/v1").replace(/\/$/, "");
+  const base = (options.baseUrl ?? API_BASE).replace(/\/$/, "");
   const fetcher = options.fetcher ?? ((...args: Parameters<typeof fetch>) => fetch(...args));
 
   function authHeaders(): Record<string, string> {

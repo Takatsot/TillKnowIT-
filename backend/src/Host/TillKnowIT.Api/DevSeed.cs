@@ -146,9 +146,10 @@ internal static class DevSeed
         text.AppendLine("## School");
         text.AppendLine();
         text.AppendLine($"Sunrise Primary (tuckshop id `{tuckshop}`), child Themba Khumalo, grade 4B, already linked to Lerato Khumalo. Link code used: `{child.LinkCode}`.");
-        Directory.CreateDirectory(outputFolder);
         var path = Path.Combine(outputFolder, "dev-seed.md");
-        await File.WriteAllTextAsync(path, text.ToString(), ct);
+        // A hosted demo may have a read-only folder: the notes are a convenience, so not being able to write them must not stop the API starting.
+        try { Directory.CreateDirectory(outputFolder); await File.WriteAllTextAsync(path, text.ToString(), ct); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { log.LogWarning("Could not write {Path}: {Reason}", path, e.Message); }
         log.LogInformation("Dev seed: done. Sign-in phones, PINs and the till's setup code are in {Path}", path);
     }
 }

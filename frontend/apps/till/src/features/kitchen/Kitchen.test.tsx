@@ -33,7 +33,8 @@ describe("kitchen feature", () => {
 
     await user.click(fresh.getByRole("button", { name: "Start A12" }));
 
-    expect(post).toHaveBeenCalledWith(expect.stringContaining("/kitchen-orders/o1/advance"), { deviceId: DEVICE, staffId: STAFF, action: "start" });
+    // The call is made after the click handler has awaited something, so on a busy machine it can land a moment later.
+    await waitFor(() => expect(post).toHaveBeenCalledWith(expect.stringContaining("/kitchen-orders/o1/advance"), { deviceId: DEVICE, staffId: STAFF, action: "start" }));
   });
 
   it("says so when the kitchen is empty", async () => {

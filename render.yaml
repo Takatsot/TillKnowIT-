@@ -1,0 +1,42 @@
+# A free demo of the API on Render (https://render.com): New > Blueprint > pick this repository.
+# It is for made-up data only (Demo__Enabled). Read docs/DEPLOY-FREE.md first: the database is not created here.
+services:
+  - type: web
+    name: tillknowit-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # Demo data, the fake partners, and the sign-in code shown on screen (no SMS). Never switch on where real shops' data lives.
+      - key: Demo__Enabled
+        value: "true"
+      - key: Auth__Required
+        value: "true"
+      # The apps on GitHub Pages: https://<owner>.github.io (no path, no trailing slash).
+      - key: Cors__Origins__0
+        value: https://takatsot.github.io
+      # Your SQL Server connection string (see docs/DEPLOY-FREE.md). Pasted in the Render dashboard, never committed.
+      - key: ConnectionStrings__Database
+        sync: false
+      - key: Auth__TokenKey
+        generateValue: true
+      - key: Storage__Root
+        value: /tmp/storage
+      - key: Storage__Key
+        generateValue: true
+      - key: Slips__BaseUrl
+        value: https://tillknowit-api.onrender.com/api/v1/slips
+      - key: Slips__SigningKey
+        generateValue: true
+      - key: Wallet__QrKey
+        generateValue: true
+      - key: Wallet__AllowanceKey
+        generateValue: true
+      - key: Wallet__WebhookSecrets__dev
+        generateValue: true
+      - key: Payments__WebhookSecrets__dev
+        generateValue: true

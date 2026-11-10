@@ -48,7 +48,7 @@ internal sealed class OtpChallengeConfiguration : Microsoft.EntityFrameworkCore.
 
 public static class AuthEndpoints
 {
-    public static IServiceCollection AddIdentityAuth(this IServiceCollection services, IConfiguration config, bool development)
+    public static IServiceCollection AddIdentityAuth(this IServiceCollection services, IConfiguration config, bool development, bool demo = false)
     {
         var key = config["Auth:TokenKey"];
         if (string.IsNullOrWhiteSpace(key) || key.Length < 32)
@@ -57,7 +57,7 @@ public static class AuthEndpoints
             key = "dev-only-auth-token-key-0123456789abcdef";
         }
         var hours = double.TryParse(config["Auth:TokenHours"], out var h) ? h : 12;
-        services.AddSingleton(new AuthSettings(key, TimeSpan.FromHours(hours), ExposeDevCode: development && config.GetValue("Auth:ExposeDevCode", true)));
+        services.AddSingleton(new AuthSettings(key, TimeSpan.FromHours(hours), ExposeDevCode: (development || demo) && config.GetValue("Auth:ExposeDevCode", true)));
         services.AddScoped<IAuthStore, AuthStore>();
         return services;
     }

@@ -3,6 +3,8 @@ import { defineConfig } from "vitest/config";
 
 // In development the API runs on its own port; the app talks to /api/v1 and Vite forwards it.
 export default defineConfig({
+  // On GitHub Pages each app lives under its own path (the build sets PAGES_BASE, for example /TillKnowIT-/till/).
+  base: process.env["PAGES_BASE"] ?? "/",
   plugins: [react()],
   server: { proxy: { "/api": { target: "http://localhost:5080", changeOrigin: true } } },
   test: { setupFiles: ["./test-setup.ts"], environment: "jsdom", testTimeout: 20000 },

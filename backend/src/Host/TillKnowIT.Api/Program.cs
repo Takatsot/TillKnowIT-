@@ -23,7 +23,17 @@ var db = builder.Configuration.GetConnectionString("Database")
 builder.Services.AddEncryptedLocalFileStore(builder.Configuration["Storage:Root"], builder.Configuration["Storage:Key"]);
 builder.Services.AddSlipOptions(builder.Configuration["Slips:BaseUrl"], builder.Configuration["Slips:SigningKey"]);
 builder.Services.AddOpenApi();
-builder.Services.AddIdentityAuth(builder.Configuration, builder.Environment.IsDevelopment());
+// Demo:Enabled is for a public demo with made-up data only: the demo people and shop are seeded, the fake partners stand in, and the sign-in code is shown on screen
+// (there is no SMS). It still needs a real Auth:TokenKey. Never switch it on where real shops' data lives.
+var demo = builder.Configuration.GetValue("Demo:Enabled", false);
+builder.Services.AddIdentityAuth(builder.Configuration, builder.Environment.IsDevelopment(), demo);
+
+// Which web addresses may call the API from a browser (the apps hosted elsewhere, such as GitHub Pages): Cors:Origins:0, Cors:Origins:1 ...
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? [];
+builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
+{
+    if (corsOrigins.Length > 0) p.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("Content-Disposition");
+}));
 builder.Services.AddExceptionHandler<BadRequestHandler>();
 builder.Services.AddProblemDetails();
 builder.Services
@@ -47,15 +57,15 @@ builder.Services.AddAccountingOAuth(AccountingOAuthExtensions.ReadOptions(k => b
 
 // A fake VAS partner exists in Development only. Elsewhere airtime and electricity report "not available"
 // until the real partner adapter is registered.
-if (builder.Environment.IsDevelopment()) builder.Services.AddDevVasPartner().AddDevPaymentPartner().AddDevStoredValuePartner().AddDevBillingCharger().AddDevFinancePartner().AddDevAccountingExporters();
+if (builder.Environment.IsDevelopment() || demo) builder.Services.AddDevVasPartner().AddDevPaymentPartner().AddDevStoredValuePartner().AddDevBillingCharger().AddDevFinancePartner().AddDevAccountingExporters();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
-    // Local convenience only. Staging and production apply migrations as a deploy step (migration bundle).
+if (app.Environment.IsDevelopment() || demo)
+{
+    // Local convenience (and the demo) only. Staging and production apply migrations as a deploy step (migration bundle).
     using var scope = app.Services.CreateScope();
     foreach (var migrator in scope.ServiceProvider.GetServices<IModuleMigrator>())
         await migrator.MigrateAsync();
@@ -66,6 +76,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+app.UseCors();
 app.UseMiddleware<TillKnowIT.Api.PersonAuthMiddleware>();
 
 var api = app.MapGroup("/api/v1");

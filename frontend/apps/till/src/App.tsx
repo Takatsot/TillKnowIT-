@@ -1,5 +1,5 @@
 import { BrandLockup, Button, Notice } from "@tillknowit/design-system";
-import { createApi, type Api } from "@tillknowit/api-client";
+import { API_BASE, createApi, type Api } from "@tillknowit/api-client";
 import { fail, flushOutbox, type CatalogueItem, type Outbox, type PromotionDef, type SendBatch } from "@tillknowit/domain";
 import { Features } from "@tillknowit/packs";
 import { isLanguage, languages, translate, translateArea, type LanguageCode, type MessageKey } from "@tillknowit/i18n";
@@ -75,7 +75,7 @@ export function App({ services }: { services?: Partial<AppServices> } = {}) {
   const [pull, setPull] = useState<PullStatus>(initialStatus);
   const kv = useMemo(() => services?.kv ?? new IndexedDbKeyValueStore(), [services?.kv]);
   const outbox = useMemo(() => new BookkeepingOutbox(services?.outbox ?? new IndexedDbOutbox(), kv), [services?.outbox, kv]);
-  const send = useMemo(() => services?.send ?? httpSend("/api/v1", fetch, deviceHeaders), [services?.send]);
+  const send = useMemo(() => services?.send ?? httpSend(API_BASE, fetch, deviceHeaders), [services?.send]);
   const sync = useRef<SyncHandle | null>(null);
   const download = useRef<DownloadSyncHandle | null>(null);
   const bridge = useRef<SaleBridge | null>(null);

@@ -1,0 +1,59 @@
+name: Publish the apps to GitHub Pages
+
+# Every app is built for its own path under one Pages site: https://<owner>.github.io/<repo>/till/, /back-office/ and so on.
+# The apps talk to the API at the address in the repository variable API_URL (Settings > Secrets and variables > Actions > Variables), for example https://tillknowit-api.onrender.com
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_URL: ${{ vars.API_URL }}
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Build every app for its path
+        run: |
+          repo="${GITHUB_REPOSITORY#*/}"
+          mkdir -p ../site
+          for app in till back-office supplier-portal admin parent-app insights-portal field-agent; do
+            PAGES_BASE="/${repo}/${app}/" npm run build -w "@tillknowit/${app}"
+            mkdir -p "../site/${app}"
+            cp -r "apps/${app}/dist/." "../site/${app}/"
+          done
+          cp pages/index.html ../site/index.html
+          touch ../site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
