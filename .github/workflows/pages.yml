@@ -1,6 +1,7 @@
 name: Publish the apps to GitHub Pages
 
 # Every app is built for its own path under one Pages site: https://<owner>.github.io/<repo>/till/, /back-office/ and so on.
+# Needs Settings > Pages > Source: GitHub Actions (switched on once). If a run says "Failed to create deployment (404)", that setting is the cause.
 # The apps talk to the API at the address in the repository variable API_URL (Settings > Secrets and variables > Actions > Variables), for example https://tillknowit-api.onrender.com
 on:
   push:
