@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TITLE HERE | TillKnowIT</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/manual.css" />
+</head>
+<body>
+  <!-- Every page has the running header with the logo. Keep it exactly like this. -->
+  <header class="run-head">
+    <a class="logo" href="index.html" aria-label="TillKnowIT manuals"><img src="assets/logo.svg" alt="TillKnowIT" /></a>
+    <span class="doc-name">SHORT DOCUMENT NAME</span>
+  </header>
+
+  <!-- The cover: logo again, large, on the green panel. -->
+  <section class="cover">
+    <img class="cover-logo" src="assets/logo-light.svg" alt="TillKnowIT" />
+    <p class="kicker">KICKER, e.g. USER MANUAL</p>
+    <h1>Document title</h1>
+    <p class="sub">One-sentence promise: who this is for and what they will be able to do.</p>
+    <p class="meta"><b>For:</b> role &nbsp;·&nbsp; <b>App:</b> name and address &nbsp;·&nbsp; <b>Version</b> 1.0 &nbsp;·&nbsp; November 2026</p>
+  </section>
+
+  <main>
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#c1">First chapter</a></li>
+        <li><a href="#c2">Second chapter</a></li>
+      </ol>
+    </nav>
+
+    <div class="sheet">
+      <h2 id="c1"><span class="num">1</span>First chapter</h2>
+      <p>Prose. Use <span class="ui">Button names</span> for anything on screen, <code>code</code> for values and addresses, <kbd>Enter</kbd> for keys.</p>
+
+      <ol class="steps">
+        <li>A numbered step.</li>
+        <li>Another step.</li>
+      </ol>
+
+      <div class="tip"><p>A helpful shortcut.</p></div>
+      <div class="note"><p>Something worth knowing.</p></div>
+      <div class="warn"><p>Something that can go wrong.</p></div>
+      <div class="danger"><p>Something that loses money or data.</p></div>
+
+      <div class="table-wrap"><table>
+        <caption>What the table is</caption>
+        <thead><tr><th>Column</th><th>Column</th></tr></thead>
+        <tbody><tr><td>Row</td><td>Text</td></tr></tbody>
+      </table></div>
+
+      <hr class="orn" />
+    </div>
+
+    <div class="pager"><a href="index.html">&larr; All manuals</a><a href="NEXT.html">Next manual &rarr;</a></div>
+  </main>
+
+  <footer class="run-foot">
+    <span>TillKnowIT &middot; SHORT DOCUMENT NAME &middot; Version 1.0</span>
+    <img src="assets/logo.svg" alt="TillKnowIT" />
+  </footer>
+</body>
+</html>

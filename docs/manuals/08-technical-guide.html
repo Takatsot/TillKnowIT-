@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Technical and Hosting Guide | TillKnowIT</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/manual.css" />
+</head>
+<body>
+  <header class="run-head">
+    <a class="logo" href="index.html" aria-label="TillKnowIT manuals"><img src="assets/logo.svg" alt="TillKnowIT" /></a>
+    <span class="doc-name">Technical and Hosting Guide</span>
+  </header>
+
+  <section class="cover">
+    <img class="cover-logo" src="assets/logo-light.svg" alt="TillKnowIT" />
+    <p class="kicker">Technical guide</p>
+    <h1>Technical and Hosting Guide</h1>
+    <p class="sub">How to run TillKnowIT on a PC, publish a free demo, configure it for a real environment, test it, and what must happen before real shops use it.</p>
+    <p class="meta"><b>For:</b> developers and whoever hosts it &nbsp;·&nbsp; <b>Version</b> 1.0 &nbsp;·&nbsp; November 2026</p>
+  </section>
+
+  <main>
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#layout">What is in the repository</a></li>
+        <li><a href="#local">Run it on your PC</a></li>
+        <li><a href="#logins">Demo people and PINs</a></li>
+        <li><a href="#config">Settings that matter</a></li>
+        <li><a href="#tests">Testing</a></li>
+        <li><a href="#demo">A free public demo</a></li>
+        <li><a href="#azure">The database on Azure</a></li>
+        <li><a href="#prod">Before real shops use it</a></li>
+        <li><a href="#faq">Problems and fixes</a></li>
+      </ol>
+    </nav>
+
+    <div class="sheet">
+
+      <h2 id="layout"><span class="num">1</span>What is in the repository</h2>
+      <p class="lead">One repository holds the server, the apps, the specifications and the decisions behind them.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Folder</th><th>Contents</th></tr></thead>
+        <tbody>
+          <tr><td><code>backend/</code></td><td>The .NET 10 solution. <code>src/Modules/*</code> (each with Domain, Application, Infrastructure, Contracts), <code>src/BuildingBlocks/*</code> (outbox, security, storage, importing, reporting), and the two hosts <code>src/Host/TillKnowIT.Api</code> and <code>TillKnowIT.Worker</code>. Tests are in <code>tests/</code>.</td></tr>
+          <tr><td><code>frontend/</code></td><td>npm workspaces. Seven apps in <code>apps/</code> and shared packages in <code>packages/</code>: domain (rules in TypeScript), i18n, design-system, api-client, app-kit, hardware, packs. Browser tests in <code>e2e/</code>.</td></tr>
+          <tr><td><code>docs/specs/</code></td><td>The five phase specifications the code is built from.</td></tr>
+          <tr><td><code>docs/adr/</code></td><td>Decision records: SQL Server instead of PostgreSQL, Marketplace inside the monolith for now, the wallet as its own module.</td></tr>
+          <tr><td><code>docs/STATUS.md</code></td><td>Every user story and its state, kept honest with every change.</td></tr>
+          <tr><td><code>docs/manuals/</code></td><td>This library.</td></tr>
+          <tr><td><code>.github/workflows/</code></td><td>Continuous integration and the GitHub Pages publish.</td></tr>
+          <tr><td><code>render.yaml</code>, <code>backend/Dockerfile</code></td><td>The free demo API on Render.</td></tr>
+        </tbody>
+      </table></div>
+
+      <hr class="orn" />
+
+      <h2 id="local"><span class="num">2</span>Run it on your PC</h2>
+      <p>You need the .NET 10 SDK, Node.js 22 and SQL Server. SQL Server LocalDB comes with Visual Studio and is enough.</p>
+
+      <h3>The API</h3>
+      <ol class="steps">
+        <li>Open a terminal in <code>backend/src/Host/TillKnowIT.Api</code>.</li>
+        <li>Set the environment and the database, then run. In Git Bash:
+<pre><code>ASPNETCORE_ENVIRONMENT=Development \
+ConnectionStrings__Database='Server=(localdb)\MSSQLLocalDB;Database=tillknowit_dev;Trusted_Connection=True;TrustServerCertificate=True' \
+dotnet run --no-launch-profile --urls http://localhost:5080</code></pre></li>
+        <li>The first start creates the tables and seeds one person for every role, a shop with a till and ten products, a supplier, and a school with a linked child. A file called <code>dev-seed.md</code> beside the API lists the phones, PINs and the till's setup code. It is ignored by git.</li>
+        <li>Check it is alive: <code>http://localhost:5080/api/v1/health</code> should answer.</li>
+      </ol>
+      <div class="warn"><p>If you start the API without <code>ConnectionStrings__Database</code> it uses a default string that points at another server and fails. Always set it.</p></div>
+
+      <h3>The apps</h3>
+      <ol class="steps">
+        <li>In <code>frontend/</code> run <code>npm ci</code> once.</li>
+        <li>Start an app with <code>npm run dev -w @tillknowit/&lt;app&gt;</code>, for example <code>@tillknowit/back-office</code>. Each dev server forwards <code>/api/v1</code> to the API on port 5080.</li>
+      </ol>
+      <div class="table-wrap"><table>
+        <caption>Ports used in development</caption>
+        <thead><tr><th>Port</th><th>App</th><th>Package name</th></tr></thead>
+        <tbody>
+          <tr><td>5080</td><td>API</td><td>(backend)</td></tr>
+          <tr><td>5173</td><td>Till</td><td><code>@tillknowit/till</code></td></tr>
+          <tr><td>5174</td><td>Back office</td><td><code>@tillknowit/back-office</code></td></tr>
+          <tr><td>5175</td><td>Supplier portal</td><td><code>@tillknowit/supplier-portal</code></td></tr>
+          <tr><td>5176</td><td>Admin</td><td><code>@tillknowit/admin</code></td></tr>
+          <tr><td>5177</td><td>Parent app</td><td><code>@tillknowit/parent-app</code></td></tr>
+          <tr><td>5178</td><td>Insights portal</td><td><code>@tillknowit/insights-portal</code></td></tr>
+          <tr><td>5179</td><td>Field agent</td><td><code>@tillknowit/field-agent</code></td></tr>
+        </tbody>
+      </table></div>
+
+      <hr class="orn" />
+
+      <h2 id="logins"><span class="num">3</span>Demo people and PINs</h2>
+      <p>On the sign-in screen enter the cell number. In development and demo mode the code is shown under the box because no SMS is sent.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Person</th><th>Cell number</th><th>Role</th><th>App</th></tr></thead>
+        <tbody>
+          <tr><td>Nomsa Dlamini</td><td>082 555 0001</td><td>Shop owner</td><td>Back office</td></tr>
+          <tr><td>Pieter Botha</td><td>082 555 0004</td><td>Field agent</td><td>Field agent</td></tr>
+          <tr><td>Alice Admin</td><td>082 555 0005</td><td>Platform admin</td><td>Admin</td></tr>
+          <tr><td>Sello Mahlangu</td><td>082 555 0006</td><td>Supplier</td><td>Supplier portal, Insights portal</td></tr>
+          <tr><td>Lerato Khumalo</td><td>082 555 0007</td><td>Parent</td><td>Parent app</td></tr>
+        </tbody>
+      </table></div>
+      <p>Till staff sign in with a PIN, not a phone: <strong>Thandi</strong> (cashier) <code>1234</code> and <strong>Sipho</strong> (manager) <code>4321</code>. Demo barcodes: <code>6001234500011</code> bread, <code>6001234500066</code> milk, <code>6001234500080</code> soap.</p>
+      <div class="note"><p>A till's setup code works once. To set the same till up again, an owner resets its credential in Staff and tills and approves it again.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="config"><span class="num">4</span>Settings that matter</h2>
+      <p>Development fills in safe defaults. <strong>Outside Development</strong> the API refuses to start without the keys below, which is deliberate. Set them as environment variables (a double underscore stands for a colon) or in a secrets store, never in the repository.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Setting</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><code>ConnectionStrings:Database</code></td><td>The SQL Server connection. <code>ConnectionStrings:Wallet</code> optionally gives the wallet a database of its own.</td></tr>
+          <tr><td><code>Auth:Required</code></td><td>Set to <code>true</code> in every real environment. Every request that names an acting person must then carry that person's token.</td></tr>
+          <tr><td><code>Auth:TokenKey</code></td><td>Signs sessions. At least 32 characters.</td></tr>
+          <tr><td><code>Storage:Root</code>, <code>Storage:Key</code></td><td>Where encrypted documents live, and the 32-byte base64 key that encrypts them.</td></tr>
+          <tr><td><code>Slips:BaseUrl</code>, <code>Slips:SigningKey</code></td><td>The public address of the slip page and the 32-byte base64 key that signs slip links.</td></tr>
+          <tr><td><code>Wallet:QrKey</code>, <code>Wallet:AllowanceKey</code></td><td>Sign the rotating payment QR and the offline allowance. At least 32 characters each and different from one another.</td></tr>
+          <tr><td><code>Wallet:WebhookSecrets:*</code>, <code>Payments:WebhookSecrets:*</code></td><td>One secret per partner, used to check signed callbacks.</td></tr>
+          <tr><td><code>Cors:Origins</code></td><td>The addresses of apps hosted elsewhere (for example the GitHub Pages address, without a path or trailing slash).</td></tr>
+          <tr><td><code>Sms:BulkSms:TokenId</code>, <code>TokenSecret</code></td><td>BulkSMS credentials. Without them SMS, and so sign-in codes, fail visibly outside Development.</td></tr>
+          <tr><td><code>Accounting:*</code></td><td>Token key, return address and the Xero and Sage client details, in both the API and the worker.</td></tr>
+          <tr><td><code>Demo:Enabled</code></td><td>Seeds demo data, uses fake partners and shows sign-in codes on screen. <strong>Never on where real data lives.</strong></td></tr>
+        </tbody>
+      </table></div>
+      <p>Generate a 32-byte base64 key with, for example, <code>openssl rand -base64 32</code>.</p>
+
+      <hr class="orn" />
+
+      <h2 id="tests"><span class="num">5</span>Testing</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>What</th><th>How to run it</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Server tests</td><td><code>dotnet test</code> in <code>backend/</code></td><td>Domain and application tests, architecture tests that enforce the module boundaries, and the property tests on the ledger. No database needed.</td></tr>
+          <tr><td>App tests</td><td><code>npm test</code> in <code>frontend/</code></td><td>Vitest and Testing Library against fake APIs.</td></tr>
+          <tr><td>Type checks</td><td><code>npm run typecheck</code> in <code>frontend/</code></td><td>Strict TypeScript across every workspace.</td></tr>
+          <tr><td>Browser tests</td><td>In <code>frontend/e2e</code>, <code>npx playwright test</code></td><td>Needs the API running on port 5080 with SQL Server. The apps are started for you. They click through every section of every app at desktop and phone width, and the main flows end to end. Not part of continuous integration, because they need the API.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Continuous integration on GitHub runs the server tests, the app tests and the type checks on every push.</p>
+
+      <hr class="orn" />
+
+      <h2 id="demo"><span class="num">6</span>A free public demo</h2>
+      <p class="lead">For showing TillKnowIT to people with made-up data. It is not for real shops: free hosting sleeps, has small limits and has no backups you can count on.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Part</th><th>Where</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td>The seven apps</td><td>GitHub Pages, published by <code>.github/workflows/pages.yml</code></td><td>Free for a public repository.</td></tr>
+          <tr><td>The API</td><td>A Render web service described by <code>render.yaml</code> and <code>backend/Dockerfile</code></td><td>Free; sleeps after about 15 idle minutes, so the first request takes up to a minute.</td></tr>
+          <tr><td>The database</td><td>A hosted SQL Server database (next chapter)</td><td>The one part with no free option outside Azure, and the Azure free offer is not available on every subscription.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>1. Publish the apps</h3>
+      <ol class="steps">
+        <li>On GitHub open <span class="ui">Settings</span> &rarr; <span class="ui">Pages</span> and set <span class="ui">Source</span> to <span class="ui">GitHub Actions</span>. This is done once. Without it a publish fails with "Failed to create deployment (404)".</li>
+        <li>Push to <code>main</code>, or run the workflow <em>Publish the apps to GitHub Pages</em> by hand. Each app is built for its own path, for example <code>/till/</code> and <code>/back-office/</code>.</li>
+        <li>The apps appear on one site with a landing page that links to each app and lists the demo people.</li>
+      </ol>
+      <div class="note"><p>The build bakes in the API's address. It uses the repository variable <code>API_URL</code> if there is one, and otherwise <code>https://tillknowit-api.onrender.com</code>. Without a working API address, sign-in shows "This copy of the app has no server connected yet".</p></div>
+
+      <h3>2. Publish the API</h3>
+      <ol class="steps">
+        <li>On render.com choose <span class="ui">New</span> &rarr; <span class="ui">Blueprint</span> and pick the repository. Render reads <code>render.yaml</code>.</li>
+        <li>When asked, paste <code>ConnectionStrings__Database</code> (never commit it). The other keys are generated.</li>
+        <li>Keep the service name <code>tillknowit-api</code>, or change <code>Slips__BaseUrl</code> and the apps' <code>API_URL</code> to match.</li>
+        <li>The first start creates the tables and the demo people, which takes a few minutes.</li>
+      </ol>
+      <div class="danger"><p>The demo settings show every sign-in code on screen. Anyone who knows a phone number can sign in as that person. Use made-up data only.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="azure"><span class="num">7</span>The database on Azure</h2>
+      <p>TillKnowIT runs on SQL Server, so a hosted database must be SQL Server. Neon, Supabase and PlanetScale are PostgreSQL or MySQL; moving to them would mean redoing every module's migrations and retesting everything.</p>
+      <ol class="steps">
+        <li>In the Azure portal create a <span class="ui">SQL Database</span> with a new server and SQL authentication. Look for the <span class="ui">Apply offer</span> banner on the Basics tab: it is the free database, and it is not offered on every subscription.</li>
+        <li>If there is no free offer, choose <em>General Purpose, Serverless</em> with a small maximum size (the preview prices storage per gigabyte, so 2 GB costs a few cents a month) and turn on auto-pause. Compute is charged only while the database is awake. Check the cost summary before you create it.</li>
+        <li>Under the server's <span class="ui">Networking</span> add a firewall rule. Render's addresses are not Azure's, so <em>Allow Azure services</em> is not enough for a demo; a wide rule works for made-up data and should be removed or narrowed before anything real goes in.</li>
+        <li>Copy the ADO.NET connection string and add <code>Connection Timeout=60;</code> so a paused database has time to wake.</li>
+      </ol>
+      <div class="warn"><p>Keep the admin password out of the repository and out of chat. If it has been shared, reset it from the server's Overview page and update the connection string in the host's settings.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="prod"><span class="num">8</span>Before real shops use it</h2>
+      <p>Replace demo mode with real settings: an always-on API and database with backups, the SMS provider, <code>Demo:Enabled</code> off, <code>Auth:Required</code> on, a limit on sign-up requests per address (today there is a limit of five codes an hour per phone number, but not per address, so bulk SMS cost is open to abuse), and the reviews below.</p>
+      <h3>To run it</h3>
+      <ol class="steps">
+        <li>Run the API and worker against a real SQL Server and confirm migrations apply, the seed loads, the outbox claim query works, cascade paths are accepted and the insight aggregate constraint is accepted.</li>
+        <li>Run the offline sync spike from decision record 0001 before building the local database and selling screen.</li>
+        <li>Turn on <code>Auth:Required</code>, set <code>Auth:TokenKey</code>, connect the SMS provider.</li>
+      </ol>
+      <h3>Partners and accounts</h3>
+      <ul>
+        <li>Payment partner, stored-value (wallet) partner, WhatsApp, SMS and email providers, and an airtime and electricity partner.</li>
+        <li>The real billing charger. Pricing: the seeded plan prices and the free message bundle are placeholders until the pilot pricing decision.</li>
+        <li>A registered credit provider and a written agreement for pay-later, with their sandbox.</li>
+        <li>Xero and Sage developer accounts and OAuth apps, then one connection and one day's journal tried in each sandbox.</li>
+        <li>A secrets store (Key Vault) for accounting tokens and partner secrets.</li>
+      </ul>
+      <h3>Reviews</h3>
+      <ul>
+        <li>Legal and data-ethics review of market insights and pay-later sharing (POPIA, competition rules), before any shop is asked to opt in.</li>
+        <li>Penetration test; load test at 10,000 shops and 2 million sales a day; review of the partner API, whose rate limit is in memory per server and needs a shared counter behind several servers.</li>
+        <li>First-language speakers to write and review the translations.</li>
+      </ul>
+      <h3>Still to build</h3>
+      <ul>
+        <li>Real printer, drawer, scale and kitchen-screen adapters once devices are chosen.</li>
+        <li>Offline sync of stock transfers; lay-by deposits and tips in the accounting journal; suggested replacement (M3-3); automatic weekly top-up (W2-5).</li>
+        <li>The separate Insights service and Partner API host, if scale asks for them.</li>
+      </ul>
+
+      <hr class="orn" />
+
+      <h2 id="faq"><span class="num">9</span>Problems and fixes</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>You see</th><th>Cause and fix</th></tr></thead>
+        <tbody>
+          <tr><td>"The server answered 405" or "This copy of the app has no server connected yet" on a hosted app</td><td>The app was published without the API's address, so it called its own host. Set the <code>API_URL</code> repository variable (or deploy the API at the default address) and publish again.</td></tr>
+          <tr><td>The API fails at start with a missing key</td><td>Outside Development every key in chapter 4 is required. The message names the one that is missing.</td></tr>
+          <tr><td>The API cannot reach the database</td><td>Check the connection string, and for Azure SQL the firewall rule. The error "Client with IP address … is not allowed to access the server" means the caller's address is not allowed.</td></tr>
+          <tr><td>Sign-in works on a PC but not hosted</td><td>Add the apps' address to <code>Cors:Origins</code> (scheme and host only, no path or trailing slash).</td></tr>
+          <tr><td>No sign-in code arrives</td><td>Outside Development and demo, a real SMS provider is required. Five codes an hour are allowed per phone number.</td></tr>
+          <tr><td>A till will not accept its setup code</td><td>The code works once. Reset the till's credential from the owner's Staff and tills screen and approve it again.</td></tr>
+          <tr><td>Azure CLI fails on a company network with a certificate or timeout error</td><td>The network inspects or blocks the sign-in traffic. Use the Azure portal in the browser instead; do not switch certificate checking off on a company machine.</td></tr>
+          <tr><td>The Docker image does not build on Render</td><td>The build log says why. The image has not been built on the machine it was written on; the same publish step and settings were run as a plain process in Production mode.</td></tr>
+        </tbody>
+      </table></div>
+
+    </div>
+
+    <div class="pager"><a href="07-admin-manual.html">&larr; Platform admin manual</a><a href="index.html">All manuals &rarr;</a></div>
+  </main>
+
+  <footer class="run-foot">
+    <span>TillKnowIT &middot; Technical and Hosting Guide &middot; Version 1.0</span>
+    <img src="assets/logo.svg" alt="TillKnowIT" />
+  </footer>
+</body>
+</html>

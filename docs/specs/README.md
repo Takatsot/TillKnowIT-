@@ -1,5 +1,7 @@
 # Product specifications
 
+Looking for the manuals? They are in [../manuals/index.html](../manuals/index.html): the solution explained, a manual for every role, and the technical guide.
+
 The five development specs the code is built from. They are copied here unchanged.
 
 | Phase | Spec | Theme |

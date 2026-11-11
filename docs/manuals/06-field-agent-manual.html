@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Field Agent Manual | TillKnowIT</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/manual.css" />
+</head>
+<body>
+  <header class="run-head">
+    <a class="logo" href="index.html" aria-label="TillKnowIT manuals"><img src="assets/logo.svg" alt="TillKnowIT" /></a>
+    <span class="doc-name">Field Agent Manual</span>
+  </header>
+
+  <section class="cover">
+    <img class="cover-logo" src="assets/logo-light.svg" alt="TillKnowIT" />
+    <p class="kicker">User manual</p>
+    <h1>The Field Agent App</h1>
+    <p class="sub">Get a new shop ready to trade: work through the seven setup steps with the owner, then verify the shop.</p>
+    <p class="meta"><b>For:</b> TillKnowIT field agents &nbsp;·&nbsp; <b>App:</b> TillKnowIT Field agent (<code>frontend/apps/field-agent</code>) &nbsp;·&nbsp; <b>Version</b> 1.0 &nbsp;·&nbsp; November 2026</p>
+  </section>
+
+  <main>
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#c1">Welcome</a></li>
+        <li><a href="#c2">Signing in</a></li>
+        <li><a href="#c3">The list of shops waiting</a></li>
+        <li><a href="#c4">The seven setup steps</a></li>
+        <li><a href="#c5">Ticking a step, with a note</a></li>
+        <li><a href="#c6">Verifying a shop</a></li>
+        <li><a href="#c7">The visit checklist</a></li>
+        <li><a href="#c8">What this app does not do</a></li>
+        <li><a href="#c9">Words used in this manual</a></li>
+        <li><a href="#c10">When something goes wrong</a></li>
+      </ol>
+    </nav>
+
+    <div class="sheet">
+      <h2 id="c1"><span class="num">1</span>Welcome</h2>
+      <p class="lead">A new shop signs itself up, but it cannot trade as a verified TillKnowIT shop until a person has seen it with their own eyes. That person is you.</p>
+      <p>The Field agent app is small on purpose. It has one menu entry, <span class="ui">Shops to set up</span>, and it does three things: it shows you the shops that are waiting, it lets you tick off the seven setup steps as you do them, and it lets you verify a shop once every step is done.</p>
+      <p>Verification matters. A verified shop is trusted by suppliers and, where a school uses the wallet, a tuck shop must be verified before its school can be. When you verify a shop you are putting your name to it: your person id is sent with every tick and with the verification.</p>
+      <div class="note"><p>Only people who have the field agent permission can use this app. If the server says you are not allowed, ask the platform team to give your cell number the field agent role.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c2"><span class="num">2</span>Signing in</h2>
+      <p class="lead">No password. You type your cell number and the app sends you a code by SMS.</p>
+      <ol class="steps">
+        <li>Open the Field agent app and find the <span class="ui">Sign in</span> box.</li>
+        <li>Type your number under <span class="ui">Your cell phone number</span> and tap <span class="ui">Send me a code</span>.</li>
+        <li>Type the code under <span class="ui">The code we sent you</span> and tap <span class="ui">Sign in</span>.</li>
+      </ol>
+      <p>Your sign-in lasts 12 hours. After that the app says <em>Your sign-in has run out. Please sign in again.</em> Use <span class="ui">Sign out</span> when you finish, especially on a shared phone.</p>
+      <h3>Demo mode</h3>
+      <p>In a demo or test version, a <span class="ui">Development only</span> box under the code field shows the code on the screen, so you can practise without a phone. The demo field agent is <strong>Pieter Botha</strong>, cell number <code>082 555 0004</code>. In the real service the code comes only by SMS.</p>
+      <div class="note"><p>SMS goes through a provider called BulkSMS that has not yet been run against the live service. Until it is switched on, real codes may not reach phones.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c3"><span class="num">3</span>The list of shops waiting</h2>
+      <p class="lead">When you sign in, the first screen is the card <span class="ui">Shops waiting for you</span>.</p>
+      <p>The help line says: <em>New shops stay pending until every step is done and you verify them. The ones furthest along come first.</em> So the shop at the top of the list is the one closest to being finished.</p>
+      <div class="table-wrap"><table>
+        <caption>The columns of the list</caption>
+        <thead><tr><th>Column</th><th>What it shows</th></tr></thead>
+        <tbody>
+          <tr><td>Shop</td><td>The name the owner gave when signing up.</td></tr>
+          <tr><td>Municipality</td><td>Where the owner said the shop is. It may be empty.</td></tr>
+          <tr><td>Steps done</td><td>For example <em>3 of 7</em>.</td></tr>
+          <tr><td>Actions</td><td>The <span class="ui">Open</span> button for that shop.</td></tr>
+        </tbody>
+      </table></div>
+      <p>If there is nothing to do, the screen says <em>No shops are waiting for setup.</em> If the list cannot load you see a red message with <span class="ui">Try again</span>.</p>
+      <p>Tap <span class="ui">Open</span> next to a shop to see its checklist. After you verify a shop you come back to this list with a green message such as <em>(Shop) is verified.</em></p>
+
+      <hr class="orn" />
+
+      <h2 id="c4"><span class="num">4</span>The seven setup steps</h2>
+      <p class="lead">Every shop has the same seven steps. Together they prove that the shop is real, that it can sell, and that its staff know how.</p>
+      <div class="table-wrap"><table>
+        <caption>The seven setup steps, as they appear on screen</caption>
+        <thead><tr><th>Step</th><th>What it means in practice</th></tr></thead>
+        <tbody>
+          <tr><td>Device check</td><td>The phone, tablet or till the shop will use turns on, connects and opens TillKnowIT.</td></tr>
+          <tr><td>Shop details</td><td>The shop name, address or municipality, language and contact are correct and match the real shop.</td></tr>
+          <tr><td>Document photos</td><td>The owner's papers (for example ID and proof the business exists) have been photographed and uploaded.</td></tr>
+          <tr><td>Catalogue import</td><td>The shop's products are loaded so the till can sell them.</td></tr>
+          <tr><td>Staff PINs</td><td>Each person who will use the till has a staff record and a PIN of their own.</td></tr>
+          <tr><td>Test sale</td><td>A sale was made on the till, from start to finish, to prove it works.</td></tr>
+          <tr><td>Training sign-off</td><td>The owner and staff have been shown how to sell, take cash and close the day, and agree they can do it.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note"><p>The app only lists the step names. The right-hand column above is the meaning we expect behind each tick. The system does not inspect your work: a step is "done" when you say it is. See <a href="#c8">What this app does not do</a>.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c5"><span class="num">5</span>Ticking a step, with a note</h2>
+      <p class="lead">You can tick steps in any order, at the shop or afterwards. The screen is titled <span class="ui">Setup steps for (shop name)</span>.</p>
+      <p>You see a table with four columns: <span class="ui">Step</span>, <span class="ui">State</span>, <span class="ui">Note</span> and <span class="ui">Actions</span>. The state is either <span class="ui">Done</span> or <span class="ui">Still to do</span>. A step that is done has no button; a step still to do has <span class="ui">Mark done</span>.</p>
+      <ol class="steps">
+        <li>Tap <span class="ui">Open</span> on the shop. The checklist appears.</li>
+        <li>Do the work for one step with the owner. See the <a href="#c7">visit checklist</a>.</li>
+        <li>If useful, type a short note in <span class="ui">Note for the next step you mark (optional)</span>. The hint gives examples: <em>signed by the owner, or 12 products loaded.</em></li>
+        <li>Tap <span class="ui">Mark done</span> on that step's row. The screen says <em>(Step) is marked done.</em> The state changes to <span class="ui">Done</span> and your note appears in the <span class="ui">Note</span> column.</li>
+        <li>Repeat for the next step. To go back to the list at any time, tap <span class="ui">Back to the list</span>.</li>
+      </ol>
+      <div class="warn"><p>The note box belongs to the <em>next</em> step you mark, then it is emptied. Type the note for a step <em>before</em> you tap its <span class="ui">Mark done</span>. Do not tap <span class="ui">Mark done</span> and then type the note: it would go on the next step you mark, not on this one.</p></div>
+      <div class="warn"><p>Do not tick a step that is not really finished. The system trusts you. A false tick lets a shop be verified without proper setup.</p></div>
+      <p>This app has no button to un-tick a step. If you tick the wrong one by mistake, tell the platform team straight away.</p>
+
+      <hr class="orn" />
+
+      <h2 id="c6"><span class="num">6</span>Verifying a shop</h2>
+      <p class="lead">Verifying is the last thing you do. It is the moment the shop stops waiting and becomes a verified shop.</p>
+      <p>Below the table, as long as any step is still to do, you see: <em>Every step must be done before you can verify the shop.</em> The <span class="ui">Verify this shop</span> button is grey.</p>
+      <ol class="steps">
+        <li>Make sure all seven rows show <span class="ui">Done</span>.</li>
+        <li>Tap <span class="ui">Verify this shop</span>.</li>
+        <li>You are returned to the list with <em>(Shop) is verified.</em> The shop disappears from the waiting list.</li>
+      </ol>
+      <p>If a shop has already been verified, for example by another agent, you see <em>This shop is already verified.</em> and no button.</p>
+      <div class="danger"><p>Verify only a shop you have seen yourself. There is no button in this app to take the verification back. The server checks that you have the right permission, and your person id is sent with the request.</p></div>
+      <p>After verification the owner no longer sees "waiting for verification" in the back office, and can go on with selling.</p>
+
+      <hr class="orn" />
+
+      <h2 id="c7"><span class="num">7</span>The visit checklist</h2>
+      <p class="lead">A good visit takes about two hours. Here is what to bring and what to say, so that you finish the seven steps on the day.</p>
+      <h3>What to bring</h3>
+      <ul>
+        <li>Your phone, charged, with the Field agent app signed in. Bring a power bank.</li>
+        <li>Mobile data. The app needs a connection; if the shop has no network, use your own.</li>
+        <li>A laptop or tablet to use the back office for document photos and the catalogue (see <a href="#c8">the next chapter</a>).</li>
+        <li>The device the shop will use as a till, if it is not already there, with its setup code from the platform team.</li>
+        <li>Your agent ID and a printed list of the seven steps.</li>
+        <li>A few products with barcodes to use for the test sale.</li>
+        <li>A sheet of paper and a pen for the owner's questions.</li>
+      </ul>
+      <h3>Before you go</h3>
+      <ul>
+        <li>Phone the owner and fix a time when they and their staff will be at the shop.</li>
+        <li>Ask the owner to have their ID, any registration papers and the staff's cell numbers ready.</li>
+        <li>Open <span class="ui">Shops to set up</span> and check how far along the shop already is.</li>
+      </ul>
+      <h3>What to say to the owner</h3>
+      <p>Speak simply and kindly. Many owners worry that a computer will be hard or that someone is checking up on them. Something like this works:</p>
+      <ul>
+        <li><em>"I am here to get your till ready, step by step. We will finish today, and then you can start selling."</em></li>
+        <li><em>"I need to see your ID and your papers, and take photos of them. They are kept safely and shown only to the people who must check them."</em></li>
+        <li><em>"Each person who sells will get their own PIN. Please do not share it. It shows who made each sale."</em></li>
+        <li><em>"We will make a test sale together first, so you can see that it works before real customers are waiting."</em></li>
+        <li><em>"When you are comfortable, I will mark your training as done. Tell me if anything is unclear."</em></li>
+      </ul>
+      <h3>A suggested order for the visit</h3>
+      <ol class="steps">
+        <li><strong>Device check.</strong> Switch on the device, connect it and open TillKnowIT. Tick <span class="ui">Device check</span>.</li>
+        <li><strong>Shop details.</strong> Check name, municipality, language and contact with the owner. Tick <span class="ui">Shop details</span>.</li>
+        <li><strong>Document photos.</strong> Photograph the papers in the back office, then tick <span class="ui">Document photos</span>.</li>
+        <li><strong>Catalogue import.</strong> Load the products in the back office, then tick <span class="ui">Catalogue import</span>. Note how many, for example <em>12 products loaded</em>.</li>
+        <li><strong>Staff PINs.</strong> Add each person who sells and set their PINs with them. Tick <span class="ui">Staff PINs</span>.</li>
+        <li><strong>Test sale.</strong> Make one cash sale on the till. Tick <span class="ui">Test sale</span>.</li>
+        <li><strong>Training sign-off.</strong> Show the owner how to sell, give change and close the day. Ask them to try. Note <em>signed by the owner</em>. Tick <span class="ui">Training sign-off</span>, then tap <span class="ui">Verify this shop</span>.</li>
+      </ol>
+      <div class="tip"><p>If the shop is not ready (for example the owner's papers are missing), do not rush. Tick what is truly done, and leave the rest. The list shows the shop as, say, <em>4 of 7</em>, so you or another agent can come back.</p></div>
+      <div class="warn"><p>Protect the owner's papers. Do not photograph their ID with your own personal phone camera app and keep it. Use the back office upload only, and never send ID photos by WhatsApp.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c8"><span class="num">8</span>What this app does not do</h2>
+      <p class="lead">We would rather you knew now than found out at the shop.</p>
+      <ul>
+        <li><strong>Taking document photos is not done in this app.</strong> You upload the owner's documents in the back office. Afterwards you tick <span class="ui">Document photos</span> here yourself.</li>
+        <li><strong>Loading the catalogue is not done in this app.</strong> Products are loaded in the back office (or by the shop's own import). Afterwards you tick <span class="ui">Catalogue import</span>.</li>
+        <li><strong>The system does not check the ticks.</strong> A step is marked, not proven. It will accept "Done" even if the photos were never uploaded. That is why your honesty matters.</li>
+        <li><strong>There is no un-tick and no un-verify.</strong> Tell the platform team if you made a mistake.</li>
+        <li><strong>No map, no photos, no camera.</strong> The app has no GPS or camera features today.</li>
+        <li><strong>English only.</strong> The app is not yet translated.</li>
+        <li><strong>SMS.</strong> The code sent by SMS has not yet run against the live provider.</li>
+      </ul>
+      <div class="note"><p>Document upload in the back office accepts JPEG, PNG and PDF files up to 10 MB each, and keeps them encrypted.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c9"><span class="num">9</span>Words used in this manual</h2>
+      <dl class="terms">
+        <dt>Verified shop</dt><dd>A shop that a field agent has visited and checked, with all seven setup steps done.</dd>
+        <dt>Pending</dt><dd>A new shop that has not yet been verified.</dd>
+        <dt>Back office</dt><dd>The web app where the owner (and you on a visit) manages products, staff, tills and documents.</dd>
+        <dt>Catalogue</dt><dd>The list of products a shop sells, with barcodes and prices.</dd>
+        <dt>Staff PIN</dt><dd>A short secret number each salesperson types on the till.</dd>
+        <dt>Test sale</dt><dd>A practice sale used to prove the till works.</dd>
+        <dt>Municipality</dt><dd>The local area (such as a metro) where the shop is.</dd>
+        <dt>Note</dt><dd>A short line you add when you mark a step, such as how many products were loaded.</dd>
+      </dl>
+
+      <hr class="orn" />
+
+      <h2 id="c10"><span class="num">10</span>When something goes wrong</h2>
+      <div class="table-wrap"><table>
+        <caption>Common problems and what to do</caption>
+        <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>No code arrives</td><td>Check your number. Wait a minute and tap <span class="ui">Use a different number</span> to ask again. After <em>Too many tries</em>, wait a few minutes.</td></tr>
+          <tr><td><em>No shops are waiting for setup.</em></td><td>All shops are verified, or none have signed up yet. Check with the platform team if you expected one.</td></tr>
+          <tr><td>A red message on the list, and <span class="ui">Try again</span></td><td>Check your data connection and tap <span class="ui">Try again</span>. If it says you are not allowed, ask the platform team to confirm your field agent role.</td></tr>
+          <tr><td>A shop I expected is missing</td><td>It may already be verified, or the owner has not made the shop yet.</td></tr>
+          <tr><td>A red message when tapping <span class="ui">Mark done</span></td><td>Read the message, check the connection and try again. If it persists, tell the platform team.</td></tr>
+          <tr><td><span class="ui">Verify this shop</span> is grey</td><td>One or more steps are still <span class="ui">Still to do</span>. Complete them first.</td></tr>
+          <tr><td>I ticked the wrong step</td><td>There is no un-tick in the app. Tell the platform team straight away.</td></tr>
+          <tr><td>My note went on the wrong step</td><td>The note box applies to the next step you mark. Tell the platform team if the wording matters.</td></tr>
+          <tr><td><em>Please sign in again.</em></td><td>Your 12 hour sign-in ended. Sign in with a new code.</td></tr>
+          <tr><td>The shop has no network</td><td>Use your phone's data. The app cannot be used without a connection.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="pager"><a href="05-parent-manual.html">&larr; Previous manual</a><a href="07-admin-manual.html">Next manual &rarr;</a></div>
+  </main>
+
+  <footer class="run-foot">
+    <span>TillKnowIT &middot; Field Agent Manual &middot; Version 1.0</span>
+    <img src="assets/logo.svg" alt="TillKnowIT" />
+  </footer>
+</body>
+</html>

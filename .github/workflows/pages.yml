@@ -6,7 +6,7 @@ name: Publish the apps to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ["frontend/**", ".github/workflows/pages.yml"]
+    paths: ["frontend/**", "docs/manuals/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -45,6 +45,9 @@ jobs:
             cp -r "apps/${app}/dist/." "../site/${app}/"
           done
           cp pages/index.html ../site/index.html
+          mkdir -p ../site/manuals
+          cp -r ../docs/manuals/. ../site/manuals/
+          rm -f ../site/manuals/_template.html
           touch ../site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

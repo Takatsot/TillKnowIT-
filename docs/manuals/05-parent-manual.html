@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parent Manual | TillKnowIT</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/manual.css" />
+</head>
+<body>
+  <header class="run-head">
+    <a class="logo" href="index.html" aria-label="TillKnowIT manuals"><img src="assets/logo.svg" alt="TillKnowIT" /></a>
+    <span class="doc-name">Parent Manual</span>
+  </header>
+
+  <section class="cover">
+    <img class="cover-logo" src="assets/logo-light.svg" alt="TillKnowIT" />
+    <p class="kicker">User manual</p>
+    <h1>The Parent App</h1>
+    <p class="sub">Add money to your child's school wallet, set the rules, and see exactly what was bought, all from your phone.</p>
+    <p class="meta"><b>For:</b> parents and guardians &nbsp;·&nbsp; <b>App:</b> TillKnowIT Parent app (<code>frontend/apps/parent-app</code>) &nbsp;·&nbsp; <b>Version</b> 1.0 &nbsp;·&nbsp; November 2026</p>
+  </section>
+
+  <main>
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#c1">Welcome</a></li>
+        <li><a href="#c2">Your privacy</a></li>
+        <li><a href="#c3">Signing in</a></li>
+        <li><a href="#c4">My children: linking a child</a></li>
+        <li><a href="#c5">Add money</a></li>
+        <li><a href="#c6">Spending rules</a></li>
+        <li><a href="#c7">Statement, QR code and cards</a></li>
+        <li><a href="#c8">Pre-orders</a></li>
+        <li><a href="#c9">Requests</a></li>
+        <li><a href="#c10">What is not ready yet</a></li>
+        <li><a href="#c11">Words used in this manual</a></li>
+        <li><a href="#c12">When something goes wrong</a></li>
+      </ol>
+    </nav>
+
+    <div class="sheet">
+      <h2 id="c1"><span class="num">1</span>Welcome</h2>
+      <p class="lead">Your child goes to a school with a tuck shop that uses TillKnowIT. Instead of carrying cash, your child has a small wallet of money that you fill, and that the tuck shop till can take from. This app is how you look after it.</p>
+      <p>You do not need to be good with phones to use this app. There are only six places to go, and each one does one job. If you can send a WhatsApp message, you can do everything here.</p>
+
+      <p>The six places are listed in the menu of the app:</p>
+      <div class="table-wrap"><table>
+        <caption>The menu of the Parent app</caption>
+        <thead><tr><th>Menu name</th><th>What it is for</th></tr></thead>
+        <tbody>
+          <tr><td><span class="ui">My children</span></td><td>See your children, their balance and daily limit. Link a new child with the code from the school.</td></tr>
+          <tr><td><span class="ui">Add money</span></td><td>Put money into a wallet. Move money between your own children.</td></tr>
+          <tr><td><span class="ui">Spending rules</span></td><td>A daily limit, alerts, and things your child may not buy.</td></tr>
+          <tr><td><span class="ui">Statement</span></td><td>Everything that was bought and added. A QR code to pay with your phone. Block a lost card.</td></tr>
+          <tr><td><span class="ui">Pre-orders</span></td><td>Order and pay for a break in advance.</td></tr>
+          <tr><td><span class="ui">Requests</span></td><td>Ask for your money back when your child leaves, or ask for your child's data to be removed.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="tip"><p>If you have more than one child at the school, the screens ask <span class="ui">Which child?</span> at the top. Pick the child first, then do what you came to do. Each child has their own wallet.</p></div>
+
+      <h3>What you need before you start</h3>
+      <ul>
+        <li>Your own cell phone number. The app sends you a code by SMS to prove it is you.</li>
+        <li>The <strong>8 letter link code</strong> that the school gave you for your child. The school prints it when your child is registered.</li>
+        <li>A bank card or online banking, if you want to add money.</li>
+      </ul>
+
+      <hr class="orn" />
+
+      <h2 id="c2"><span class="num">2</span>Your privacy</h2>
+      <p class="lead">You are trusted with information about a child, so this app is careful. Here is what it does and does not do, in plain words.</p>
+      <ul>
+        <li><strong>You see only your own child.</strong> A school wallet shows a parent only their own learner's spending. You cannot see other children, other parents, or what the school sells to anyone else.</li>
+        <li><strong>Nothing is shown until you agree.</strong> When you link a child you must tick a box that says you agree that TillKnowIT may keep your child's name, photo, purchases and balance so the school wallet can work. Until you tick it and link the child, you see nothing about them.</li>
+        <li><strong>Up to four parents per child.</strong> A child can be linked to at most four parents or guardians, for example both parents and two grandparents. Each one must link with the code and give their own consent.</li>
+        <li><strong>Photos stay at the school.</strong> The school may keep a photo so the cashier can check it is your child. Photos are kept at the school tills only; they do not appear in this app.</li>
+        <li><strong>You can ask for everything to be removed.</strong> See <a href="#c9">Requests</a>. The record of the money stays, as the law says, but without any name on it.</li>
+      </ul>
+      <div class="note"><p>The school, not the app, controls your child's name, grade, class, photo, cards and wristbands, and whether a child has left. If any of these are wrong, ask the school.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c3"><span class="num">3</span>Signing in</h2>
+      <p class="lead">There is no password to remember. You type your cell number and the app sends you a code.</p>
+      <ol class="steps">
+        <li>Open the Parent app. You see the <span class="ui">Sign in</span> box.</li>
+        <li>Type your cell phone number under <span class="ui">Your cell phone number</span>. The hint shows the style: 082 123 4567.</li>
+        <li>Tap <span class="ui">Send me a code</span>. The app says: <em>If that number has an account, a code is on its way.</em></li>
+        <li>When the SMS arrives, type the code under <span class="ui">The code we sent you</span> and tap <span class="ui">Sign in</span>.</li>
+      </ol>
+      <p>If you typed the wrong number, tap <span class="ui">Use a different number</span>. You will be asked to sign in again after your sign-in runs out (about 12 hours); the app says <em>Your sign-in has run out. Please sign in again.</em> To leave, use <span class="ui">Sign out</span>.</p>
+      <p>If you are a new person, the app offers <span class="ui">I am new here: create an account</span>. Type your name as people know you and your number, and follow the same steps.</p>
+
+      <h3>Trying it out (demo mode)</h3>
+      <p>In a demo or test version of the app, a box labelled <span class="ui">Development only</span> appears under the code box. It shows the code on the screen so you can practise without a phone. In the demo, the sample parent is <strong>Lerato Khumalo</strong>, cell number <code>082 555 0007</code>. This never happens in the real service: in real life the code comes only by SMS.</p>
+      <div class="note"><p>SMS sending is built to use a provider called BulkSMS, but it has not been run against the live service yet. Until it is switched on, real codes will not reach a phone.</p></div>
+      <div class="warn"><p>Never tell anyone your sign-in code, not even someone who says they are from the school or from TillKnowIT. The code gives access to your children's wallets.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c4"><span class="num">4</span>My children: linking a child</h2>
+      <p class="lead">Open <span class="ui">My children</span>. This is the first place you go, and the place that shows balances at a glance.</p>
+      <h3>What you see</h3>
+      <p>For each child you see their name, the school, and the grade and class (<em>Grade 5, class B</em>), then <span class="ui">Balance</span> in big letters. Under it you see the <span class="ui">Daily limit</span>, or <span class="ui">No daily limit</span>. If the wallet has been stopped you see <span class="ui">This wallet is not active.</span> If you have no children linked yet, the app says: <em>No child is linked to you yet. Add one below.</em></p>
+
+      <h3>Linking a child</h3>
+      <ol class="steps">
+        <li>Find the card called <span class="ui">Add a child</span>.</li>
+        <li>Type the 8 letter code the school gave you in <span class="ui">Link code</span>. Capital letters are fine.</li>
+        <li>Read the sentence beside the tick box: <em>I agree that TillKnowIT may keep my child's name, photo, purchases and balance so the school wallet can work.</em> If you agree, tick it.</li>
+        <li>Tap <span class="ui">Add child</span>. The button stays grey until the code is typed and the box is ticked.</li>
+        <li>You see a green message: <em>(Name) was added.</em> The child now appears in the list.</li>
+      </ol>
+      <div class="warn"><p>The link code is private to your family. The school gives each child one code, shown once. Do not post it in a class group. Anyone with the code who also gives consent could link to your child, and a child can have up to four parents.</p></div>
+      <p>If the app refuses the code, check each letter with the school's paper. Ask the school for the code again if you have lost it. See <a href="#c12">When something goes wrong</a>.</p>
+      <p>There is also a card called <span class="ui">Changes the school makes</span>. It reminds you that your child's name, grade, class and photo, new cards and wristbands, and marking a child as having left are all done by the school.</p>
+
+      <hr class="orn" />
+
+      <h2 id="c5"><span class="num">5</span>Add money</h2>
+      <p class="lead">Money goes into the wallet only after the payment company confirms that you paid. That keeps your money safe.</p>
+      <h3>Adding money</h3>
+      <ol class="steps">
+        <li>Open <span class="ui">Add money</span>. If you have several children, choose the child under <span class="ui">Which child?</span>. You see <span class="ui">Balance now</span>.</li>
+        <li>Type the amount in <span class="ui">Amount in rand</span>. You may write 50 or 50,00. The hint says <em>From R20 to R5000.</em> If the amount does not look right the app says <em>Type an amount like 50 or 50,00.</em></li>
+        <li>Tap <span class="ui">Add money</span>.</li>
+        <li>A card called <span class="ui">Added in this visit</span> appears, with the status <span class="ui">Waiting for payment</span>. Tap <span class="ui">Go to the payment page</span> and pay by card or by instant EFT.</li>
+        <li>When you come back, tap <span class="ui">Check my balance</span>. When the money arrives the status changes to <span class="ui">Money arrived</span> and the balance goes up. If something went wrong it says <span class="ui">Payment failed</span>.</li>
+      </ol>
+      <p>The app explains why you must wait: <em>The money is added only after the payment partner confirms your payment.</em> This can take a short while. You do not need to press <span class="ui">Add money</span> again; doing so would start a second payment.</p>
+
+      <h3>Test mode (demo)</h3>
+      <p>In a demo version the payment partner is pretend. The app shows a warning: <em>Test mode: the payment partner is a pretend one. Its payment page does not open and no real money moves.</em> That is normal there. Practise freely.</p>
+      <div class="danger"><p>The real payment partner and the real stored-value wallet partner are not connected yet. Only a pretend partner exists today. Do not expect real money to move until the school or TillKnowIT tells you the real service is switched on.</p></div>
+
+      <h3>Cash at the school office</h3>
+      <p>Some schools also accept cash at the school office. The school office records it for you, and it then appears in your Statement as <span class="ui">Cash top-up</span>. You do not do this in the app.</p>
+
+      <h3>Moving money between your own children</h3>
+      <p>If one child has too much and another too little, use the card <span class="ui">Move money between my children</span>.</p>
+      <ol class="steps">
+        <li>Under <span class="ui">Which child?</span> choose the child the money comes <em>from</em>. The card says <span class="ui">From (name)</span>.</li>
+        <li>Under <span class="ui">Move to</span> choose the other child.</li>
+        <li>Type the amount in <span class="ui">Amount to move in rand</span> and tap <span class="ui">Move money</span>.</li>
+        <li>The app confirms: <em>R20,00 was moved from (name) to (name).</em></li>
+      </ol>
+      <p>You can only move money between your own children, and you need two children linked. Moving money is safe to repeat if the screen froze: <em>the same request is never done twice.</em></p>
+
+      <hr class="orn" />
+
+      <h2 id="c6"><span class="num">6</span>Spending rules</h2>
+      <p class="lead">You decide how much your child may spend in a day, and what they may not buy. The till follows your rules.</p>
+      <h3>Daily limit and alerts</h3>
+      <p>Open <span class="ui">Spending rules</span>. Under <span class="ui">Daily limit</span> the app explains: the most your child can spend at the tuck shop in one day. When it is reached, the till says no until tomorrow. You also see <span class="ui">Spent today</span>.</p>
+      <ol class="steps">
+        <li>Type an amount in <span class="ui">Daily limit in rand</span>, for example 20 or 20,50. Leave it empty for no limit.</li>
+        <li>Tick <span class="ui">Tell me when (name) buys something</span> if you want to be told about each purchase.</li>
+        <li>In <span class="ui">Warn me when the balance is below (rand)</span> type an amount to be warned before the money runs out. Leave empty for no warning.</li>
+        <li>Tap <span class="ui">Save</span>. You see <em>Your rules were saved.</em></li>
+      </ol>
+      <div class="note"><p>The school can also set a ceiling for every wallet. Where both the school's ceiling and your limit apply, the lower one wins.</p></div>
+
+      <h3>Things your child may not buy</h3>
+      <p>Under <span class="ui">Things (name) may not buy</span> you see what is already blocked, or <em>Nothing is blocked.</em> The tuck shop till refuses blocked items even when there is money.</p>
+      <p>You can block two kinds of thing:</p>
+      <ul>
+        <li><span class="ui">Whole group</span>: nothing in the group can be bought, for example sweets.</li>
+        <li><span class="ui">One item</span>: only that item is refused.</li>
+      </ul>
+      <ol class="steps">
+        <li>In the card <span class="ui">Block something</span> choose what to block under <span class="ui">What do you want to block?</span></li>
+        <li>Type the <span class="ui">Name or code</span>, or tap a suggestion under <span class="ui">From the school menu</span>.</li>
+        <li>Tap <span class="ui">Block it</span>. You see <em>Rules saved.</em></li>
+      </ol>
+      <p>To undo a block, tap <span class="ui">Allow again</span> next to it.</p>
+      <div class="warn"><p>A change reaches the till the next time it syncs. It may not take effect on the very next purchase, especially if the till has no data for a while.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c7"><span class="num">7</span>Statement, QR code and cards</h2>
+      <p class="lead">The Statement is your proof of every cent: what was bought, what was added, and what the balance was afterwards.</p>
+      <h3>Reading the statement</h3>
+      <p>Under <span class="ui">Show</span> choose <span class="ui">Last 7 days</span>, <span class="ui">Last 30 days</span> or <span class="ui">Last 90 days</span>. Under <span class="ui">What was bought and added</span> each line has a kind, and below it <em>Balance after</em>. The kinds are:</p>
+      <div class="table-wrap"><table>
+        <caption>Kinds of lines on the Statement</caption>
+        <thead><tr><th>Kind</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>Top-up</td><td>You added money by card or EFT.</td></tr>
+          <tr><td>Cash top-up</td><td>Cash was paid at the school office.</td></tr>
+          <tr><td>Purchase</td><td>Your child bought something.</td></tr>
+          <tr><td>Order refunded</td><td>A pre-order was cancelled and the money returned.</td></tr>
+          <tr><td>Transfer</td><td>Money moved between your children.</td></tr>
+          <tr><td>Refund</td><td>Money paid back to you.</td></tr>
+        </tbody>
+      </table></div>
+      <p>If there is nothing, the app says <em>Nothing happened on this wallet in this time.</em> To keep a copy, tap <span class="ui">Download spreadsheet (CSV)</span> or <span class="ui">Download PDF</span>.</p>
+
+      <h3>Pay with my phone (QR code)</h3>
+      <p>If your child has a phone, or you are at the tuck shop yourself, you can pay with a QR code instead of a card. Tap <span class="ui">Show QR code</span> and show it to the cashier. The code works for about a minute, then it stops. The screen says <em>Works until</em> a time; when it runs out it says <em>This code has expired. Get a new one.</em> Tap <span class="ui">New QR code</span>.</p>
+
+      <h3>A lost card or wristband</h3>
+      <p>The card <span class="ui">Cards and wristbands</span> lists your child's cards, each marked <span class="ui">Working</span> or <span class="ui">Blocked</span>. A card may be a <em>tap card</em>, a <em>QR code</em> or a <em>wristband</em>. Anyone who finds a card could spend what is in the wallet, so act quickly.</p>
+      <ol class="steps">
+        <li>To block one, tap <span class="ui">Block this card</span> next to it. You see <em>The card was blocked.</em></li>
+        <li>To block everything, tap <span class="ui">Block all cards</span>, then confirm <span class="ui">Yes, block them</span> (or <span class="ui">No, keep them</span> to back out). The app says how many were blocked, or <em>There were no active cards to block.</em></li>
+      </ol>
+      <div class="danger"><p>Blocking cannot be undone from the app: <em>Block every card of (name)? This cannot be undone.</em> Blocked cards stop working at every till. Your phone's QR code keeps working. A replacement card must come from the school, and it is linked to the same wallet.</p></div>
+      <p>The block reaches tills in the next sync, so a till that has been offline may take a little while to learn about it.</p>
+
+      <hr class="orn" />
+
+      <h2 id="c8"><span class="num">8</span>Pre-orders</h2>
+      <p class="lead">Order your child's break in advance and pay now. The money is taken from the wallet when you place the order.</p>
+      <ol class="steps">
+        <li>Open <span class="ui">Pre-orders</span>. Under <span class="ui">Order for a break</span> pick the <span class="ui">Break</span>. Each break shows its cut-off, for example <em>Break 1 (order before 09:30)</em>.</li>
+        <li>Pick the <span class="ui">Day</span>. It must be a school day, from today up to a week ahead.</li>
+        <li>Under <span class="ui">Menu</span> type how many of each item. The screen shows <span class="ui">Total</span> as you go.</li>
+        <li>Tap <span class="ui">Place order</span>. You see <em>Order placed. Total R...</em></li>
+      </ol>
+      <p>If you choose nothing the app says <em>Choose at least one item.</em> If the school has not set up breaks or a menu, the app says <em>The school has no menu or breaks yet.</em> Prices come from the school's menu.</p>
+      <h3>Your orders</h3>
+      <p>Under <span class="ui">My orders</span> you see orders from the last week or coming up, each with a status: <span class="ui">Placed</span>, <span class="ui">Ready</span>, <span class="ui">Collected</span> or <span class="ui">Cancelled</span>, and <em>Closes (time)</em>.</p>
+      <p>To cancel, tap <span class="ui">Cancel order</span> before the cut-off time. The app says: <em>The order was cancelled and the money is back in the wallet.</em> You get everything back, including any fee, if you cancel before the cut-off.</p>
+      <div class="warn"><p>After the cut-off time an order cannot be cancelled by you. Times are South African time. If you ordered by mistake, be quick.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c9"><span class="num">9</span>Requests</h2>
+      <p class="lead">Two serious requests live here: getting your money back when your child leaves, and removing your child's data. Both ask for care.</p>
+      <h3>Get my money back</h3>
+      <p>When a child has left the school, you can ask for the money left in their wallet. Only the school can mark a child as having left. If the school has not done this, ask them first: the screen says <em>Only the school can mark your child as having left.</em></p>
+      <ol class="steps">
+        <li>Open <span class="ui">Requests</span> and choose the child.</li>
+        <li>Under <span class="ui">Get my money back</span> tap <span class="ui">Ask for a refund</span>.</li>
+        <li>The app shows the amount and a status. The statuses are <em>waiting for the school</em>, <em>approved</em>, <em>paid</em> and <em>not approved</em>.</li>
+      </ol>
+      <p>The school checks the request, and the money is then paid back to you.</p>
+      <h3>Remove my child's data</h3>
+      <p>You can ask us to delete your child's name, photo and links to you. The record of the money stays, because the law says so, but without any name. All cards are blocked. If there is money left in the wallet it is paid back to you first, and then the data is removed. This takes at most 30 days.</p>
+      <ol class="steps">
+        <li>Tap <span class="ui">Remove my child's data</span>.</li>
+        <li>Read the question: <em>Remove all of (name)'s data? This cannot be undone.</em></li>
+        <li>Tap <span class="ui">Yes, remove it</span>, or <span class="ui">No, keep it</span> to stop.</li>
+        <li>If the wallet is empty the data is removed at once. Otherwise you see <em>Your request was received. It will be done by (date). Money left in the wallet must be refunded first.</em></li>
+      </ol>
+      <div class="danger"><p>Removing a child's data cannot be undone. Your child will no longer have a wallet that you can see. Do this only when you are sure, for example after the child has left and the refund is done.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c10"><span class="num">10</span>What is not ready yet</h2>
+      <p>We prefer to tell you honestly what is not finished.</p>
+      <ul>
+        <li><strong>Real payments.</strong> Card and EFT top-ups are built to go through a licensed payment partner and to be credited only when the partner's signed message arrives. Only a pretend partner is connected so far, so no real money moves yet.</li>
+        <li><strong>Real SMS codes.</strong> The sign-in code is built for the BulkSMS provider, which has not run against the live service yet.</li>
+        <li><strong>Refunds and payouts.</strong> Refunds when a child leaves are built, but the real partner payment call is not connected yet.</li>
+        <li><strong>The app itself.</strong> The Parent app has been tested only against practice data and a development server, and it is new. If you find a problem, tell the school.</li>
+        <li><strong>Language.</strong> The Parent app shows English only for now.</li>
+        <li><strong>Phone and card readers (NFC).</strong> Cards and wristbands depend on the school's tills being set up for them.</li>
+      </ul>
+
+      <hr class="orn" />
+
+      <h2 id="c11"><span class="num">11</span>Words used in this manual</h2>
+      <dl class="terms">
+        <dt>Wallet</dt><dd>Your child's pot of money at the school tuck shop. It holds a balance that is added to by you and spent at the till.</dd>
+        <dt>Balance</dt><dd>What is left in the wallet right now.</dd>
+        <dt>Top-up</dt><dd>Adding money to a wallet, by card, EFT or cash at the school.</dd>
+        <dt>EFT</dt><dd>Electronic funds transfer: paying from your bank account. The instant kind confirms in moments.</dd>
+        <dt>Link code</dt><dd>The 8 letter code from the school that links you to your child.</dd>
+        <dt>Consent</dt><dd>Your agreement that TillKnowIT may keep your child's details so the wallet can work. You give it when you link a child.</dd>
+        <dt>Daily limit</dt><dd>The most your child can spend in one day.</dd>
+        <dt>Sync</dt><dd>When the till and the app share the latest information. Changes you make reach the till at the next sync.</dd>
+        <dt>QR code</dt><dd>A square picture that the cashier scans to take payment from the wallet. It stops working after about a minute.</dd>
+        <dt>Cut-off</dt><dd>The last time you may place or cancel a pre-order for a break.</dd>
+        <dt>Erasure</dt><dd>Removing your child's name, photo and links, while the money record stays without any name.</dd>
+      </dl>
+
+      <hr class="orn" />
+
+      <h2 id="c12"><span class="num">12</span>When something goes wrong</h2>
+      <div class="table-wrap"><table>
+        <caption>Common problems and what to do</caption>
+        <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>No SMS code arrives</td><td>Check the number. Wait a minute, then tap <span class="ui">Use a different number</span> and ask again. If you see <em>Too many tries</em>, wait a few minutes. Real SMS may not yet be switched on.</td></tr>
+          <tr><td><em>That code is not right, or it has expired.</em></td><td>Type the newest code. Ask for a new one if some time has passed.</td></tr>
+          <tr><td><em>That does not look like a cell phone number.</em></td><td>Type the number again, for example 082 123 4567.</td></tr>
+          <tr><td><em>No child is linked to you yet.</em></td><td>Open <span class="ui">My children</span> and use <span class="ui">Add a child</span> with the code from the school.</td></tr>
+          <tr><td><span class="ui">Add child</span> is grey</td><td>Type the link code and tick the consent box. Both are needed.</td></tr>
+          <tr><td>The code is refused</td><td>Check each letter. Ask the school for the code again. A child may already have four parents linked.</td></tr>
+          <tr><td>Payment says <span class="ui">Waiting for payment</span> for a long time</td><td>Tap <span class="ui">Check my balance</span>. Do not pay twice. If the money left your account and the balance does not rise, keep your bank proof and speak to the school.</td></tr>
+          <tr><td><span class="ui">Payment failed</span></td><td>No money was added. Try again, or use another card or EFT.</td></tr>
+          <tr><td>The amount is refused</td><td>Amounts must be from R20 to R5000. Use the style 50 or 50,00.</td></tr>
+          <tr><td>The till still sold a blocked item</td><td>Rules reach the till at the next sync. Wait a little and tell the school if it carries on.</td></tr>
+          <tr><td>My child's card was refused</td><td>Check the <span class="ui">Statement</span> for the balance, the daily limit and whether the card shows <span class="ui">Blocked</span>.</td></tr>
+          <tr><td>My child cannot buy at all</td><td>Check <span class="ui">This wallet is not active.</span> on <span class="ui">My children</span>, the balance, and the daily limit. Ask the school.</td></tr>
+          <tr><td>The pre-order cannot be cancelled</td><td>The cut-off has passed. Ask the school.</td></tr>
+          <tr><td><span class="ui">Ask for a refund</span> shows an error</td><td>The school must first mark the child as having left. Ask the school.</td></tr>
+          <tr><td>A screen shows an error and <span class="ui">Try again</span></td><td>Tap <span class="ui">Try again</span>. If data runs out, reconnect and try again.</td></tr>
+          <tr><td><em>Please sign in again.</em></td><td>Your sign-in ended. Sign in with a new code.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><p>For anything that needs a person, such as a new card, a wrong name or a child who has left, go to the school office. The school keeps those details, and only the school can change them.</p></div>
+    </div>
+
+    <div class="pager"><a href="04-supplier-manual.html">&larr; Previous manual</a><a href="06-field-agent-manual.html">Next manual &rarr;</a></div>
+  </main>
+
+  <footer class="run-foot">
+    <span>TillKnowIT &middot; Parent Manual &middot; Version 1.0</span>
+    <img src="assets/logo.svg" alt="TillKnowIT" />
+  </footer>
+</body>
+</html>

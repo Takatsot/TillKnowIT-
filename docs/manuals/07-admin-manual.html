@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Platform Admin Manual | TillKnowIT</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/manual.css" />
+</head>
+<body>
+  <header class="run-head">
+    <a class="logo" href="index.html" aria-label="TillKnowIT manuals"><img src="assets/logo.svg" alt="TillKnowIT" /></a>
+    <span class="doc-name">Platform Admin Manual</span>
+  </header>
+
+  <section class="cover">
+    <img class="cover-logo" src="assets/logo-light.svg" alt="TillKnowIT" />
+    <p class="kicker">User manual</p>
+    <h1>The Platform Admin App</h1>
+    <p class="sub">Run the platform with care: business types, plans, suppliers, disputes, reconciliation, schools and the wallet, partners and the shared catalogue.</p>
+    <p class="meta"><b>For:</b> TillKnowIT platform team &nbsp;·&nbsp; <b>App:</b> TillKnowIT Platform admin (<code>frontend/apps/admin</code>) &nbsp;·&nbsp; <b>Version</b> 1.0 &nbsp;·&nbsp; November 2026</p>
+  </section>
+
+  <main>
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#c1">Welcome and ground rules</a></li>
+        <li><a href="#c2">Signing in and the menu</a></li>
+        <li><a href="#c3">Business packs</a></li>
+        <li><a href="#c4">Plans and billing</a></li>
+        <li><a href="#c5">Suppliers and ranking settings</a></li>
+        <li><a href="#c6">Disputes and payments</a></li>
+        <li><a href="#c7">Schools and wallet</a></li>
+        <li><a href="#c8">Partner API</a></li>
+        <li><a href="#c9">Catalogue approvals and lookups</a></li>
+        <li><a href="#c10">What is not connected or not built</a></li>
+        <li><a href="#c11">Words used in this manual</a></li>
+        <li><a href="#c12">When something goes wrong</a></li>
+      </ol>
+    </nav>
+
+    <div class="sheet">
+      <h2 id="c1"><span class="num">1</span>Welcome and ground rules</h2>
+      <p class="lead">This app can change what every shop, supplier and school on the platform sees and is paid. Treat each action as one that someone else may later ask you to explain.</p>
+      <p>The Platform admin app is for members of the TillKnowIT platform team. Its seven sections cover the things that only the platform may do: define business types, set plans and ranking rules, approve suppliers, settle disputes, watch the money reconcile, run schools and the wallet, give partners read-only access to data, and keep the shared catalogue clean.</p>
+
+      <h3>Four-eyes and audit</h3>
+      <p>Two principles run through this manual.</p>
+      <ul>
+        <li><strong>Audit.</strong> The server writes an audit record for the admin actions described here (for example catalogue decisions and lookup changes). Your signed-in person id travels with each request. Assume that who did what, and when, can be looked up. Write notes as if a colleague, an auditor or a partner may read them.</li>
+        <li><strong>Four-eyes.</strong> Money-moving and access-granting actions should be reviewed by a second person before or right after you do them. This is a <em>process rule</em> that the team follows. <strong>The app itself does not enforce a second approver.</strong> One signed-in admin can resolve a dispute, run payouts or issue a key alone. The four-eyes reviews are listed as a process item, not a software feature, in the project's status document. Agree who your second pair of eyes is, and use them for the actions marked below.</li>
+      </ul>
+      <div class="warn"><p>Because the app lets one person finish these actions alone, the safety comes from you. Before you resolve a dispute, resolve a reconciliation, run payouts, verify a school or give a partner a key, tell a colleague what you are about to do and why.</p></div>
+
+      <h3>Which actions deserve a second person</h3>
+      <div class="table-wrap"><table>
+        <caption>Actions with money, access or reputation at stake</caption>
+        <thead><tr><th>Action</th><th>Why a second person should know</th></tr></thead>
+        <tbody>
+          <tr><td>Resolve a dispute</td><td>Paying the supplier releases held money. It cannot be taken back by you.</td></tr>
+          <tr><td>Resolve a wallet reconciliation</td><td>It lifts the block on payouts. Your note is the only explanation.</td></tr>
+          <tr><td>Run payouts</td><td>Real money is sent to tuck shops.</td></tr>
+          <tr><td>Verify a school or change its fee</td><td>A school is trusted with children's money. Only the platform can change the fee.</td></tr>
+          <tr><td>Register, rotate or revoke a partner key</td><td>A key gives access to shop data.</td></tr>
+          <tr><td>Verify or reject a supplier</td><td>Suppliers handle shops' orders and money.</td></tr>
+          <tr><td>Change ranking settings or plans</td><td>They change what shops see and what is charged.</td></tr>
+          <tr><td>Approve, reject or merge a product</td><td>Merging moves every shop's product onto another one.</td></tr>
+        </tbody>
+      </table></div>
+
+      <hr class="orn" />
+
+      <h2 id="c2"><span class="num">2</span>Signing in and the menu</h2>
+      <p class="lead">You sign in with your cell number and a code. There are no passwords to leak.</p>
+      <ol class="steps">
+        <li>Open the Platform admin app. In the <span class="ui">Sign in</span> box type your number under <span class="ui">Your cell phone number</span>.</li>
+        <li>Tap <span class="ui">Send me a code</span>, then type the code under <span class="ui">The code we sent you</span> and tap <span class="ui">Sign in</span>.</li>
+        <li>Your sign-in lasts 12 hours. Then the app says <em>Your sign-in has run out. Please sign in again.</em> Use <span class="ui">Sign out</span> when you finish or leave your desk.</li>
+      </ol>
+      <h3>Demo mode</h3>
+      <p>In a demo or development version a <span class="ui">Development only</span> box shows the code on screen. The demo platform admin is <strong>Alice Admin</strong>, <code>082 555 0005</code>. This never happens in the real service. Never use real shop or school data in a demo.</p>
+      <h3>The menu</h3>
+      <p>The menu entries, in order, are:</p>
+      <ol>
+        <li><span class="ui">Business packs</span></li>
+        <li><span class="ui">Plans and billing</span></li>
+        <li><span class="ui">Suppliers</span></li>
+        <li><span class="ui">Disputes and payments</span></li>
+        <li><span class="ui">Schools and wallet</span></li>
+        <li><span class="ui">Partner API</span></li>
+        <li><span class="ui">Catalogue</span></li>
+      </ol>
+      <p>Every call carries your person id, and the server checks that you are a platform admin. If you see an error about permission, you are signed in as the wrong person.</p>
+
+      <hr class="orn" />
+
+      <h2 id="c3"><span class="num">3</span>Business packs</h2>
+      <p class="lead">A pack is a business type made of features. Saving a change makes a new version, so tills know that their copy is out of date.</p>
+      <p>Open <span class="ui">Business packs</span>. The table has columns <span class="ui">Pack</span>, <span class="ui">Code</span>, <span class="ui">Version</span>, <span class="ui">Features</span>, <span class="ui">Slip template</span>, <span class="ui">Status</span> and <span class="ui">Actions</span>. A pack is <span class="ui">Active</span> or <span class="ui">Switched off</span>. Five packs are supplied: spaza, cafe, butchery, salon, and clothing and hardware.</p>
+      <h3>Creating a pack</h3>
+      <ol class="steps">
+        <li>Tap <span class="ui">New pack</span>.</li>
+        <li>Fill in <span class="ui">Pack code</span> (lowercase letters, digits and underscores, 2 to 30 characters, starting with a letter; it cannot be changed later), <span class="ui">Pack name</span>, an optional <span class="ui">Description (optional)</span> and the <span class="ui">Slip template code</span>.</li>
+        <li>Under <span class="ui">Features this pack switches on</span> tick the features it needs. The one for schools is <span class="ui">School wallet (school_wallet)</span>, with the hint <em>Turn on for shops that are school tuckshops.</em></li>
+        <li>For a feature that takes settings, a box <span class="ui">Settings for (feature) (JSON object, optional)</span> appears. For example, the barcode rules for <code>price_embedded_barcodes</code>. The JSON must be a valid object.</li>
+        <li>Tap <span class="ui">Create pack</span>. You see <em>(Name) was created.</em></li>
+      </ol>
+      <h3>Editing, switching off and on</h3>
+      <p>Tap <span class="ui">Edit</span> on a row to change it, then <span class="ui">Save pack</span>: <em>(Name) was saved (version 3).</em> Each edit raises the version. Use <span class="ui">Switch off</span> and <span class="ui">Switch on</span> to retire or restore a pack. Use <span class="ui">Cancel</span> to leave a form without saving.</p>
+      <div class="warn"><p>Edits reach every shop that uses the pack, the next time their tills sync. Check the JSON settings twice: a wrong barcode rule changes what every till in that business type does. The default pack can never be switched off; the server refuses.</p></div>
+      <div class="tip"><p>A brand-new pack works with no code change, so a new business type is a data task, not a release. Test it on a demo shop first.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c4"><span class="num">4</span>Plans and billing</h2>
+      <p class="lead">Plans decide what a shop or supplier pays each month and which features and limits they get.</p>
+      <div class="danger"><p>The screen opens with a standing warning: <em>These prices are placeholders. The seeded plans were made before the pilot pricing decision, so check every price before a business is charged.</em> The free message bundle is also a placeholder. The real billing gateway that charges a card is not connected yet.</p></div>
+      <p>Open <span class="ui">Plans and billing</span>. The heading is <span class="ui">Plans</span>. Use <span class="ui">Show plans for</span> to filter by <span class="ui">Everyone</span>, <span class="ui">Shops</span> or <span class="ui">Suppliers</span>. The columns are <span class="ui">Plan</span>, <span class="ui">Code</span>, <span class="ui">For</span>, <span class="ui">Price a month</span>, <span class="ui">Features</span> and <span class="ui">Actions</span>. A free plan shows <span class="ui">Free</span>; a feature with a limit shows <em>(feature) (up to 50)</em>.</p>
+      <p>Note the line <em>Only plans that are switched on are listed here, because the server's plan list shows only those. A plan you switch off will disappear from this list.</em> There is no switch-off button here; to retire a plan, untick <span class="ui">Offered to customers</span> when editing. Remember that you will then not see it again in the app.</p>
+      <h3>Making or changing a plan</h3>
+      <ol class="steps">
+        <li>Tap <span class="ui">New plan</span> or <span class="ui">Edit</span>.</li>
+        <li>Enter <span class="ui">Plan code</span> (lowercase letters, digits and underscores; fixed once saved), <span class="ui">Who it is for</span> and <span class="ui">Plan name</span>.</li>
+        <li>Enter <span class="ui">Price a month (rand)</span>, for example 199 or 199.50. A bad value gives <em>Write the price in rand, for example 199 or 199.50.</em></li>
+        <li>Tick <span class="ui">Offered to customers</span> if it may be chosen.</li>
+        <li>Under <span class="ui">Features on this plan</span> tick features; for a feature with a limit, fill <span class="ui">Limit for (feature)</span>. Leave empty for no limit. A limit is a whole number, 0 or more.</li>
+        <li>Tap <span class="ui">Save plan</span>. You see <em>(Name) was saved.</em></li>
+      </ol>
+      <div class="warn"><p>A price change affects what businesses are billed. Have a second person confirm the amount in rand, not cents, before you save. Never lower a limit below what existing customers already use without warning them.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c5"><span class="num">5</span>Suppliers and ranking settings</h2>
+      <p class="lead">Suppliers join the marketplace only after a person at TillKnowIT has checked them. This section also holds the numbers that decide how offers are ranked.</p>
+      <h3>Suppliers waiting for approval</h3>
+      <p>Open <span class="ui">Suppliers</span>. The first card, <span class="ui">Suppliers waiting for approval</span>, has columns <span class="ui">Supplier</span>, <span class="ui">Status</span>, <span class="ui">Areas</span>, <span class="ui">Terms</span> (for example <em>Minimum order R300, delivery R40, pays on delivery</em>) and <span class="ui">Actions</span>. When none are waiting: <em>No suppliers are waiting for approval.</em></p>
+      <ol class="steps">
+        <li>Tap <span class="ui">Review</span> on a supplier. The panel <span class="ui">Review (name)</span> opens.</li>
+        <li>Check each item under <span class="ui">What you checked (all four are needed to verify)</span>: <span class="ui">Business registration checked</span>, <span class="ui">Contact person confirmed</span>, <span class="ui">Delivery capability confirmed</span> and <span class="ui">Prices reviewed</span>. Tick a box only after you have really done that check, outside the app.</li>
+        <li>Tap <span class="ui">Verify supplier</span>: <em>(Name) was verified.</em></li>
+        <li>Or write a clear <span class="ui">Reason for rejecting</span> (the hint says <em>The supplier is told this reason</em>) and tap <span class="ui">Reject supplier</span>: <em>(Name) was rejected.</em></li>
+        <li><span class="ui">Close</span> the panel without a decision.</li>
+      </ol>
+      <div class="warn"><p>The four ticks are your declaration that you did the checks. A second person should spot-check registration documents and bank details. The rejection reason goes to the supplier: keep it factual and courteous.</p></div>
+
+      <h3>Marketplace ranking settings</h3>
+      <p>The card <span class="ui">Marketplace ranking settings</span> decides how offers are ranked for shops. A change applies to the next ranking and needs no release. A value outside the allowed range is refused. The table shows <span class="ui">Setting</span>, <span class="ui">Value</span>, <span class="ui">Allowed range</span> and <span class="ui">Used when not set</span>.</p>
+      <div class="table-wrap"><table>
+        <caption>The five ranking settings</caption>
+        <thead><tr><th>Setting</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>Weight of cost</td><td>How much the true cost per unit counts in the ranking.</td></tr>
+          <tr><td>Weight of supplier rating</td><td>How much the average delivery rating counts. A supplier average counts only after 3 ratings.</td></tr>
+          <tr><td>Weight of delivery time</td><td>How much speed counts.</td></tr>
+          <tr><td>Sponsored boost (%)</td><td>How much a sponsored offer is lifted. It is always labelled sponsored.</td></tr>
+          <tr><td>VAT used to compare prices (%)</td><td>The VAT rate used so that prices with and without VAT can be compared.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Change a value, then tap <span class="ui">Save (setting)</span>: <em>(Setting) was saved.</em> A non-number gives <em>Write a number.</em> A number out of range gives <em>Allowed range is (min) to (max).</em></p>
+      <div class="danger"><p>Ranking is a matter of trust. The marketplace is built so that, with default settings, a sponsored offer never outranks a cheaper non-sponsored one. Raising the sponsored boost, or lowering the weight of cost, can change that. Do not change these numbers without a second person agreeing and writing down why.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c6"><span class="num">6</span>Disputes and payments</h2>
+      <p class="lead">When a shop and a supplier disagree about an order, the money for that order is frozen until you decide. This is a serious duty.</p>
+      <h3>Open disputes</h3>
+      <p>Open <span class="ui">Disputes and payments</span>. The first card, <span class="ui">Open disputes</span>, lists disputes with <span class="ui">Raised</span>, <span class="ui">Raised by</span>, <span class="ui">Order</span>, <span class="ui">Reason</span>, <span class="ui">Status</span> and <span class="ui">Actions</span>. If there are none: <em>There are no open disputes.</em></p>
+      <ol class="steps">
+        <li>Read the reason, and look at the order and what both sides say, outside this app if you must.</li>
+        <li>Tap <span class="ui">Resolve</span>. The card <span class="ui">Resolve the dispute on order (n)</span> opens.</li>
+        <li>Under <span class="ui">Outcome</span> choose <span class="ui">Pay the supplier</span> or <span class="ui">Refund the shop</span>. The hint says: <em>Paying the supplier releases the held money. Refunding the shop does not release any of it.</em></li>
+        <li>Add a <span class="ui">Note (optional)</span>. Make it a habit to always write one: what you saw, and why.</li>
+        <li>Tap <span class="ui">Resolve dispute</span>. You see <em>The dispute on order (n) was resolved.</em> Use <span class="ui">Close</span> to back out.</li>
+      </ol>
+      <div class="danger"><p>Releasing money cannot be undone from this app. Have a second person read the facts and agree the outcome before you tap <span class="ui">Resolve dispute</span>.</p></div>
+
+      <h3>Payment reconciliation (supplier payments)</h3>
+      <p>The card <span class="ui">Payment reconciliation</span> compares the payment partner's records with ours for one day. A daily job does this to the cent as well; here you can run it for a chosen day.</p>
+      <ol class="steps">
+        <li>Choose the <span class="ui">Day</span> and tap <span class="ui">Run reconciliation</span>. The button says <span class="ui">Running...</span> while it works.</li>
+        <li>Read <span class="ui">Report for (day)</span>: <em>(n) payments matched.</em> then either <em>Nothing is out of step for this day.</em> or <em>(n) do not match.</em></li>
+        <li>For each mismatch the table gives <span class="ui">Partner reference</span>, <span class="ui">Kind</span> and <span class="ui">Detail</span>. Take the reference to the payment partner and find out what happened.</li>
+      </ol>
+      <div class="note"><p>This section only shows the mismatches. A mismatch has no "resolve" button here: you fix it with the partner and your finance colleague. The wallet's own reconciliation, described in the next chapter, is different and does block payouts.</p></div>
+      <div class="warn"><p>Real payment partner: only a development fake is connected today. Reports here reflect the fake partner. Do not treat a clean report as proof about real money until a real partner is live.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c7"><span class="num">7</span>Schools and wallet</h2>
+      <p class="lead">A school wallet holds children's money. This is the most sensitive part of the platform: take care with names, cards and cash.</p>
+      <p>Open <span class="ui">Schools and wallet</span>. The card <span class="ui">Open a school</span> lets you pick one: <em>Pick a school from the list to work on it. A school you register on the School tab opens by itself.</em> Under <span class="ui">School</span> choose <span class="ui">Choose a school</span> and tap <span class="ui">Open school</span>. You see <em>Working on (name).</em></p>
+      <p>The sections are tabs, labelled <span class="ui">School</span>, <span class="ui">Holders</span>, <span class="ui">Breaks and menu</span>, <span class="ui">Cash and staff accounts</span>, <span class="ui">Payouts</span> and <span class="ui">Reconciliation</span>. Holders, Breaks and menu, and Cash and staff accounts need an open school (<em>Open or register a school first.</em>); Payouts and Reconciliation do not.</p>
+
+      <h3>The School tab: register and verify</h3>
+      <ol class="steps">
+        <li>Under <span class="ui">Register a school</span> type the <span class="ui">School name</span>, an optional <span class="ui">EMIS number (optional)</span>, and the <span class="ui">Tuckshop id</span>.</li>
+        <li>The tuckshop must already exist, and it must be verified before the school can be (see the field agent manual). Tap <span class="ui">Register school</span>: <em>(Name) was registered.</em> The school then shows <span class="ui">Waiting for verification</span>.</li>
+        <li>Check the school and its tuckshop. Tap <span class="ui">Verify school</span>: <em>(Name) was verified.</em> Statuses are <span class="ui">Waiting for verification</span>, <span class="ui">Verified</span> and <span class="ui">Suspended</span>.</li>
+      </ol>
+      <p>The details card shows <span class="ui">Platform fee</span> and <span class="ui">Payouts</span> (the schedule). Under <span class="ui">Settings</span>:</p>
+      <ul>
+        <li><span class="ui">Platform fee (percent)</span>: from 0 to 10. <em>Only the platform can change it.</em> For example 2.5.</li>
+        <li><span class="ui">Payout schedule</span>: <span class="ui">Daily</span>, <span class="ui">Weekly</span> or <span class="ui">Monthly</span>. Weekly pays on Friday; monthly on the last day of the month.</li>
+        <li><span class="ui">Teachers may use monthly staff accounts</span>: lets teachers run a monthly tab.</li>
+        <li><span class="ui">Daily ceiling per wallet (rand, optional)</span>: R0 to R5000; empty is no ceiling. The parent's own limit also applies, and the lower one wins.</li>
+        <li><span class="ui">Offline split time (minutes)</span>: from 5 minutes to 8 hours (480).</li>
+      </ul>
+      <p>Tap <span class="ui">Save settings</span>: <em>The settings were saved.</em> Under <span class="ui">School admins</span> enter a <span class="ui">Person id</span> and tap <span class="ui">Add admin</span>. The person must already have signed up. A school admin looks after holders, breaks and the menu.</p>
+      <div class="warn"><p>The fee is deducted from every wallet sale before the shop is paid. Verifying a school and setting its fee are decisions to share with a second person.</p></div>
+
+      <h3>The Holders tab: learners and teachers</h3>
+      <p>A <em>holder</em> is a learner or teacher with a wallet. The table lists <span class="ui">Name</span>, <span class="ui">Type</span>, <span class="ui">Grade</span>, <span class="ui">Class</span>, <span class="ui">Status</span> and <span class="ui">Actions</span>.</p>
+      <h4>Add one person</h4>
+      <p>Under <span class="ui">Add one learner or teacher</span> give the <span class="ui">First name</span>, <span class="ui">Surname</span>, the type (<span class="ui">Learner</span> or <span class="ui">Teacher</span>) and, for learners, the grade and class. Tap <span class="ui">Add person</span>: <em>(Name) was added.</em> followed by <span class="ui">Link code:</span> and the code. Edit later with <span class="ui">Edit</span> (<span class="ui">Change (name)</span>) and <span class="ui">Save changes</span>.</p>
+      <h4>Import from a file</h4>
+      <ol class="steps">
+        <li>Under <span class="ui">Import holders from a file</span> read the hint: a CSV or Excel file with a first name column and a surname column. Sending the same file again creates nobody twice.</li>
+        <li>Choose the <span class="ui">File</span> and tap <span class="ui">Import holders</span> (it says <span class="ui">Importing...</span>).</li>
+        <li>Read the summary: <em>(n) created, (n) already there, (n) not valid.</em> The table <span class="ui">Rows that were not created</span> lists each bad row with <span class="ui">Row</span>, <span class="ui">Outcome</span> and <span class="ui">Detail</span>. Fix the file and import again; duplicates are flagged, not repeated.</li>
+        <li>The card <span class="ui">Link codes</span> appears with the warning: <em>Link codes are shown once. Save them now and give each to the school so parents can link their child.</em> Tap <span class="ui">Save link codes (CSV)</span> straight away.</li>
+      </ol>
+      <div class="danger"><p>Link codes are shown once. If you close the page without saving them you cannot get them back from this screen. Handle the file as private: it contains a code for every child. Give it only to the school, never to a group chat, and delete your copy afterwards.</p></div>
+      <p>Photos, where used, are stored encrypted and served only to a till of that school.</p>
+
+      <h4>Cards and wristbands</h4>
+      <p>Tap <span class="ui">Cards</span> on a holder: the card <span class="ui">Cards and wristbands for (name)</span> opens. Type the <span class="ui">Card number</span> (tap a card on a reader that types its number, or read the printed number). Add an optional <span class="ui">Card name</span> that the parent sees, for example <em>Blue wristband</em>. Tap <span class="ui">Link card</span>: <em>The card is now linked to (name).</em> Each card is <span class="ui">Active</span> or <span class="ui">Blocked</span>; <span class="ui">Block</span> stops it at every till: <em>The card is blocked.</em></p>
+      <div class="warn"><p>A block reaches tills at their next snapshot. A parent who reports a lost card should be told this. A replacement card links to the same wallet.</p></div>
+
+      <h3>The Breaks and menu tab</h3>
+      <p>Pre-orders close at each break's cut-off time. A school has at most 10 breaks, and <em>saving replaces the whole list</em>. For each break enter <span class="ui">Break code</span>, <span class="ui">Break name</span> and <span class="ui">Cut-off (HH:mm)</span> (South African time). Use <span class="ui">Add a break</span> and <span class="ui">Remove break (n)</span>, then <span class="ui">Save breaks</span>: <em>The breaks were saved.</em></p>
+      <p>Under <span class="ui">Menu items</span> the table shows <span class="ui">Item</span>, <span class="ui">Price</span> and <span class="ui">Available</span> (<span class="ui">Yes</span>/<span class="ui">No</span>). Use <span class="ui">Add a menu item</span> or <span class="ui">Edit</span>: <span class="ui">Item name</span>, <span class="ui">Price (rand)</span> (for example 12.50), optional <span class="ui">Product id (optional)</span> and <span class="ui">Category code (optional)</span>, and <span class="ui">Available to order</span>. Tap <span class="ui">Save item</span>. Pre-order prices come from this menu, and parents' category and item blocks use these codes.</p>
+
+      <h3>The Cash and staff accounts tab</h3>
+      <p><span class="ui">Record a cash deposit</span> is for cash the school paid into our account so it can be loaded onto wallets. Enter <span class="ui">Amount (rand)</span> and a <span class="ui">Deposit reference</span>, then tap <span class="ui">Record deposit</span>: <em>The deposit of R500,00 was recorded.</em> In this model, the school owes that cash until it is paid in.</p>
+      <div class="danger"><p>Record the amount exactly as banked, with the bank's reference. A deposit loads real wallets. Have your second person compare the bank statement with the entry.</p></div>
+      <p><span class="ui">Staff accounts</span> show what teachers owe the tuckshop for a month. Enter the <span class="ui">Month</span> as 2026-10 and tap <span class="ui">Show month</span>. You see <em>Total owed for (month): (amount)</em> and a table of <span class="ui">Teacher</span> and <span class="ui">Owed</span>. Tap <span class="ui">Settle (month)</span>: <em>(Month) was settled.</em> Settling posts once per teacher and month; settling the same month again does not charge twice.</p>
+
+      <h3>The Payouts tab</h3>
+      <p><span class="ui">Run payouts</span> pays each tuckshop what it is owed from wallet sales. Payouts are normally driven by each school's schedule; here you can run them for an optional <span class="ui">Day (optional)</span>. A payout is made once per shop per day, and a failed one is recorded and retried. Tap <span class="ui">Run payouts</span>.</p>
+      <ul>
+        <li>If a reconciliation difference is unresolved you see <em>Payouts are on hold: (reason)</em> and nothing is paid.</li>
+        <li>If nothing was owed: <em>Nothing was owed, so no payouts were made.</em></li>
+        <li>Otherwise a table lists <span class="ui">Shop</span>, <span class="ui">Day</span>, <span class="ui">Amount</span>, <span class="ui">Status</span> and <span class="ui">Error</span>.</li>
+      </ul>
+      <p>The card <span class="ui">A tuckshop's wallet sales and payouts</span> takes a <span class="ui">Shop id</span> and a <span class="ui">From</span>/<span class="ui">To</span> date, and <span class="ui">Show sales</span> gives <span class="ui">Wallet sales</span>, <span class="ui">Platform fees</span>, <span class="ui">Paid out</span> and <span class="ui">Still owed to the shop</span>. Use it to answer a shop owner's question before you re-run anything.</p>
+      <div class="danger"><p>Running payouts moves real money to shops once a real partner is live. It is safe to repeat (the partner reference is the idempotency key, so a day is not paid twice) but not safe to run blindly. Check the blocked message and have a second person approve the run.</p></div>
+
+      <h3>The Reconciliation tab</h3>
+      <p>The wallet reconciliation compares what the payment partner holds with our ledger for a day, to the cent, and checks that every ledger transaction balances. A job does this daily; you can run it for a day. Every run is recorded and listed.</p>
+      <p>Each run shows <span class="ui">Partner holds</span>, <span class="ui">Our ledger says</span> and <span class="ui">Difference</span>, with a status: <span class="ui">Matched</span>, <span class="ui">Does not match</span> or <span class="ui">Resolved</span>.</p>
+      <div class="danger"><p>A reconciliation difference blocks all wallet payouts until it is resolved. Resolving means writing, in plain words, what was found and what was done: <span class="ui">What was found and what was done</span>, at least 5 characters (the hint says so, and the button stays grey until you meet it). Write a real explanation, not "ok". A second person must read it before it is saved. The note is the only record that explains why money was allowed to move again.</p></div>
+      <ol class="steps">
+        <li>Pick the <span class="ui">Day</span> and tap <span class="ui">Run reconciliation</span>.</li>
+        <li>For a <span class="ui">Does not match</span> run, find the cause with the finance team and the partner. Do not guess.</li>
+        <li>Tap <span class="ui">Resolve</span> on the run, type the note, and tap <span class="ui">Resolve</span> again. You see <em>The reconciliation for (day) was resolved.</em></li>
+      </ol>
+      <p>The wallet's money records (the double-entry ledger) are append-only. Nothing here edits history; a correction is written as a new entry through the proper route, never by changing old ones.</p>
+      <div class="warn"><p>Stored-value partner: only a development fake is connected today. Top-ups, refunds on leaving and payouts have been coded and tested against fakes only. The wallet's separate database and service are prepared but are infrastructure work still to do.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c8"><span class="num">8</span>Partner API</h2>
+      <p class="lead">A partner (a bank, a bookkeeper, an app) reads shop data through a read-only API. It sees only shops that approved it.</p>
+      <p>Open <span class="ui">Partner API</span>. The card <span class="ui">API clients</span> lists each <span class="ui">Partner</span>, <span class="ui">Key starts with</span> (the first characters of its key), <span class="ui">May read</span> (its scopes), <span class="ui">Calls a minute</span>, <span class="ui">Status</span> (<span class="ui">Active</span> or <span class="ui">Revoked</span>) and <span class="ui">Actions</span>.</p>
+      <h3>Scopes</h3>
+      <p>A scope is one kind of data a partner may read. Today there are two: <span class="ui">Daily sales (sales.daily)</span> and <span class="ui">Monthly sales (sales.monthly)</span>. Choose the narrowest set the partner needs. The API is read-only.</p>
+      <h3>Registering a partner</h3>
+      <ol class="steps">
+        <li>In <span class="ui">Register a partner</span> type the <span class="ui">Partner name</span> and an optional <span class="ui">Contact email (optional)</span>.</li>
+        <li>Under <span class="ui">What the partner may read</span> tick at least one scope (<em>Choose at least one.</em>).</li>
+        <li>Set the <span class="ui">Rate limit (calls a minute)</span>, from 1 to 6000. Bad values give <em>The rate limit is a whole number from 1 to 6000.</em></li>
+        <li>Tap <span class="ui">Register partner</span>: <em>(Name) was registered. Copy the key below now.</em></li>
+        <li>The card <span class="ui">New key for (name)</span> shows the <span class="ui">API key</span>. Tap <span class="ui">Copy key</span>. If copying fails, select it and copy by hand.</li>
+        <li>Only after you have stored the key somewhere safe, tap <span class="ui">I have copied the key</span>.</li>
+      </ol>
+      <div class="danger"><p>The key is shown once and cannot be shown again. Only a fingerprint is kept on our side. If you lose it, you must rotate the key. Pass it to the partner over a safe channel, never by plain email or WhatsApp.</p></div>
+      <h3>Rotating a key</h3>
+      <p>Tap <span class="ui">Rotate key</span> on a partner. A new key is shown once, in the same way. <em>The old key keeps working for 24 hours, so the partner can switch without a gap.</em> Rotate on a schedule, and at once if a key may have leaked. If a leak is suspected, rotate and then consider revoking.</p>
+      <h3>Revoking a partner</h3>
+      <p>Tap <span class="ui">Revoke</span>. To avoid mistakes the app asks again with a button <span class="ui">Revoke (name) for good</span>; <span class="ui">Keep</span> backs out. Afterwards: <em>(Name) was revoked.</em> The partner's status becomes <span class="ui">Revoked</span>.</p>
+      <div class="warn"><p>Each shop owner approves each partner for their own shop and may withdraw. Your key alone gives a partner no shop data. Every call a partner makes is logged. The rate limit is counted in memory per server, so with several API servers the real limit is higher than the number you set.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c9"><span class="num">9</span>Catalogue approvals and lookups</h2>
+      <p class="lead">The shared catalogue is the list of products every shop can look up by barcode. Keeping it clean helps every shop.</p>
+      <h3>Suggested products</h3>
+      <p>Open <span class="ui">Catalogue</span>. The card <span class="ui">Suggested products</span> lists products that shops suggested which are not in the shared catalogue yet: <span class="ui">Barcode</span>, <span class="ui">Name</span>, <span class="ui">Size</span>, <span class="ui">Category</span>, <span class="ui">Suggested</span> and <span class="ui">Actions</span>. If none: <em>No suggested products are waiting for review.</em> You have three choices for each one.</p>
+      <h4>Approve</h4>
+      <ol class="steps">
+        <li>Tap <span class="ui">Approve</span>. The panel <span class="ui">Approve (name)</span> opens with the hint <em>Change a field only if the shop got it wrong. Empty fields stay as suggested.</em></li>
+        <li>Tidy the <span class="ui">Name</span>, <span class="ui">Size</span> or <span class="ui">Category</span>, or tick <span class="ui">Keep the suggested category</span>.</li>
+        <li>Tap <span class="ui">Approve product</span>: <em>(Name) was approved.</em></li>
+      </ol>
+      <h4>Reject</h4>
+      <p>Tap <span class="ui">Reject</span>, enter a <span class="ui">Reason for rejecting</span> (the server requires one), and tap <span class="ui">Reject product</span>: <em>(Name) was rejected.</em></p>
+      <h4>Merge</h4>
+      <p>Use <span class="ui">Merge</span> when the product already exists in the catalogue under another record, for example a duplicate with a typing error.</p>
+      <ol class="steps">
+        <li>Tap <span class="ui">Merge</span>. The panel <span class="ui">Merge (name) into an existing product</span> opens.</li>
+        <li>Type the <span class="ui">Barcode of the product we already have</span> and tap <span class="ui">Find product</span>. You see <em>Found: (name) ((barcode))</em>. Check that it is the right product.</li>
+        <li>Tap <span class="ui">Merge into this product</span>: <em>(Name) was merged.</em> The shops that suggested it move onto the approved product.</li>
+      </ol>
+      <div class="warn"><p>A merge moves shops' products to the target product. Look at the found name and barcode before you confirm. If you merge into the wrong product, many shops are affected and there is no undo button in this app. Every decision is audited.</p></div>
+
+      <h3>Platform lookups and translations</h3>
+      <p>The card <span class="ui">Platform lookups</span> holds the lists the apps use. <em>Switching one off hides it from new choices.</em> Choose a list under <span class="ui">List</span>:</p>
+      <div class="table-wrap"><table>
+        <caption>The lookup lists</caption>
+        <thead><tr><th>List</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td>Categories</td><td>Grouping products, including categories parents may block.</td></tr>
+          <tr><td>Units</td><td>How goods are measured and sold.</td></tr>
+          <tr><td>Payment methods</td><td>How customers pay at the till.</td></tr>
+          <tr><td>VAT rates</td><td>Tax rates on products.</td></tr>
+          <tr><td>Adjustment reasons</td><td>Reasons for stock write-offs and counts.</td></tr>
+          <tr><td>Document types</td><td>Types of compliance documents shops upload.</td></tr>
+          <tr><td>Languages</td><td>Languages offered in the apps.</td></tr>
+          <tr><td>Municipalities</td><td>Areas used for suppliers and shops. The eight metros are supplied; add more here.</td></tr>
+        </tbody>
+      </table></div>
+      <p>The table shows <span class="ui">Code</span>, <span class="ui">Order</span> and <span class="ui">Status</span> (<span class="ui">On</span> or <span class="ui">Off</span>). To change one, tap <span class="ui">Edit</span> (<span class="ui">Edit (code)</span>); to make one, tap <span class="ui">Add to this list</span>. Enter the <span class="ui">Code</span> (lowercase letters, digits and underscores), the <span class="ui">English name</span> and the <span class="ui">Sort order</span>, tick <span class="ui">Switched on</span> if it should be offered, then tap <span class="ui">Save</span>: <em>(Code) was saved.</em></p>
+      <div class="note"><p>Lookups support translations on the server, and the changes are audited. In this screen you enter the English name. First drafts of some translations exist for isiZulu, isiXhosa, Sesotho, Setswana and Afrikaans, written without first-language speakers: they are <strong>not reviewed</strong> and should be checked by a speaker before release.</p></div>
+      <div class="warn"><p>Never delete or recode a lookup that shops already use. Switch it off instead. A code cannot be reused for something different without confusing the data already saved with it.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="c10"><span class="num">10</span>What is not connected or not built</h2>
+      <p>Be honest with colleagues and partners about the state of things. According to the project's status document:</p>
+      <ul>
+        <li><strong>Payment partner (suppliers).</strong> Only a development fake exists. Held money, disputes, signed webhooks and the daily reconciliation are built and tested, not run against a real partner.</li>
+        <li><strong>Stored-value wallet partner.</strong> Only a development fake exists. Top-ups, refunds on leaving and payouts are coded and tested without a real partner.</li>
+        <li><strong>Billing gateway.</strong> The real charger is not connected. Plan prices and the free message bundle are placeholders until the pilot pricing decision.</li>
+        <li><strong>Sign-in SMS.</strong> Built for BulkSMS, never run against the live service. Anyone can ask a code for any number (five per hour per number), so a per-address limit is needed before launch.</li>
+        <li><strong>Four-eyes reviews.</strong> A process item, not enforced by the app (see <a href="#c1">chapter 1</a>).</li>
+        <li><strong>Partner API.</strong> Version 1 runs inside the main host; the separate host and gateway are not built. The rate limit is per server in memory. A security review is outstanding. The penetration test is a to-do.</li>
+        <li><strong>Plans screen.</strong> It shows only active plans and has no "switch off" button.</li>
+        <li><strong>Translations.</strong> Drafts are unreviewed; most back-office and admin areas show English only.</li>
+        <li><strong>Un-doing.</strong> This app has no undo for merges, dispute outcomes, reconciliation resolutions or key revocations.</li>
+      </ul>
+
+      <hr class="orn" />
+
+      <h2 id="c11"><span class="num">11</span>Words used in this manual</h2>
+      <dl class="terms">
+        <dt>Pack</dt><dd>A business type made of features (spaza, cafe, butchery and so on), versioned each time it changes.</dd>
+        <dt>Feature flag</dt><dd>A named switch (such as <code>school_wallet</code>) that turns a part of the till or back office on.</dd>
+        <dt>Plan</dt><dd>A monthly price with features and limits, for shops or suppliers.</dd>
+        <dt>Ranking</dt><dd>How the marketplace orders supplier offers for a shop.</dd>
+        <dt>Dispute</dt><dd>A shop and supplier disagreement over an order, which freezes the held money.</dd>
+        <dt>Reconciliation</dt><dd>Comparing our records with the payment partner's, to the cent, for a day.</dd>
+        <dt>Ledger</dt><dd>The append-only, double-entry record of all wallet money. Balances are calculated from it, never stored.</dd>
+        <dt>Holder</dt><dd>A learner or teacher who has a school wallet.</dd>
+        <dt>Link code</dt><dd>A one-time code that lets a parent link a child. Shown once.</dd>
+        <dt>Payout</dt><dd>Money sent to a tuckshop for its wallet sales, after the platform fee.</dd>
+        <dt>Scope</dt><dd>A kind of data a partner key may read (<code>sales.daily</code>, <code>sales.monthly</code>).</dd>
+        <dt>Rotation</dt><dd>Replacing a key with a new one; the old key works for 24 more hours.</dd>
+        <dt>Idempotent</dt><dd>Safe to repeat: the same request is never done twice.</dd>
+        <dt>Four-eyes</dt><dd>A rule that a second person reviews an important action.</dd>
+        <dt>Audit</dt><dd>A permanent record of who did what and when.</dd>
+        <dt>Lookup</dt><dd>A managed list the apps use, such as categories, units or municipalities.</dd>
+        <dt>Merge</dt><dd>Moving shops from a suggested product to an already approved one.</dd>
+      </dl>
+
+      <hr class="orn" />
+
+      <h2 id="c12"><span class="num">12</span>When something goes wrong</h2>
+      <div class="table-wrap"><table>
+        <caption>Common problems and what to do</caption>
+        <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>A red message on a screen, and a reload button</td><td>Read the message. Check your connection and sign-in. If it says you are not allowed, you are not signed in as a platform admin.</td></tr>
+          <tr><td><em>Please sign in again.</em></td><td>Your 12 hour sign-in ended. Sign in with a new code.</td></tr>
+          <tr><td>A pack's JSON settings are refused</td><td>The settings must be one valid JSON object. Check braces, quotes and commas.</td></tr>
+          <tr><td>The pack code is refused</td><td>Use 2 to 30 lowercase letters, digits and underscores, starting with a letter.</td></tr>
+          <tr><td>A plan has gone from the list</td><td>It was switched off (<span class="ui">Offered to customers</span> unticked). Only active plans are listed.</td></tr>
+          <tr><td>A ranking value is refused</td><td>Stay within the <span class="ui">Allowed range</span> shown in the table.</td></tr>
+          <tr><td><span class="ui">Verify supplier</span> does nothing</td><td>All four checklist boxes must be ticked.</td></tr>
+          <tr><td>Reject needs a reason</td><td>Type a <span class="ui">Reason for rejecting</span>. The supplier will read it.</td></tr>
+          <tr><td>A reconciliation shows a mismatch</td><td>Find the partner reference and the difference with finance and the partner. Do not resolve until you can explain it.</td></tr>
+          <tr><td><em>Payouts are on hold</em></td><td>An unresolved wallet reconciliation difference exists. Resolve it on the <span class="ui">Reconciliation</span> tab, with a proper note and a second person's review.</td></tr>
+          <tr><td>The school will not verify</td><td>Its tuckshop must be verified first. See the field agent manual.</td></tr>
+          <tr><td>An import shows rows not created</td><td>Check the table of rows that were not created. Fix the file and import it again; people already created are not made twice.</td></tr>
+          <tr><td>The link codes were not saved</td><td>They are shown once. Ask the platform team how the school can be given new codes. Do not guess.</td></tr>
+          <tr><td>A key was lost or leaked</td><td>Use <span class="ui">Rotate key</span> (old one works 24 hours) or <span class="ui">Revoke</span> if you must cut access at once.</td></tr>
+          <tr><td>A merge cannot find the product</td><td>Check the barcode digit by digit. Use <span class="ui">Find product</span> before <span class="ui">Merge into this product</span>.</td></tr>
+          <tr><td>A lookup does not appear in an app</td><td>Check that it is switched on and that the app has refreshed.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><p>When in doubt, stop and ask. A delayed payout can be explained to a shop owner; an unexplained one is much harder to put right.</p></div>
+    </div>
+
+    <div class="pager"><a href="06-field-agent-manual.html">&larr; Previous manual</a><a href="08-technical-guide.html">Next manual &rarr;</a></div>
+  </main>
+
+  <footer class="run-foot">
+    <span>TillKnowIT &middot; Platform Admin Manual &middot; Version 1.0</span>
+    <img src="assets/logo.svg" alt="TillKnowIT" />
+  </footer>
+</body>
+</html>

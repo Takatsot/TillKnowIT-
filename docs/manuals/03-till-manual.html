@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Till Manual | TillKnowIT</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/manual.css" />
+</head>
+<body>
+  <header class="run-head">
+    <a class="logo" href="index.html" aria-label="TillKnowIT manuals"><img src="assets/logo.svg" alt="TillKnowIT" /></a>
+    <span class="doc-name">Till manual</span>
+  </header>
+
+  <section class="cover">
+    <img class="cover-logo" src="assets/logo-light.svg" alt="TillKnowIT" />
+    <p class="kicker">USER MANUAL</p>
+    <h1>The Till</h1>
+    <p class="sub">Selling, taking payment, refunds and cash-up at the counter, with or without the internet. For cashiers on their first day and the managers who stand behind them.</p>
+    <p class="meta"><b>For:</b> cashiers and shift managers &nbsp;·&nbsp; <b>App:</b> Till (<code>apps/till</code>) &nbsp;·&nbsp; <b>Version</b> 1.0 &nbsp;·&nbsp; November 2026</p>
+  </section>
+
+  <main>
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#c1">Welcome</a></li>
+        <li><a href="#c2">Setting up the till</a></li>
+        <li><a href="#c3">Unlocking with your PIN</a></li>
+        <li><a href="#c4">Selling</a></li>
+        <li><a href="#c5">Taking payment</a></li>
+        <li><a href="#c6">Vouchers, points and the school wallet</a></li>
+        <li><a href="#c7">Credit customers</a></li>
+        <li><a href="#c8">Slips</a></li>
+        <li><a href="#c9">Lowering a price</a></li>
+        <li><a href="#c10">Refunds and cancelling a sale</a></li>
+        <li><a href="#c11">Tickets, tables and the kitchen</a></li>
+        <li><a href="#c12">Quotes and lay-by</a></li>
+        <li><a href="#c13">Serial numbers, customers and appointments</a></li>
+        <li><a href="#c14">Stock and transfers</a></li>
+        <li><a href="#c15">Cash-up at the end of the day</a></li>
+        <li><a href="#c16">Working offline</a></li>
+        <li><a href="#c17">Expired items</a></li>
+        <li><a href="#c18">Printer, drawer and scale</a></li>
+        <li><a href="#c19">Quick card</a></li>
+        <li><a href="#c20">When something goes wrong</a></li>
+        <li><a href="#c21">Glossary</a></li>
+      </ol>
+    </nav>
+
+    <div class="sheet">
+
+      <!-- 1 -->
+      <h2 id="c1"><span class="num">1</span>Welcome</h2>
+      <p class="lead">You are standing at a counter, there is a queue, and you need to ring up a sale. This manual is built for that moment: short steps, plain words, and a one-page Quick card you can print and stick next to the till.</p>
+      <p>The Till is the app you sell on. It runs in the browser on the shop's till, tablet or phone. It is made to keep selling when the internet drops: every sale is saved on the till first and sent to the server afterwards (see <a href="#c16">Working offline</a>).</p>
+
+      <h3>Who does what</h3>
+      <dl class="terms">
+        <dt>Cashier</dt>
+        <dd>Rings up sales, takes payment, gives slips, looks up past sales and can start a refund. A refund above the shop's limit needs a manager.</dd>
+        <dt>Manager</dt>
+        <dd>Does everything a cashier does, and also: approves refunds and lower prices with their PIN, cancels a whole sale, and sees the <span class="ui">Stock</span> and <span class="ui">Transfers</span> tabs.</dd>
+        <dt>Owner</dt>
+        <dd>Sets the shop up in the back office (staff, tills, products). An owner can approve at the till in the same way a manager can.</dd>
+      </dl>
+
+      <h3>What you see on the screen</h3>
+      <ul>
+        <li><b>The top bar.</b> It shows <span class="ui">Online</span> or <span class="ui">Working offline</span>, how many sales are still waiting to be sent, when the till was last updated, an <span class="ui">Update now</span> button and a language list.</li>
+        <li><b>The greeting.</b> After you unlock, <span class="ui">Hello, Thandi</span> (your own name) and a <span class="ui">Lock till</span> button.</li>
+        <li><b>The tabs.</b> <span class="ui">Sell</span> is always first. The other tabs depend on your role and on what the owner switched on for the shop. A tab that needs the internet is greyed out while the till is offline.</li>
+      </ul>
+
+      <div class="table-wrap"><table>
+        <caption>The tabs you may see, and who sees them</caption>
+        <thead><tr><th>Tab</th><th>Who sees it</th><th>Needs internet?</th></tr></thead>
+        <tbody>
+          <tr><td>Sell</td><td>Everyone</td><td>No</td></tr>
+          <tr><td>Past sales</td><td>Everyone</td><td>No (online refunds do)</td></tr>
+          <tr><td>Cash-up</td><td>Everyone</td><td>No</td></tr>
+          <tr><td>Credit book</td><td>Everyone</td><td>No (shows the last copy)</td></tr>
+          <tr><td>Stock</td><td>Managers and owner</td><td>No</td></tr>
+          <tr><td>Transfers</td><td>Managers and owner</td><td>Yes</td></tr>
+          <tr><td>Tables, Kitchen, Quotes, Lay-by, Vouchers, Customers, Appointments, Serial numbers, School wallet</td><td>Everyone, but only if the owner switched that feature on for the shop</td><td>Yes</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note"><p>If a tab in this manual is missing on your till, the shop's business type does not include it. Ask the owner. Nothing is wrong with the till.</p></div>
+
+      <div class="warn"><p>This manual describes what the app does today. Part of the app is still being finished: real printers, cash drawers and scales are not connected yet, and WhatsApp, SMS and email slips are not sent from the till screen. Where that matters, the chapter says so plainly.</p></div>
+
+      <h3>Practise with the demo till</h3>
+      <p>On a practice or demo till you can use these staff:</p>
+      <div class="table-wrap"><table>
+        <caption>Demo staff and products (practice only, never in a real shop)</caption>
+        <thead><tr><th>Name</th><th>Role</th><th>PIN</th></tr></thead>
+        <tbody>
+          <tr><td>Thandi</td><td>Cashier</td><td><code>1234</code></td></tr>
+          <tr><td>Sipho</td><td>Manager</td><td><code>4321</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Product</th><th>Barcode</th></tr></thead>
+        <tbody>
+          <tr><td>Bread</td><td><code>6001234500011</code></td></tr>
+          <tr><td>Milk</td><td><code>6001234500066</code></td></tr>
+          <tr><td>Soap</td><td><code>6001234500080</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="danger"><p>Change the PINs on a real till. Everyone who has read this manual knows these two.</p></div>
+
+      <hr class="orn" />
+
+      <!-- 2 -->
+      <h2 id="c2"><span class="num">2</span>Setting up the till</h2>
+      <p class="lead">A new till has to be told which shop it belongs to, and the owner has to approve it. You do this once. Cashiers normally never see this screen again.</p>
+
+      <h3>What the owner gives you</h3>
+      <p>In the back office, under <span class="ui">Staff and tills</span>, the owner registers the till, then chooses <span class="ui">Show setup</span>. The owner gets three things and must give them to whoever sets up the till:</p>
+      <ul>
+        <li>the <b>shop number</b> (a long code with dashes),</li>
+        <li>the <b>till number</b> (also a long code with dashes), and</li>
+        <li>the <b>setup code</b>.</li>
+      </ul>
+      <div class="danger"><p>The setup code is shown to the owner only once. If it is lost, the owner must reset the till in the back office to get a new one. The sales already waiting on the till are kept.</p></div>
+
+      <h3>Register this till</h3>
+      <ol class="steps">
+        <li>Open the Till app in the browser. On a new till you see <span class="ui">Register this till</span>.</li>
+        <li>Type the <span class="ui">Shop number</span>, the <span class="ui">Till number</span> and the <span class="ui">Setup code</span>.</li>
+        <li>Press <span class="ui">Register till</span>. The button stays grey until all three boxes are filled.</li>
+      </ol>
+      <p>If a number looks wrong the till tells you: <i>The shop number does not look right. It is a long code with dashes.</i> or <i>The till number does not look right. It is a long code with dashes.</i> Copy the numbers again from the owner rather than typing them from memory.</p>
+      <p>If the browser is not allowed to store data, you will see <i>This till could not save its registration. Check that the browser is allowed to store data.</i> Do not use a private window for the till.</p>
+
+      <h3>Waiting for approval</h3>
+      <p>The till does not check with the server the moment you register, so you can do this even without a connection. At the first update the till asks the server whether the owner approved it. Until then you will see:</p>
+      <div class="note"><p><i>This till is waiting for the owner to approve it in the back office. You can sell, but nothing is sent until it is approved.</i></p></div>
+      <p>The owner opens <span class="ui">Staff and tills</span> and presses <span class="ui">Approve</span> next to the till. The banner goes away at the next update. You can press <span class="ui">Update now</span> in the top bar to speed it up (it needs the internet).</p>
+      <p>If the owner switches the till off you will see <i>The owner has switched this till off. Ask the owner.</i></p>
+
+      <h3>Staff, products and promotions download by themselves</h3>
+      <p>Once the till is approved and online it downloads the shop's staff, products, promotions and business settings. You do not do anything. The top bar shows <span class="ui">Updated 08:42</span> (the time of the last download), or <span class="ui">Not updated yet</span> if it has never worked. After that the till can sell and check PINs with no internet at all.</p>
+      <div class="warn"><p>Until the staff have downloaded, the PIN screen says <i>No staff on this till yet. Ask the owner to add you.</i> Connect the till to the internet once and press <span class="ui">Update now</span>. If it still says that, the owner has not added you in the back office.</p></div>
+
+      <h3>Setting a till up again</h3>
+      <p>Sometimes the server stops accepting a till, for example because its saved credential was lost. The till then shows <span class="ui">Set this till up again</span> with the old numbers filled in. The owner must add or reset the till in the back office (that shows a new setup code). Type the new <span class="ui">Setup code</span> and press <span class="ui">Set up till again</span>. If sales are waiting, the screen tells you: <i>sales are waiting on this till. They are kept and will be sent once the till is set up again.</i> Nothing is lost.</p>
+
+      <h3>If the owner wipes the till</h3>
+      <p>The owner can ask for a till to be cleared (for example if it was stolen or is being replaced). The till first sends every waiting sale. While it still has sales to send you will see <i>The owner asked for this till to be cleared. … sales must be sent first. Keep the till online.</i> Leave it connected until the message goes. After the wipe the till is no longer registered.</p>
+
+      <hr class="orn" />
+
+      <!-- 3 -->
+      <h2 id="c3"><span class="num">3</span>Unlocking with your PIN</h2>
+      <p class="lead">Every person has their own PIN. The till is locked until someone signs in, and it records who rang up each sale.</p>
+
+      <ol class="steps">
+        <li>On <span class="ui">Who is selling?</span> press your name.</li>
+        <li>The screen says <span class="ui">PIN for</span> and your name. Tap your PIN on the number pad. A PIN is 4 to 6 digits. Dots show how many you have typed.</li>
+        <li>Press <span class="ui">OK</span>. Use <span class="ui">Delete</span> to remove the last digit.</li>
+        <li>You see <span class="ui">Hello, </span>and your name. You are in.</li>
+      </ol>
+      <p>Picked the wrong name? Press <span class="ui">Not you?</span> to go back to the list.</p>
+
+      <h3>Wrong PIN and the lock</h3>
+      <p>A wrong PIN shows <i>That PIN is not right. Tries left: 4.</i> (the number goes down). After <b>5 wrong tries</b> that person is locked for <b>5 minutes</b>. The pad goes grey and says <i>Too many wrong tries. Try again in 5 min.</i> and counts down.</p>
+      <div class="warn"><p>The lock belongs to the person, and it is saved on the till. Closing the app, switching the till off or choosing a different name does not clear it. Another cashier can still sign in with their own PIN while yours waits.</p></div>
+      <p>The same lock protects a manager's PIN when a manager approves a refund or a price (see <a href="#c9">Lowering a price</a>). Guessing a manager's PIN at approval time uses up the same five tries.</p>
+
+      <h3>Locking the till</h3>
+      <p>Whenever you step away, press <span class="ui">Lock till</span>. The sale you were busy with stays on the screen and is still there when you unlock. Do not leave a till unlocked: whatever is sold under your name is your sale.</p>
+      <div class="danger"><p>Never tell anyone your PIN. A manager's PIN approves refunds and price drops. Anyone who knows it can take money from the shop in your name.</p></div>
+
+      <hr class="orn" />
+
+      <!-- 4 -->
+      <h2 id="c4"><span class="num">4</span>Selling</h2>
+      <p class="lead">Scan or type, check the list, press Pay. That is nearly all of it.</p>
+
+      <h3>Scan a barcode</h3>
+      <ol class="steps">
+        <li>Click in the box that says <span class="ui">Scan or type a barcode or name</span>. It is already ready when you open the Sell tab.</li>
+        <li>Scan the barcode with the scanner, or type the number and press <kbd>Enter</kbd> (or press <span class="ui">Add</span>).</li>
+        <li>The item appears in the list with its price. Scan the same item again to add one more.</li>
+      </ol>
+      <p>Try it with <code>6001234500011</code> (bread). If the till does not know a code it says <i>We do not have that barcode.</i> Put the item aside and tell the owner, who can add it in the back office.</p>
+
+      <h3>Search by name</h3>
+      <p>Type two or more letters of the name. Up to six matches appear, each with its price (a weighed item shows <code>/kg</code>). Press the one you want. If only one item matches, <kbd>Enter</kbd> takes it. If nothing matches you will see <i>Nothing found for that.</i></p>
+
+      <h3>Changing the list</h3>
+      <ul>
+        <li><span class="ui">+</span> adds one more, <span class="ui">&minus;</span> takes one off.</li>
+        <li><span class="ui">&#10005;</span> removes the whole line.</li>
+        <li><span class="ui">Clear sale</span> empties everything and starts again. Anything already taken from a voucher, points or a school wallet for this sale is given back (see <a href="#c6">Vouchers, points and the school wallet</a>).</li>
+      </ul>
+      <p>An empty sale says <i>Nothing in this sale yet.</i></p>
+
+      <h3>Items sold by weight</h3>
+      <p>Meat, mince, bulk goods: these are sold by the gram. When you pick or scan one, the screen changes to <span class="ui">Weight of Mince in grams</span>.</p>
+      <ol class="steps">
+        <li>Put the item on the scale and read the weight.</li>
+        <li>Type the weight in <b>grams</b> (700 for 700 g). Whole numbers only.</li>
+        <li>Press <span class="ui">Add weight</span>. The line shows the grams, for example <code>700 g</code>, and the price for that weight.</li>
+      </ol>
+      <p>If the weight is not allowed (zero, for example) the till says <i>That weight is not allowed.</i> Press <span class="ui">Back</span> to leave without adding.</p>
+      <p>A <span class="ui">Read from scale</span> button appears only when a scale is connected to the till. No real scale adapter is built yet, so on most tills you type the weight (see <a href="#c18">Printer, drawer and scale</a>).</p>
+      <p>Some shops use price labels printed by a scale. If your shop does, scan the label and the till adds the item at the weight or price on the label. Such a line has no <span class="ui">+</span> and <span class="ui">&minus;</span>, and its price cannot be lowered. To change it, remove the line and scan again.</p>
+
+      <h3>Add-ons</h3>
+      <p>An add-on (extra cheese, a bag, a side) is a product like any other in this app. Scan it or search for it by name and add it as another line. It carries its own price and takes its own stock. There is no separate &quot;add-on&quot; button on the Sell tab.</p>
+
+      <h3>Promotions and discounts</h3>
+      <p>Promotions (percent off, amount off, a fixed price, combos) are applied for you when the right items are in the sale, on the right days and hours. You do not type anything. When a promotion applies, the totals show <span class="ui">Discount</span> with the amount taken off.</p>
+      <p>Only a promotion or a manager-approved price (next sections) can lower a price. A cashier cannot give a discount on their own.</p>
+
+      <h3>The totals</h3>
+      <dl class="terms">
+        <dt>Discount</dt><dd>What promotions took off (only shown when there is one).</dd>
+        <dt>VAT included</dt><dd>The VAT that is already inside the prices.</dd>
+        <dt>Total</dt><dd>What the customer pays for the goods.</dd>
+        <dt>Tip / To pay</dt><dd>Only if a tip was added: the tip, and the final amount to pay.</dd>
+      </dl>
+
+      <h3>Tips</h3>
+      <p>If the shop takes tips, a row of buttons appears once there is something in the sale: <span class="ui">No tip</span>, <span class="ui">Tip 10%</span>, <span class="ui">Tip 15%</span>, and a box <span class="ui">Tip amount</span> with <span class="ui">Set tip</span>. Type an amount such as <code>10</code> or <code>7,50</code>.</p>
+      <p>A tip cannot be more than the bill (<i>A tip cannot be more than the bill.</i>). The tip is added to what the customer pays and goes in the cash drawer, but it is not counted as a sale. A tip cannot be added to a credit sale.</p>
+
+      <h3>Attaching a customer</h3>
+      <p>If the shop uses customers and loyalty points, you can attach the sale to a customer. Type their <span class="ui">Customer phone number</span> and press <span class="ui">Find customer</span>. If several people match, pick the right one. You will see <span class="ui">Customer: Name</span> and a <span class="ui">Remove customer</span> button.</p>
+      <p>Finding a customer needs the internet: <i>Customers can only be found when the till is online.</i> If nobody has that number you get <i>No customer has that phone number.</i> New customers are added in the <span class="ui">Customers</span> tab (see <a href="#c13">Serial numbers, customers and appointments</a>).</p>
+
+      <hr class="orn" />
+
+      <!-- 5 -->
+      <h2 id="c5"><span class="num">5</span>Taking payment</h2>
+      <p class="lead">Press <span class="ui">Pay</span> and ask how the customer is paying. The button shows the amount, for example <span class="ui">Pay R42,00</span>.</p>
+      <p>The screen asks <span class="ui">How is the customer paying?</span> and shows the total. You choose one of these: <span class="ui">Cash</span>, <span class="ui">Card</span>, <span class="ui">QR</span>, <span class="ui">Credit</span>, and, if the shop has it switched on, <span class="ui">Split payment</span>. <span class="ui">Back</span> returns to the sale without selling.</p>
+
+      <h3>Cash</h3>
+      <ol class="steps">
+        <li>Press <span class="ui">Cash</span>.</li>
+        <li>Either press a quick button (the first is <span class="ui">Exact</span>; the others are notes that cover the bill, such as R50 or R100), or type the money you were given in <span class="ui">Cash received</span>.</li>
+        <li>When the money covers the bill, the button turns into <span class="ui">Change: R8,00</span>. Press it.</li>
+        <li>Give the change. The screen shows <i>Sale saved. Total R42,00. Change: R8,00.</i></li>
+      </ol>
+      <div class="warn"><p>A quick button completes the sale immediately. Make sure it is the note the customer actually handed you. Pressing <span class="ui">R100</span> when you were given R50 means the till will tell you to give R58 too much.</p></div>
+
+      <h3>Card</h3>
+      <p>Press <span class="ui">Card</span> after the card machine has said <b>approved</b>. The sale is saved at once as a card sale.</p>
+      <div class="danger"><p>The till is not connected to the card machine. It does not know whether the payment worked. Press <span class="ui">Card</span> or <span class="ui">QR</span> only after the customer's payment has gone through on the machine or on their phone. Once saved, the sale is saved.</p></div>
+
+      <h3>QR</h3>
+      <p>Same as card, for a customer paying by a QR code on their phone. Press <span class="ui">QR</span> only after you have seen the payment arrive.</p>
+
+      <h3>Split payments</h3>
+      <p>When one customer pays in more than one way, for example R20 cash and the rest on card. <span class="ui">Split payment</span> appears only if the owner switched it on for the shop.</p>
+      <ol class="steps">
+        <li>Press <span class="ui">Split payment</span>. You get <span class="ui">Part 1</span>.</li>
+        <li>Choose the method (<span class="ui">Method for part 1</span>: Cash, Card, QR, Wallet, Voucher or Points) and type the amount (<span class="ui">Amount for part 1</span>).</li>
+        <li>For cash, fill in <span class="ui">Cash received for part 1</span> if the customer gave more than that part. Leaving it empty means the exact amount.</li>
+        <li>Press <span class="ui">Add a part</span> for the next method. It fills in the amount still to pay.</li>
+        <li>Watch <span class="ui">Still to pay: R0,00</span>. When it is zero, press <span class="ui">Pay</span>.</li>
+      </ol>
+      <ul>
+        <li>A sale can be split into at most <b>6</b> payments, and each method can be used <b>once</b>.</li>
+        <li>If the parts add up to too much you see <span class="ui">Over by R5,00</span>. Fix an amount, or press <span class="ui">&#10005;</span> to remove a part.</li>
+        <li>Credit cannot be part of a split.</li>
+        <li>Wallet, voucher and points parts need their reference. The till fills it in for you when you use the buttons described in the next chapter.</li>
+        <li>If something is wrong: <i>Check the amounts. Wallet and voucher payments need their reference, and cash received cannot be less than the amount.</i></li>
+      </ul>
+
+      <h3>After the sale</h3>
+      <p>The screen returns to an empty sale and shows <i>Sale saved. Total R42,00.</i> The sale is now safe on the till, whether or not there is internet. If the shop has a printer and cash drawer connected, the slip prints and the drawer opens after a cash sale (see <a href="#c18">Printer, drawer and scale</a>).</p>
+      <p>If the printer or drawer fails the sale still stands. The till adds a plain-words note, such as <i>The slip did not print: The printer is out of paper. Put in a new roll.</i></p>
+
+      <hr class="orn" />
+
+      <!-- 6 -->
+      <h2 id="c6"><span class="num">6</span>Vouchers, points and the school wallet</h2>
+      <p class="lead">These three take money from something the customer holds, not from their hand. They need the internet, because the server must confirm the balance.</p>
+
+      <div class="warn"><p>Vouchers, points and wallets work only while the till is online. Offline, the buttons are disabled and the till says <i>Vouchers, points and wallets need the internet. Connect the till to use them.</i> A till that is not registered also cannot use them.</p></div>
+
+      <h3>How to use them at the counter</h3>
+      <p>They are used from the <span class="ui">Split payment</span> screen, even if the customer is paying the whole bill that way. Under <span class="ui">Pay with something that needs the internet</span> you will see the buttons the shop has switched on: <span class="ui">Use voucher</span>, <span class="ui">Use points</span>, <span class="ui">Pay from wallet</span>. If you have no <span class="ui">Split payment</span> button, ask the owner to switch it on.</p>
+
+      <h3>A gift voucher</h3>
+      <ol class="steps">
+        <li>On the split screen press <span class="ui">Use voucher</span>.</li>
+        <li>Type or scan the <span class="ui">Voucher code</span>. <span class="ui">Amount to take</span> is filled with what is still to pay. Lower it if the voucher is worth less, or if the customer wants to use part of it.</li>
+        <li>Press <span class="ui">Take from voucher</span>.</li>
+        <li>The part is added and locked: <i>Taken and locked in: reference&nbsp;&hellip;</i>. Finish the rest of the bill with other parts, then press <span class="ui">Pay</span>.</li>
+      </ol>
+      <p>Only one voucher can be used on a sale: <i>A voucher is already used on this sale.</i> You cannot take more than is left to pay: <i>Type an amount more than zero and not more than what is left to pay.</i></p>
+
+      <h3>Loyalty points</h3>
+      <ol class="steps">
+        <li>Attach the customer to the sale first (<span class="ui">Find customer</span>). Without it you will see <i>Attach the customer to the sale first, then use their points.</i></li>
+        <li>On the split screen press <span class="ui">Use points</span>.</li>
+        <li>Type the whole number of <span class="ui">Points to use</span> and press <span class="ui">Take points</span>.</li>
+      </ol>
+      <p>The till checks first. <i>The customer has only 120 points.</i> or <i>Those points are worth R…, more than the R… still to pay. Use fewer points.</i> Points can be used once per sale.</p>
+
+      <h3>School wallet at the Sell tab</h3>
+      <ol class="steps">
+        <li>On the split screen press <span class="ui">Pay from wallet</span>.</li>
+        <li>Choose <span class="ui">How the wallet is read</span>: <span class="ui">QR code</span> (the learner's phone) or <span class="ui">Card or wristband</span>.</li>
+        <li>Scan or type the code in <span class="ui">Wallet QR code or card number</span>.</li>
+        <li>Check <span class="ui">Amount to take</span> and press <span class="ui">Take from wallet</span>.</li>
+        <li>The till says <i>Took R15,00 from Name's wallet.</i> Check the name and the child in front of you.</li>
+      </ol>
+      <p>The wallet is charged once for a given sale. Pressing again after a lost answer is safe: the same sale never takes the money twice.</p>
+
+      <h3>The School wallet tab</h3>
+      <p>Schools' tuckshops also have a <span class="ui">School wallet</span> tab (shown when the owner has switched it on for the shop). It is a quick screen for wallet-only sales: add the items, then <span class="ui">Scan the QR code or type it</span>, say whether the code is from <span class="ui">A phone (QR code)</span> or <span class="ui">A card or wristband</span>, and press <span class="ui">Take R15,00 from the wallet</span>. For a teacher there is a tick box <span class="ui">Charge a teacher's monthly staff account</span>.</p>
+      <p>After a good payment you see the person's name, grade and class, <span class="ui">Left in the wallet</span>, and <i>Check that the person in front of you is Name.</i> If a photo is on file the screen says so. Look at the child. A card in the wrong hands is how wallets are stolen from.</p>
+      <p>The wallet refuses a payment with a clear reason:</p>
+      <div class="table-wrap"><table>
+        <caption>When the wallet says no (<span class="ui">Payment not taken</span>)</caption>
+        <thead><tr><th>You see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>This card is not linked to anyone at this school.</td><td>Check it is the right card, or ask the school office.</td></tr>
+          <tr><td>This card has been blocked.</td><td>Do not accept it. Ask the office.</td></tr>
+          <tr><td>This QR code has expired or is not valid.</td><td>Ask the learner to open a fresh code on the phone.</td></tr>
+          <tr><td>There is not enough money in the wallet.</td><td>The parent tops it up in the parent app. Take another way to pay for the rest, if you can.</td></tr>
+          <tr><td>This wallet is frozen. / This learner is no longer at the school.</td><td>Ask the office.</td></tr>
+          <tr><td>One of these items is blocked on this wallet by the parent.</td><td>Remove that item.</td></tr>
+          <tr><td>This would go over the daily spending limit.</td><td>Lower the amount or use another payment method.</td></tr>
+          <tr><td>The wallet was being used at the same moment.</td><td>Try again.</td></tr>
+          <tr><td>Only a teacher can use a staff account. / This school does not use staff accounts.</td><td>Untick the staff-account box.</td></tr>
+        </tbody>
+      </table></div>
+      <p>School wallets also work for a short time offline: the till has been given a small allowance for each wallet. If the sale is over that allowance, the server will refuse it later. The shop owner and the parent are told.</p>
+
+      <h3>Selling and checking vouchers</h3>
+      <p>The <span class="ui">Vouchers</span> tab has three parts:</p>
+      <ul>
+        <li><b>Sell a voucher.</b> Type the <span class="ui">Voucher value</span> (from R1 up to R5000), choose how the customer pays (Cash, Card, QR) and press <span class="ui">Sell voucher</span>. The code is shown once: <i>Give this code to the customer now. It is shown only once and cannot be looked up again.</i> Press <span class="ui">I have given the code to the customer</span> only after you have done that.</li>
+        <li><b>Check a balance.</b> Type the code and press <span class="ui">Check balance</span>. It says how much is left (it shows only the last four characters) and until when, or <i>This voucher has been cancelled.</i> or <i>This voucher has expired.</i></li>
+        <li><b>Use a voucher.</b> Takes an amount off a voucher and shows a payment reference. It is the same thing the <span class="ui">Use voucher</span> button does inside a sale; prefer that button.</li>
+      </ul>
+      <div class="danger"><p>A voucher code cannot be looked up again. If you close the screen before the customer has the code, the money is on a voucher nobody can use. Write the code down or show it on the screen before you press <span class="ui">I have given the code to the customer</span>.</p></div>
+
+      <hr class="orn" />
+
+      <!-- 7 -->
+      <h2 id="c7"><span class="num">7</span>Credit customers</h2>
+      <p class="lead">Some regular customers buy on credit and pay later. The owner sets them up in the back office, with a credit limit.</p>
+
+      <h3>Selling on credit</h3>
+      <ol class="steps">
+        <li>Build the sale and press <span class="ui">Pay</span>, then <span class="ui">Credit</span>.</li>
+        <li>On <span class="ui">Choose the credit customer</span> press the customer's name. Next to each name you see what they already owe, for example <span class="ui">owes R120,00</span>.</li>
+        <li>The sale is saved on their account.</li>
+      </ol>
+      <p>If the sale takes them over their limit the till warns you: <i>This sale takes Name over their credit limit. You can still go ahead.</i> The decision is yours. Follow what the shop owner told you.</p>
+      <p>If there are no credit customers you see <i>There are no credit customers on this till yet. The owner adds them in the back office.</i> A sale with a tip cannot go on credit: <i>Take the tip off to sell on credit.</i></p>
+
+      <h3>When a credit customer pays</h3>
+      <ol class="steps">
+        <li>Open the <span class="ui">Credit book</span> tab.</li>
+        <li>Find the customer (<span class="ui">Find a customer by name or phone</span>) and press <span class="ui">Take payment</span>.</li>
+        <li>You see <i>Name owes R120,00.</i> Type the <span class="ui">Amount paid</span> and choose <span class="ui">Paid by</span> (Cash, Card or QR).</li>
+        <li>Press <span class="ui">Save payment</span>. It says <i>Payment of R50,00 from Name saved. They now owe R70,00.</i></li>
+      </ol>
+      <p>A payment cannot be larger than what the customer owes: <i>That is more than Name owes (R120,00).</i></p>
+      <div class="note"><p>The credit book works offline. It then shows <i>the balances from the last time it was online, plus what has been taken since.</i> Cash taken here counts in the end-of-day cash-up as <span class="ui">Paid on credit accounts in cash</span>.</p></div>
+
+      <hr class="orn" />
+
+      <!-- 8 -->
+      <h2 id="c8"><span class="num">8</span>Slips</h2>
+      <p class="lead">The shop does not print a slip for every sale. Give one only if the customer asks. That saves paper and money.</p>
+
+      <h3>The QR slip</h3>
+      <p>Right after a sale, the sale screen shows a <span class="ui">Get QR slip</span> button. Press it, and the till shows <i>QR slip: </i> and a web address. The customer can scan or open it on their phone. A QR slip is free to give. The public slip page does not show staff or customer details.</p>
+      <p>It can say:</p>
+      <ul>
+        <li><i>The QR slip will be available once this sale has been sent to the server.</i> The sale is still waiting on the till. Wait a moment and press again.</li>
+        <li><i>Connect the till to the internet to get the QR slip.</i> You are offline.</li>
+        <li><i>This till is not registered, so it cannot get a QR slip.</i></li>
+      </ul>
+      <p>If a printer is connected, <span class="ui">Print slip with QR</span> prints the slip with its QR code on it.</p>
+
+      <h3>WhatsApp, SMS and email slips</h3>
+      <p>The server can send a slip by WhatsApp, SMS or email, with <b>at most 3 slips per sale</b>. But these three are <b>not yet offered on the Till screen</b>: only <span class="ui">Get QR slip</span> is. The message providers are also not yet connected for real sending. Until this changes, the customer takes a QR slip or a printed slip.</p>
+      <div class="note"><p>On a paid plan, slips by WhatsApp or SMS are counted against the shop's monthly message bundle. If a free plan's bundle runs out, the slip turns into a QR code.</p></div>
+
+      <hr class="orn" />
+
+      <!-- 9 -->
+      <h2 id="c9"><span class="num">9</span>Lowering a price</h2>
+      <p class="lead">A cashier cannot lower a price alone. A manager (or the owner) must approve it with their PIN. A price can only go down, never up.</p>
+
+      <ol class="steps">
+        <li>In the sale, find the line and press <span class="ui">Change price</span>.</li>
+        <li>Type the new price in <span class="ui">New price for Bread</span> (an amount such as <code>12</code> or <code>7,50</code>). It must be lower than the current one. Otherwise: <i>The new price must be lower than R15,00. A price can only be lowered.</i></li>
+        <li>Press <span class="ui">Ask a manager</span>. (<span class="ui">Not now</span> cancels.)</li>
+        <li>You see <i>A manager or the owner must approve a lower price with their PIN.</i> The manager chooses their name in <span class="ui">Manager</span>, types their <span class="ui">Manager PIN</span> and presses <span class="ui">Approve</span>.</li>
+        <li>The line now shows <i>Price approved by Sipho</i>. The new price is in the total.</li>
+      </ol>
+      <p>To undo it, press <span class="ui">Remove price change</span> on that line.</p>
+      <ul>
+        <li>The PIN is checked on the till, so approval works <b>offline</b>. The server checks the manager's role again later.</li>
+        <li>A wrong PIN says <i>That PIN is not right. Tries left: 3.</i> Too many wrong tries: <i>Too many wrong tries. Try again in a few minutes.</i></li>
+        <li>If there is no manager on the till: <i>There is no manager on this till to approve it. The owner can sign in and approve it.</i></li>
+        <li>A price-labelled item cannot be changed: <i>A labelled item cannot be changed. Remove it and scan again.</i></li>
+      </ul>
+      <div class="warn"><p><b>For managers:</b> a lower price is lost money. Only type your PIN yourself and only when you have seen why. Never give your PIN to a cashier to &quot;press for you&quot;. Your name is stored on the sale line.</p></div>
+
+      <hr class="orn" />
+
+      <!-- 10 -->
+      <h2 id="c10"><span class="num">10</span>Refunds and cancelling a sale</h2>
+      <p class="lead">A refund takes some or all of the goods back and returns the money. A cancellation voids the whole sale. Both are done from the <span class="ui">Past sales</span> tab, and both go back to stock.</p>
+
+      <h3>Find the sale</h3>
+      <p>Open <span class="ui">Past sales</span>. It lists the recent sales rung up on this till, with <span class="ui">Time</span>, <span class="ui">Items</span>, <span class="ui">Total</span> and <span class="ui">Paid by</span>. Type an item name or an amount in <span class="ui">Find by item name or amount</span>, then press <span class="ui">Open</span> on the right row. If the list is empty: <i>No sales on this till yet.</i></p>
+      <div class="note"><p>Past sales shows what <b>this till</b> sold recently. For an old sale from another till, ask a manager to look it up in the back office.</p></div>
+
+      <h3>Take goods back (a refund)</h3>
+      <ol class="steps">
+        <li>On the sale, under <span class="ui">Take goods back</span>, type for each item the quantity coming back (<span class="ui">Quantity to take back of Bread (up to 3)</span>). You can never return more than was sold, less what was already returned.</li>
+        <li>Type the <span class="ui">Reason for the refund</span>. A reason is needed: <i>Say why the goods are coming back.</i></li>
+        <li>Check <span class="ui">Refund: R30,00</span> and the line under it, <i>The money goes back to the customer the way it was paid: cash.</i> (for a credit sale: <i>The amount comes off what the customer owes.</i>)</li>
+        <li>Press <span class="ui">Refund</span>. <i>Refund of R30,00 saved.</i></li>
+      </ol>
+      <p>If the shop has not switched refunds on you will see <i>Refunds are not switched on for this shop.</i> If everything has already been taken back: <i>Everything on this sale has been taken back.</i></p>
+
+      <h3>Refunds over the limit</h3>
+      <p>A refund above the shop's limit needs a manager. The limit is <b>R500</b> unless the shop set a different one. For a cashier the button becomes <span class="ui">Ask a manager</span> and the screen says <i>A refund above R500,00 needs a manager to approve it.</i> The manager picks their name, types their <span class="ui">Manager PIN</span> and presses <span class="ui">Approve</span>. A manager refunding above the limit approves it with their own sign-in.</p>
+      <div class="warn"><p><b>For managers:</b> check the customer and the goods yourself before you approve. The stock goes back on the shelf, and the money leaves the drawer. Cash refunds are taken off what the till expects at cash-up, so an unrecorded cash refund shows up as a shortage.</p></div>
+
+      <h3>Sales paid in several ways, by wallet, voucher or lay-by</h3>
+      <p>These cannot be refunded at the till. The screen says <i>This sale was paid by split, wallet, voucher or lay-by, so it is refunded through the server, not at the till.</i> You use <span class="ui">Refund online</span>, which needs the internet and a sale that has already reached the server.</p>
+      <ol class="steps">
+        <li>Fill in quantities and the reason as above.</li>
+        <li>Choose <span class="ui">Pay the refund back as</span>: <span class="ui">Gift voucher</span> (the default), <span class="ui">Cash</span>, <span class="ui">Card</span> or <span class="ui">QR</span>.</li>
+        <li>Press <span class="ui">Refund online</span> (or <span class="ui">Ask a manager</span> over the limit).</li>
+        <li>For a gift voucher the screen shows <i>Gift voucher code: … Give it to the customer now. It is shown only once.</i></li>
+      </ol>
+      <p>Possible messages: <i>This till is not online. Connect to the internet to refund this sale.</i>, <i>This sale has not reached the server yet. Wait for the till to finish sending, then try again.</i>, <i>That refund was already made.</i></p>
+
+      <h3>Cancel the whole sale (managers only)</h3>
+      <p>A cashier does not see this section. A manager or owner can cancel a sale if it was rung up wrongly.</p>
+      <ol class="steps">
+        <li>Open the sale in <span class="ui">Past sales</span>.</li>
+        <li>Under <span class="ui">Cancel the whole sale</span> press <span class="ui">Cancel this sale</span>.</li>
+        <li>Type the <span class="ui">Reason for cancelling</span>.</li>
+        <li>Press <span class="ui">Confirm cancellation</span>. <i>The sale was cancelled.</i> A cancelled sale shows a <span class="ui">Cancelled</span> mark.</li>
+      </ol>
+      <ul>
+        <li>If part of the sale was already refunded, it cannot be cancelled: <i>Part of this sale was already taken back, so it cannot be cancelled.</i></li>
+        <li>Cancelling a credit sale also takes the amount off the customer's account.</li>
+        <li>The shop owner is alerted when a till has many cancellations in an hour. It is one of the ways the owner spots theft.</li>
+      </ul>
+      <div class="danger"><p>Cancelling does not hand money back for you. If the customer paid cash, you still have to count it back out, and it must be recorded properly. Do not cancel to &quot;fix&quot; a till that is short.</p></div>
+      <p>To throw away a sale that has <b>not been paid yet</b>, use <span class="ui">Clear sale</span> on the Sell tab instead.</p>
+
+      <hr class="orn" />
+
+      <!-- 11 -->
+      <h2 id="c11"><span class="num">11</span>Tickets, tables and the kitchen</h2>
+      <p class="lead">Cafes and restaurants keep a sale open while the customer eats and pay at the end. These tabs appear only if the owner chose a business type with tickets, tables and a kitchen. They need the internet, because several tills share the same open tickets.</p>
+
+      <h3>Open tickets and tables</h3>
+      <p>The <span class="ui">Tables</span> tab has two views: <span class="ui">Floor plan</span> and <span class="ui">Open tickets</span>. On the floor plan each table shows <span class="ui">Free</span> or <span class="ui">Open: R85,00</span>. If there are no tables yet: <i>No tables on the floor plan yet. The owner sets them up in the back office. You can still open a ticket without a table.</i> If tickets are not switched on for the shop you see <i>Tables need open tickets switched on for this shop.</i></p>
+      <ol class="steps">
+        <li>Press a free table (or <span class="ui">New ticket without a table</span>).</li>
+        <li>Type the <span class="ui">Ticket name or number</span> (for example <code>Table 4</code> or <code>Takeaway 12</code>, up to 40 characters).</li>
+        <li>Add the items, then press <span class="ui">Open ticket</span>.</li>
+      </ol>
+      <p>Open a ticket from the list with <span class="ui">Open</span>. The ticket tells you who has it:</p>
+      <dl class="terms">
+        <dt>Held by this till</dt><dd>You can change it.</dd>
+        <dt>Another till is working on it</dt><dd>You can look but not change it: <i>Another till is working on this ticket, so it is read only.</i></dd>
+        <dt>Free to take</dt><dd>Press <span class="ui">Take it to edit</span> first.</dd>
+      </dl>
+      <p>When you hold a ticket you can <span class="ui">Save changes</span>, <span class="ui">Move</span> it to another table, <span class="ui">Merge</span> another ticket into it, or <span class="ui">Give it back</span> so other tills can work on it. A hold lapses after 10 minutes if nothing happens, so give a ticket back when you are done.</p>
+
+      <h3>Paying a ticket</h3>
+      <p>Press <span class="ui">Take payment</span> (a ticket with no items says <i>A ticket with no items cannot be paid.</i>). Choose <span class="ui">Paid by</span> Cash, Card or QR, and for cash type <span class="ui">Cash received</span>. Press <span class="ui">Take R85,00 and close the ticket</span>. It confirms <i>Paid R85,00. The ticket is closed.</i> and shows the change.</p>
+      <p>If the sale is saved but the server could not close the ticket yet, the screen says <i>The sale is saved on this till. The server could not close the ticket yet; press the button again.</i> Press it again. It will not charge twice.</p>
+      <p>Or press <span class="ui">Move to the sale on the till</span> to put the ticket's items on the Sell tab, where you can use the normal payment screens (including split payments and vouchers).</p>
+
+      <h3>Voiding a ticket</h3>
+      <p><span class="ui">Void ticket</span> throws the items away and cannot be undone: <i>Void ticket Table 4? Its items are thrown away and it cannot be undone.</i> Choose <span class="ui">Yes, void it</span> only when you are sure, or <span class="ui">Keep it</span>.</p>
+      <div class="warn"><p>A voided ticket loses food that may already have been made. Voids are visible to the owner. Never void a ticket to hide a sale.</p></div>
+
+      <h3>Sending to the kitchen</h3>
+      <p>The <span class="ui">Kitchen</span> tab has two views: <span class="ui">Send to the kitchen</span> and <span class="ui">Kitchen board</span>.</p>
+      <ol class="steps">
+        <li>On <span class="ui">Send to the kitchen</span>, an <span class="ui">Order number</span> is filled in. Keep it, or type your own (letters, digits and dashes, up to 12 characters). Each number is used once.</li>
+        <li>Type the <span class="ui">Table or name</span> and add the items. Or choose <span class="ui">Fill from an open ticket</span>.</li>
+        <li>Press <span class="ui">Send to the kitchen</span>. <i>Order K-1042 sent to the kitchen.</i></li>
+      </ol>
+      <p>If the number was used already, a new one is filled in. Send again. If no kitchen printer or screen is set up you see <i>No kitchen screen or printer is set up on this till. The order is on the kitchen board.</i> That is normal for now. See <a href="#c18">Printer, drawer and scale</a>.</p>
+      <p>The <span class="ui">Kitchen board</span> has three columns: <span class="ui">New orders</span>, <span class="ui">Being made</span> and <span class="ui">Ready to collect</span>. Buttons move an order along: <span class="ui">Start K-1042</span>, <span class="ui">Mark K-1042 ready</span>, <span class="ui">Collected K-1042</span>, and <span class="ui">Cancel K-1042</span>. <span class="ui">Refresh the board</span> loads the latest.</p>
+
+      <hr class="orn" />
+
+      <!-- 12 -->
+      <h2 id="c12"><span class="num">12</span>Quotes and lay-by</h2>
+      <p class="lead">A quote holds a price for a customer. A lay-by lets a customer pay in parts and collect the goods when it is paid off. Both need the internet.</p>
+
+      <h3>Quotes</h3>
+      <p>Open the <span class="ui">Quotes</span> tab. The list shows <span class="ui">Quote</span>, <span class="ui">Customer</span>, <span class="ui">Total</span>, <span class="ui">Valid until</span> and <span class="ui">Status</span> (<span class="ui">Open</span>, <span class="ui">Turned into a sale</span>, <span class="ui">Expired</span>, <span class="ui">Cancelled</span>).</p>
+      <ol class="steps">
+        <li>Press <span class="ui">New quote</span>.</li>
+        <li>Keep the <span class="ui">Quote number</span> (it is filled in; up to 20 characters), type the <span class="ui">Customer name</span> and <span class="ui">Customer phone</span>, and pick <span class="ui">Valid until</span> (from today, up to 90 days).</li>
+        <li>Add the items and press <span class="ui">Save quote</span>. <i>Quote Q-0001 saved.</i></li>
+      </ol>
+      <p>For a saved quote, the row has buttons: <span class="ui">Download Q-0001 as PDF</span>, <span class="ui">Add Q-0001 to the sale on the till</span>, <span class="ui">Convert Q-0001 to a sale</span> (turns it into an open ticket; then <span class="ui">Take payment now</span> or <span class="ui">Pay later from the open tickets</span>) and <span class="ui">Cancel Q-0001</span> (<i>The customer's price is no longer held.</i>).</p>
+      <p>When you add a quote to the sale it becomes lines on the Sell tab at the quoted price, and the quote is marked <i>turned into a sale</i>. If it could not be marked, the quote stays open until you are back online. If you then give up the sale with <span class="ui">Clear sale</span>, the quote opens again.</p>
+
+      <h3>Lay-by</h3>
+      <p>Open the <span class="ui">Lay-by</span> tab. The shop sets the rules (a minimum deposit and a longest time to pay off). The screen reminds you: <i>The deposit is at least 10% of the total. The lay-by must be paid off within 12 weeks.</i> (the real numbers are the shop's).</p>
+      <ol class="steps">
+        <li>Press <span class="ui">Start a lay-by</span>.</li>
+        <li>Fill in the <span class="ui">Lay-by reference</span> (pre-filled), <span class="ui">Customer name</span> and <span class="ui">Customer phone</span>.</li>
+        <li>Add the items. Type the <span class="ui">Deposit</span> (the screen says <i>At least R…</i>) and choose <span class="ui">Deposit paid by</span> Cash, Card or QR. Pick <span class="ui">Pay off by</span>.</li>
+        <li>Press <span class="ui">Start lay-by</span>. <i>Lay-by L-0001 started. R300,00 still owing.</i></li>
+      </ol>
+      <p>Later, open the lay-by with <span class="ui">Open</span>. You see <span class="ui">Payments so far</span> and <i>Still owing R300,00 of R450,00.</i> To take a payment type the <span class="ui">Payment</span>, choose <span class="ui">Paid by</span> and press <span class="ui">Take payment</span>. You cannot take more than is owed.</p>
+      <div class="table-wrap"><table>
+        <caption>Lay-by statuses</caption>
+        <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>Paying off</td><td>Open. Take payments.</td></tr>
+          <tr><td>Paid off, ready to collect</td><td>Press <span class="ui">Collect the goods</span>. It is rung up as an ordinary sale.</td></tr>
+          <tr><td>Lapsed</td><td>It was not paid off in time.</td></tr>
+          <tr><td>Cancelled</td><td>Cancelled; the shop kept its fee.</td></tr>
+          <tr><td>Collected</td><td>Finished.</td></tr>
+        </tbody>
+      </table></div>
+      <p>If you press <span class="ui">Collect the goods</span> and the sale is still being sent: <i>The sale is saved on this till and is being sent to the server. Press Collect again in a moment.</i></p>
+      <div class="warn"><p><b>Cancelling a lay-by costs the customer money.</b> Press <span class="ui">Cancel lay-by</span> and the till shows <i>If you cancel now the shop keeps about R… and R… goes back to the customer. The server works out the final amounts.</i> Choose <span class="ui">Yes, cancel the lay-by</span> or <span class="ui">Keep it</span>. Show the customer these figures first. The final fee and refund come from the server.</p></div>
+      <p>While a lay-by is active the stock for it is set aside, so it cannot be sold to someone else.</p>
+
+      <hr class="orn" />
+
+      <!-- 13 -->
+      <h2 id="c13"><span class="num">13</span>Serial numbers, customers and appointments</h2>
+
+      <h3>Serial numbers</h3>
+      <p>Some items, such as a phone or a tool, are tracked by serial number. After a sale that includes one, the sale screen offers: <i>These items have serial numbers. Type them now, or later in the Serial numbers tab.</i> You get a box for each unit: <span class="ui">Serial number 1 for Drill</span>.</p>
+      <ol class="steps">
+        <li>Type the serial numbers from the box or the item.</li>
+        <li>Press <span class="ui">Save serial numbers</span>. <i>Serial numbers saved. They go to the server once the sale has arrived.</i> Or press <span class="ui">Not now</span> and do it later.</li>
+      </ol>
+      <p>If you saved none: <i>Type at least one serial number.</i> A serial number can be sold once only.</p>
+      <p>Later, in the <span class="ui">Serial numbers</span> tab, <span class="ui">Record against a sale</span> lets you choose a recent sale (<span class="ui">Choose one of this till's recent sales</span>) or type its reference, choose the <span class="ui">Item</span>, type the serial number, press <span class="ui">Add serial number</span>, then <span class="ui">Record serial numbers</span>. <span class="ui">Find a serial number</span> searches what was sold (type at least 3 characters).</p>
+      <p>If the server does not have the sale yet: <i>The server does not have that sale yet. It is still waiting to be sent from this till. Try again in a moment.</i></p>
+
+      <h3>Customers and loyalty</h3>
+      <p>The <span class="ui">Customers</span> tab finds people by phone number or name (<span class="ui">Find a customer by phone number or name</span>; type at least 3 characters). A row shows <span class="ui">Name</span>, <span class="ui">Phone</span> and (with loyalty) <span class="ui">Points</span>.</p>
+      <ol class="steps">
+        <li>If nobody is found: <i>No customer found. You can add them below.</i> Press <span class="ui">Add a customer</span>.</li>
+        <li>Type the <span class="ui">Name</span> and <span class="ui">Cell phone number</span> (a South African number, for example 082 123 4567). Email is optional.</li>
+        <li>Tick the consent box <b>only if the customer said yes</b> to receiving messages (receipts, specials, reminders).</li>
+        <li>Press <span class="ui">Save customer</span>. <i>Thandi M. was saved.</i></li>
+      </ol>
+      <div class="danger"><p>Do not tick the consent box on your own. A customer who did not agree must not be messaged. The customer's page says <i>Has not agreed to messages. Do not message this customer.</i> if they did not.</p></div>
+      <p>Open a customer to see their points (<i>120 points, worth R12,00.</i>), the <span class="ui">Recent points</span> list (Earned, Used, Adjusted, Taken back) and the button <span class="ui">Add Name to the sale on the till</span>. Points are earned by the sale and are taken back if the sale is refunded or cancelled. To pay with points in a sale, see <a href="#c6">Vouchers, points and the school wallet</a>.</p>
+
+      <h3>Appointments</h3>
+      <p>For salons and services. The <span class="ui">Appointments</span> tab shows one day at a time (<span class="ui">Day</span>, <span class="ui">Today</span>) with <span class="ui">Time</span>, <span class="ui">Service</span>, <span class="ui">Customer</span>, <span class="ui">With</span>, <span class="ui">Price</span> and <span class="ui">Status</span>. A clash shows <span class="ui">Overlaps another appointment</span>.</p>
+      <ol class="steps">
+        <li>Press <span class="ui">Book an appointment</span>.</li>
+        <li>Choose the <span class="ui">Service</span> and who it is <span class="ui">With</span>. Choose the <span class="ui">Date</span> and <span class="ui">Time</span> (on the hour or in 5-minute steps).</li>
+        <li>Type the <span class="ui">Customer name</span> and <span class="ui">Customer phone</span>, or use <span class="ui">Find a saved customer</span>. Saved customers who agreed to messages get reminders.</li>
+        <li>Press <span class="ui">Book it</span>. <i>Booked Haircut for Name at 14:00.</i></li>
+      </ol>
+      <p>Then update each booking as the day goes: <span class="ui">Confirm</span>, <span class="ui">Complete</span>, <span class="ui">Cancel</span> or <span class="ui">did not come</span>. The status becomes <span class="ui">Confirmed</span>, <span class="ui">Done</span>, <span class="ui">Cancelled</span> or <span class="ui">Did not come</span>. If no services are set up: <i>No services are set up yet. The owner adds them in the back office.</i></p>
+
+      <hr class="orn" />
+
+      <!-- 14 -->
+      <h2 id="c14"><span class="num">14</span>Stock and transfers</h2>
+      <p class="lead">Managers and the owner receive deliveries, count shelves and write off losses at the till. Cashiers do not see these tabs.</p>
+
+      <h3>The stock list</h3>
+      <p>Open <span class="ui">Stock</span>. The <span class="ui">Stock list</span> shows each <span class="ui">Product</span> with how many are <span class="ui">On hand</span> and <span class="ui">Notes</span>: <span class="ui">Out</span>, <span class="ui">Low</span>, <span class="ui">Not selling</span>, <span class="ui">Expired</span>, <span class="ui">Expiring soon</span> (within 14 days) and <span class="ui">Needs a count</span>. Offline it says <i>The till is offline, so these are the figures from the last time it was online.</i> Press <span class="ui">Refresh</span> when online. On a till that has never loaded the figures: <i>No stock figures yet. Connect the till to the internet once to load them.</i></p>
+
+      <h3>Receive stock</h3>
+      <ol class="steps">
+        <li>Press <span class="ui">Receive stock</span>.</li>
+        <li>Optionally type the <span class="ui">Supplier</span> and <span class="ui">Invoice number</span>.</li>
+        <li>Scan or type each product (<span class="ui">Scan a barcode or type a product name</span>). For each, type the <span class="ui">Quantity</span> (a whole number above zero) and the <span class="ui">Cost each</span> (for example <code>12</code> or <code>12,50</code>).</li>
+        <li>Press <span class="ui">Save delivery</span>. <i>Delivery saved: 6 products.</i></li>
+      </ol>
+      <p>Check the delivery against the supplier's invoice before you save. A wrong cost changes the shop's profit figures.</p>
+
+      <h3>Count</h3>
+      <ol class="steps">
+        <li>Press <span class="ui">Count</span> and choose the product. The till says <i>The till has 12 of Milk.</i></li>
+        <li>Count the shelf. Type the number in <span class="ui">Counted</span>, pick a <span class="ui">Reason</span> and press <span class="ui">Save count</span>.</li>
+        <li>If it matches: <i>The count matches. Nothing to change.</i> Otherwise: <i>Saved. Milk: -2 (now 10).</i></li>
+      </ol>
+      <p>If the till does not know how many there should be: <i>Connect to the internet and refresh the stock list first.</i></p>
+
+      <h3>Write off</h3>
+      <p>Goods that are expired, damaged, missing or taken for own use must leave stock, so the figures stay honest.</p>
+      <ol class="steps">
+        <li>Press <span class="ui">Write off</span> and choose the product.</li>
+        <li>Type <span class="ui">How many to write off</span> and the <span class="ui">Reason</span>: <span class="ui">Expired</span>, <span class="ui">Damaged</span>, <span class="ui">Missing</span> or <span class="ui">Own use</span>.</li>
+        <li>Press <span class="ui">Confirm write-off</span>. <i>Written off: 3 of Yoghurt.</i></li>
+      </ol>
+      <div class="warn"><p>A write-off is a loss the owner sees. Always choose the true reason. A count with a loss reason is recorded as a write-off too. Stock work done offline is saved on the till and sent later, like a sale.</p></div>
+
+      <h3>Transfers between branches</h3>
+      <p>If the owner has several branches and the plan allows it, <span class="ui">Transfers</span> moves stock between them. It needs the internet: <i>Stock transfers need the internet. Connect the till and try again.</i> Three views:</p>
+      <ul>
+        <li><span class="ui">Coming in</span>: stock on its way to this shop. For each transfer, type <span class="ui">Received quantity of Milk</span> and press <span class="ui">Receive</span>. If less arrived the screen shows <i>Milk: 8 of 10 received (short by 2).</i> Press <span class="ui">Cancel transfer</span> if it is not coming.</li>
+        <li><span class="ui">Sent</span>: stock this shop sent, with its status (<span class="ui">on its way</span>, <span class="ui">received</span>, <span class="ui">cancelled</span>).</li>
+        <li><span class="ui">Send stock</span>: type the other branch's number (from the back office), add the products and quantities, and press <span class="ui">Send stock</span>. <i>Stock sent. The other branch can now receive it.</i> You can only send to your own branches.</li>
+      </ul>
+      <p>If the plan does not allow it: <i>Your plan does not include moving stock between branches. Ask the owner about upgrading.</i></p>
+
+      <hr class="orn" />
+
+      <!-- 15 -->
+      <h2 id="c15"><span class="num">15</span>Cash-up at the end of the day</h2>
+      <p class="lead">Count the drawer, compare it with what the till expects, save. It takes five minutes and it is how the shop catches shortages early.</p>
+
+      <ol class="steps">
+        <li>Finish selling. Make sure any credit payments and refunds of the day are done.</li>
+        <li>Open the <span class="ui">Cash-up</span> tab. It says <i>Count the cash in the drawer and compare it with what the till expects for 2026-11-11.</i></li>
+        <li>Check the <span class="ui">Float (cash the drawer started the day with)</span>. It is filled with the last float you used. Correct it if today's was different.</li>
+        <li>Read the table: <span class="ui">Float</span>, <span class="ui">Cash sales</span>, <span class="ui">Paid on credit accounts in cash</span>, <span class="ui">Cash given back in refunds</span> and <span class="ui">Expected in the drawer</span>.</li>
+        <li>Now count the drawer, and type it in <span class="ui">Cash counted in the drawer</span>. <b>Count first, type second.</b></li>
+        <li>The till tells you: <span class="ui">Short by R20,00</span>, <span class="ui">Over by R5,00</span> or <i>The drawer balances.</i> Add a <span class="ui">Note (optional)</span> to explain.</li>
+        <li>Press <span class="ui">Save cash-up</span>. <i>Cash-up saved for 2026-11-11. The drawer balances.</i></li>
+      </ol>
+      <ul>
+        <li>The tips are in the drawer too, but they are not sales. The owner will tell you how the shop counts them.</li>
+        <li>Only the cash part of a split payment counts as cash.</li>
+        <li>A second cash-up for the same day is refused by the server: <i>A cash-up for … was already saved from this till. The server keeps one per day, so a second one may be refused.</i></li>
+        <li>Cash-up works offline. The server works out the expected cash again from the sales that really arrived.</li>
+      </ul>
+      <div class="danger"><p>Do not change the counted amount to match what is expected. A shortage that is written down honestly can be understood. A hidden one cannot. The owner is alerted when cash-ups are short.</p></div>
+
+      <hr class="orn" />
+
+      <!-- 16 -->
+      <h2 id="c16"><span class="num">16</span>Working offline</h2>
+      <p class="lead">The internet will drop. The till is built so that you can keep selling. Know what still works, and what has to wait.</p>
+
+      <h3>Saved on the till first</h3>
+      <p>When you finish a sale, the till writes it into a queue on the till itself (the <b>outbox</b>) <b>before</b> it says <i>Sale saved</i>. Nothing waits for the network. If the internet is down, or the till is switched off right after, the sale is still there. When a connection returns, the till sends the queue by itself. If sending fails it tries again, waiting longer each time (from 5 seconds up to 5 minutes). A sale only leaves the till after the server has confirmed it has it.</p>
+
+      <figure>
+        <div class="diagram">
+          <svg viewBox="0 0 760 150" role="img" aria-labelledby="offt offd" xmlns="http://www.w3.org/2000/svg">
+            <title id="offt">How a sale travels</title>
+            <desc id="offd">A sale is rung up, saved in the outbox on the till, shown as Sale saved, then sent to the server when a connection is available.</desc>
+            <rect x="10" y="40" width="150" height="70" rx="8" fill="#dcebe2" stroke="#0f5c40" />
+            <text x="85" y="70" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" fill="#0b2a1f">You ring up</text>
+            <text x="85" y="90" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" fill="#0b2a1f">the sale</text>
+            <rect x="215" y="40" width="160" height="70" rx="8" fill="#f6e9c8" stroke="#c0912f" />
+            <text x="295" y="68" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" fill="#0b2a1f">Saved in the outbox</text>
+            <text x="295" y="90" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" fill="#0b2a1f">on the till</text>
+            <rect x="430" y="40" width="150" height="70" rx="8" fill="#dcebe2" stroke="#0f5c40" />
+            <text x="505" y="70" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" fill="#0b2a1f">&quot;Sale saved&quot;</text>
+            <text x="505" y="90" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" fill="#0b2a1f">is shown</text>
+            <rect x="630" y="40" width="120" height="70" rx="8" fill="#e1eef7" stroke="#1d5f8a" />
+            <text x="690" y="70" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" fill="#0b2a1f">Server has it</text>
+            <text x="690" y="90" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" fill="#0b2a1f">(when online)</text>
+            <path d="M160 75 H213 M375 75 H428 M580 75 H628" stroke="#1e2b25" stroke-width="2" fill="none" />
+            <path d="M205 69 l8 6 -8 6 M420 69 l8 6 -8 6 M620 69 l8 6 -8 6" stroke="#1e2b25" stroke-width="2" fill="none" />
+            <text x="505" y="135" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#5b6a62">The queue sends itself; you never have to press anything.</text>
+          </svg>
+        </div>
+        <figcaption>A sale is safe on the till before it is called saved.</figcaption>
+      </figure>
+
+      <h3>The lights in the top bar</h3>
+      <div class="table-wrap"><table>
+        <caption>What the top bar tells you</caption>
+        <thead><tr><th>You see</th><th>It means</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>Online</td><td>The till has a connection.</td><td>Nothing.</td></tr>
+          <tr><td>Working offline</td><td>No connection. Selling, cash-up, past sales, stock and the credit book carry on.</td><td>Keep selling. Do not restart the till.</td></tr>
+          <tr><td>3 sales waiting to send</td><td>Sales saved on the till that the server does not have yet.</td><td>Nothing, if you are offline. If you are online and the number does not fall, see <a href="#c20">When something goes wrong</a>.</td></tr>
+          <tr><td>2 sales refused: ask the owner</td><td>The server looked at the sale and said no. The sale is kept, not lost.</td><td>Tell the owner. Do not re-ring it as a new sale without asking.</td></tr>
+          <tr><td>Updated 08:42 / Not updated yet</td><td>When staff, products and promotions were last downloaded.</td><td>Press <span class="ui">Update now</span> (online only) if prices look old.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="danger"><p><b>Before the end of the day</b>: look at <span class="ui">sales waiting to send</span>. If it is not zero, leave the till on and online until it is. Do not clear the browser's data, uninstall the app or reset the till while sales are waiting. Those sales exist only on this till.</p></div>
+
+      <h3>What works offline</h3>
+      <ul>
+        <li>Selling: scan, search, weighed items, promotions, cash, card, QR, credit, split payments of cash, card and QR.</li>
+        <li>Unlocking with your PIN, and manager approval of a lower price or a refund.</li>
+        <li>Refunds and cancellations of sales paid by cash, card, QR or credit (saved on the till and sent later).</li>
+        <li>Cash-up, the credit book (with the last copy of the balances), the stock list (last copy), receiving, counting and writing off stock.</li>
+        <li>Serial numbers typed straight after a sale (they wait until the sale has arrived).</li>
+      </ul>
+
+      <h3>What needs the internet</h3>
+      <ul>
+        <li>Vouchers, loyalty points and school wallet payments. This includes selling a voucher and checking a balance. They are disabled offline.</li>
+        <li>Online refunds: sales paid by split, wallet, voucher or lay-by.</li>
+        <li>The tabs Tables, Kitchen, Quotes, Lay-by, Vouchers, Customers, Appointments, Serial numbers, School wallet and Transfers (they are greyed out).</li>
+        <li>Finding a customer by phone number, and getting a QR slip.</li>
+        <li>Downloading new prices, staff or the owner's changes, and the owner's approval of a new till.</li>
+      </ul>
+      <div class="warn"><p>If a customer wants to pay with a voucher, points or a school wallet and the internet is down, ask them to pay another way, or to come back. Do not accept a voucher code and promise to &quot;sort it out later&quot;: the till cannot check the balance, and the shop may never be paid.</p></div>
+      <p>If you take something from a voucher, points or a wallet and then give up the sale (<span class="ui">Back</span>, <span class="ui">Clear sale</span>), the till gives it back for you: <i>The voucher amount was given back.</i>, <i>The points were given back.</i> or <i>The wallet payment was cancelled and the money returned.</i> If the till is offline at that moment: <i>Something taken from a voucher, points or wallet will be given back as soon as the till is online.</i> It does this by itself, even if the till is closed and opened again.</p>
+
+      <hr class="orn" />
+
+      <!-- 17 -->
+      <h2 id="c17"><span class="num">17</span>Expired items</h2>
+      <p class="lead">Selling food past its expiry date is dangerous and against the law. The system is designed to stop it.</p>
+      <p>The rule is simple. An item whose expiry date has passed <b>blocks the sale</b> unless a manager approves it with their PIN. An item that expires today can still be sold. When a manager approves, their name is kept on the sale line, and the server checks that their role is allowed to approve.</p>
+      <div class="warn"><p><b>Honest status.</b> The expiry rule and its checks are built into the till's rules and the server, but the Sell screen in this version does not yet show a special expired-item message or a separate override button. The only expiry warnings you will see on the till today are the <span class="ui">Expired</span> and <span class="ui">Expiring soon</span> notes in the <span class="ui">Stock</span> list (managers). Do not rely on the till to stop you. Check the date on the pack, and tell the owner if the till sold something that was off.</p></div>
+      <p>What to do in practice:</p>
+      <ol class="steps">
+        <li>Look at the date on anything perishable you sell.</li>
+        <li>If it is past the date, do not sell it. Set it aside for the manager.</li>
+        <li>A manager writes it off in <span class="ui">Stock</span> &rarr; <span class="ui">Write off</span> with the reason <span class="ui">Expired</span>.</li>
+        <li>Only a manager may decide to sell an expired item at all. It is a decision that the shop and the manager answer for.</li>
+      </ol>
+
+      <hr class="orn" />
+
+      <!-- 18 -->
+      <h2 id="c18"><span class="num">18</span>Printer, drawer and scale</h2>
+      <p class="lead">An honest word first: the Till app is written to work with a receipt printer, a cash drawer, a weighing scale and a kitchen printer or screen, but the <b>real device connections are not written yet</b>.</p>
+      <p>The project's build status says the rules and slip layouts exist and are tested against pretend devices. The part that talks to real hardware (over USB, Bluetooth or Web Serial) is not written, because it needs the printer and scale models to be chosen and a test on real equipment. So today, on a real till:</p>
+      <ul>
+        <li>No slip prints by itself, and <span class="ui">Print slip with QR</span> does not appear.</li>
+        <li>The cash drawer does not open by itself. Open it with the key.</li>
+        <li>The <span class="ui">Read from scale</span> button does not appear. Type the weight in grams yourself.</li>
+        <li>Kitchen orders go to the kitchen board on screen, not to a kitchen printer.</li>
+      </ul>
+      <p>When the shop's hardware is connected in a later version, the till will do these things for you, and it will describe problems in plain words:</p>
+      <div class="table-wrap"><table>
+        <caption>Device messages (shown once adapters exist)</caption>
+        <thead><tr><th>You see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>The printer is not connected. Check the cable or the Bluetooth.</td><td>Check the cable, switch it on, check Bluetooth.</td></tr>
+          <tr><td>The printer is out of paper. Put in a new roll.</td><td>Put in a roll.</td></tr>
+          <tr><td>The printer cover is open. Close it.</td><td>Close the cover.</td></tr>
+          <tr><td>The weight is not steady yet. Wait a moment and try again.</td><td>Wait for the scale to settle.</td></tr>
+          <tr><td>The scale is not answering. Check it is on and connected.</td><td>Switch it on, check the connection.</td></tr>
+          <tr><td>The cash drawer did not open. Open it with the key.</td><td>Use the key.</td></tr>
+          <tr><td>The kitchen screen cannot be reached.</td><td>Check the kitchen screen's connection.</td></tr>
+          <tr><td>The device did not answer.</td><td>Check it is on and try again.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note"><p>A failing printer or drawer never cancels a sale. The sale stays saved, and the till only adds a note.</p></div>
+
+      <!-- 19: Quick card on its own printed page -->
+      <h2 id="c19" style="break-before:page; page-break-before:always;"><span class="num">19</span>Quick card</h2>
+      <p class="lead">Print this page and keep it by the till. Do this, press that.</p>
+      <div class="table-wrap"><table>
+        <caption>Quick card: the till in one page</caption>
+        <thead><tr><th>Do this</th><th>Press that</th></tr></thead>
+        <tbody>
+          <tr><td>Sign in</td><td>Your name, your PIN (4 to 6 digits), <span class="ui">OK</span>. Five wrong tries lock you for 5 minutes.</td></tr>
+          <tr><td>Step away</td><td><span class="ui">Lock till</span></td></tr>
+          <tr><td>Add an item</td><td>Scan it, or type its name or barcode and press <kbd>Enter</kbd> or <span class="ui">Add</span></td></tr>
+          <tr><td>One more / one less / remove</td><td><span class="ui">+</span> / <span class="ui">&minus;</span> / <span class="ui">&#10005;</span></td></tr>
+          <tr><td>Weighed item</td><td>Type grams, <span class="ui">Add weight</span></td></tr>
+          <tr><td>Start again</td><td><span class="ui">Clear sale</span></td></tr>
+          <tr><td>Take payment</td><td><span class="ui">Pay</span>, then <span class="ui">Cash</span>, <span class="ui">Card</span> or <span class="ui">QR</span></td></tr>
+          <tr><td>Cash, customer gave a note</td><td><span class="ui">Cash</span>, the quick note button (or <span class="ui">Cash received</span>), then <span class="ui">Change</span></td></tr>
+          <tr><td>Card / QR</td><td>Press only after the payment went through</td></tr>
+          <tr><td>Two ways to pay</td><td><span class="ui">Pay</span>, <span class="ui">Split payment</span>, <span class="ui">Add a part</span>, until <span class="ui">Still to pay: R0,00</span></td></tr>
+          <tr><td>Voucher, points, school wallet</td><td><span class="ui">Split payment</span>, then <span class="ui">Use voucher</span> / <span class="ui">Use points</span> / <span class="ui">Pay from wallet</span> (online only)</td></tr>
+          <tr><td>Sell on credit</td><td><span class="ui">Pay</span>, <span class="ui">Credit</span>, choose the customer</td></tr>
+          <tr><td>Credit customer pays</td><td>Tab <span class="ui">Credit book</span>, <span class="ui">Take payment</span></td></tr>
+          <tr><td>Customer wants a slip</td><td><span class="ui">Get QR slip</span> (right after the sale)</td></tr>
+          <tr><td>Lower a price</td><td><span class="ui">Change price</span>, new price, <span class="ui">Ask a manager</span>, manager PIN, <span class="ui">Approve</span></td></tr>
+          <tr><td>Refund goods</td><td>Tab <span class="ui">Past sales</span>, <span class="ui">Open</span>, quantity, reason, <span class="ui">Refund</span> (over R500: <span class="ui">Ask a manager</span>)</td></tr>
+          <tr><td>Cancel a whole sale (manager)</td><td><span class="ui">Past sales</span>, <span class="ui">Open</span>, <span class="ui">Cancel this sale</span>, reason, <span class="ui">Confirm cancellation</span></td></tr>
+          <tr><td>Receive / count / write off stock (manager)</td><td>Tab <span class="ui">Stock</span>, <span class="ui">Receive stock</span> / <span class="ui">Count</span> / <span class="ui">Write off</span></td></tr>
+          <tr><td>End of day</td><td>Tab <span class="ui">Cash-up</span>: float, count the drawer, type it, <span class="ui">Save cash-up</span></td></tr>
+          <tr><td>Internet is down</td><td>Keep selling. Watch <span class="ui">sales waiting to send</span>. No vouchers, points or wallets until it is back.</td></tr>
+          <tr><td>Till will not send</td><td><span class="ui">Update now</span>. Leave the till on. Tell the owner if sales are <span class="ui">refused</span>.</td></tr>
+        </tbody>
+      </table></div>
+      <p><b>Remember:</b> never press <span class="ui">Card</span> or <span class="ui">QR</span> before the money has arrived. Never give out your PIN. Never clear the browser's data while sales are waiting to send.</p>
+
+      <hr class="orn" />
+
+      <!-- 20 -->
+      <h2 id="c20"><span class="num">20</span>When something goes wrong</h2>
+      <p class="lead">Stay calm. A sale that is saved on the till is not lost. Find the message below.</p>
+
+      <div class="table-wrap"><table>
+        <caption>Problems and what to do</caption>
+        <thead><tr><th>What you see or what happens</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>No staff on this till yet. Ask the owner to add you.</td><td>Connect the till to the internet and press <span class="ui">Update now</span>. If it persists the owner must add you in the back office.</td></tr>
+          <tr><td>That PIN is not right. Tries left: n.</td><td>Take care. After five wrong tries you are locked for five minutes. Do not guess. Ask the manager to check your PIN with the owner.</td></tr>
+          <tr><td>Too many wrong tries. Try again in n min.</td><td>Wait. Another person can sign in meanwhile. The owner can change a PIN in the back office.</td></tr>
+          <tr><td>This till is waiting for the owner to approve it</td><td>You can sell, but nothing is sent. Ask the owner to approve the till in <span class="ui">Staff and tills</span>.</td></tr>
+          <tr><td>The owner has switched this till off.</td><td>Ask the owner.</td></tr>
+          <tr><td>The last update did not work: …</td><td>Check the internet, then press <span class="ui">Update now</span>. Keep selling.</td></tr>
+          <tr><td>Set this till up again</td><td>Ask the owner for a new setup code (see <a href="#c2">Setting up the till</a>). Waiting sales are kept.</td></tr>
+          <tr><td>We do not have that barcode.</td><td>Search by name. If it is not found, set the item aside and tell the owner.</td></tr>
+          <tr><td>That did not work. Try again.</td><td>Try once more. If it repeats, write down what you did and tell the owner.</td></tr>
+          <tr><td>Sales waiting to send does not go down while online</td><td>Press <span class="ui">Update now</span>. Wait a few minutes (the till retries, waiting longer each time). Make sure the till is approved. Leave it on.</td></tr>
+          <tr><td>n sales refused: ask the owner</td><td>The server refused those sales, and the till keeps them. Tell the owner, who can see why in the back office. Do not ring them again yourself.</td></tr>
+          <tr><td>A tab is greyed out</td><td>It needs the internet. It works again when the top bar says <span class="ui">Online</span>.</td></tr>
+          <tr><td>A tab I expect is missing</td><td>Either your role does not include it (Stock and Transfers are for managers), or the owner has not switched that feature on.</td></tr>
+          <tr><td>Vouchers, points and wallets need the internet.</td><td>Ask the customer to pay another way, or wait for the connection.</td></tr>
+          <tr><td>The QR slip will be available once this sale has been sent to the server.</td><td>Wait a moment, then press <span class="ui">Get QR slip</span> again.</td></tr>
+          <tr><td>This sale has not reached the server yet. (online refund)</td><td>Wait until the waiting count is 0, then try again.</td></tr>
+          <tr><td>That could not be saved: …</td><td>Read the reason after the colon. Fix it (an amount, a number) and press the button again.</td></tr>
+          <tr><td>You pressed <span class="ui">Card</span> but the payment failed</td><td>Tell a manager at once. A manager cancels the sale in <span class="ui">Past sales</span> and you ring it up again.</td></tr>
+          <tr><td>Drawer will not open, slip will not print</td><td>Open the drawer with the key. The sale is saved. See <a href="#c18">Printer, drawer and scale</a>.</td></tr>
+          <tr><td>The till froze or the browser closed in the middle of a sale</td><td>Open the app again. Finished sales are on the till. The sale that was open is gone, so ring it again. If you were taking voucher, points or wallet money, the till gives it back when it starts.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="tip"><p>When you tell the owner about a problem, say: what you pressed, the words on the screen, and the time. That is almost always enough to find it.</p></div>
+
+      <hr class="orn" />
+
+      <!-- 21 -->
+      <h2 id="c21"><span class="num">21</span>Glossary</h2>
+      <dl class="terms">
+        <dt>Add-on</dt><dd>An extra item (a side, a bag) that is a product with its own price and stock.</dd>
+        <dt>Approve</dt><dd>When a manager or owner types their PIN to allow a lower price or a large refund.</dd>
+        <dt>Back office</dt><dd>The owner's website for staff, tills, products and reports. The till does not do these things.</dd>
+        <dt>Cash-up</dt><dd>The end-of-day count of the cash drawer against what the till expects.</dd>
+        <dt>Credit (customer)</dt><dd>A regular customer who buys now and pays later, up to a limit.</dd>
+        <dt>Float</dt><dd>The cash the drawer starts the day with.</dd>
+        <dt>Held ticket</dt><dd>A sale kept open (for a table or a customer) to be paid later.</dd>
+        <dt>Lay-by</dt><dd>Goods set aside while the customer pays them off in parts.</dd>
+        <dt>Lock (PIN)</dt><dd>The 5-minute pause after five wrong PIN tries.</dd>
+        <dt>Offline</dt><dd>The till has no connection. It can still sell. Sales are sent later.</dd>
+        <dt>Outbox</dt><dd>The queue on the till where every sale and record waits until the server confirms it.</dd>
+        <dt>Override (price)</dt><dd>A manager-approved lower price on one sale line.</dd>
+        <dt>Past sales</dt><dd>The tab where you find recent sales to refund or cancel.</dd>
+        <dt>Promotion</dt><dd>An automatic discount, such as a percentage off, a fixed price or a combo.</dd>
+        <dt>QR slip</dt><dd>A free digital slip: a web address the customer opens on their phone.</dd>
+        <dt>Refused (sale)</dt><dd>A sale the server would not accept. It is kept and shown in the top bar so the owner can look at it.</dd>
+        <dt>Setup code</dt><dd>The one-time code the owner gets when a till is added. It proves the till belongs to the shop.</dd>
+        <dt>Split payment</dt><dd>One sale paid in more than one way, up to six, each way once.</dd>
+        <dt>Sync</dt><dd>The till sending its queue to the server, and receiving staff, products and promotions.</dd>
+        <dt>Tender</dt><dd>The way a customer pays: cash, card, QR, credit, voucher, points or wallet.</dd>
+        <dt>Voucher</dt><dd>A gift or refund code worth a set amount of money. Its code is shown only once.</dd>
+        <dt>Wallet (school)</dt><dd>A learner's or teacher's prepaid account at a school tuckshop, read from a phone QR code or a card or wristband.</dd>
+        <dt>Write-off</dt><dd>Taking goods out of stock because they are expired, damaged, missing or used by the owner.</dd>
+      </dl>
+
+      <p style="text-align:center"><i>You know enough to start. Ring up your first sale with the demo till and the demo barcodes, then do it again with the internet switched off.</i></p>
+
+      <hr class="orn" />
+    </div>
+
+    <div class="pager"><a href="02-shop-owner-manual.html">&larr; Previous manual</a><a href="04-supplier-manual.html">Next manual &rarr;</a></div>
+  </main>
+
+  <footer class="run-foot">
+    <span>TillKnowIT &middot; Till manual &middot; Version 1.0</span>
+    <img src="assets/logo.svg" alt="TillKnowIT" />
+  </footer>
+</body>
+</html>

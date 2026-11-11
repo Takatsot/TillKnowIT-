@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Solution Explained | TillKnowIT</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/manual.css" />
+</head>
+<body>
+  <header class="run-head">
+    <a class="logo" href="index.html" aria-label="TillKnowIT manuals"><img src="assets/logo.svg" alt="TillKnowIT" /></a>
+    <span class="doc-name">The Solution Explained</span>
+  </header>
+
+  <section class="cover">
+    <img class="cover-logo" src="assets/logo-light.svg" alt="TillKnowIT" />
+    <p class="kicker">Solution guide</p>
+    <h1>The Solution Explained</h1>
+    <p class="sub">What TillKnowIT is, who it is for, how its parts fit together, and what is real today and what still needs a partner.</p>
+    <p class="meta"><b>For:</b> owners, partners, funders and new team members &nbsp;·&nbsp; <b>Version</b> 1.0 &nbsp;·&nbsp; November 2026</p>
+  </section>
+
+  <main>
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#idea">The idea in one page</a></li>
+        <li><a href="#people">Who uses it</a></li>
+        <li><a href="#does">What it does</a></li>
+        <li><a href="#fits">How the parts fit together</a></li>
+        <li><a href="#modules">The modules</a></li>
+        <li><a href="#offline">Selling without a connection</a></li>
+        <li><a href="#money">Looking after money</a></li>
+        <li><a href="#privacy">Privacy and security</a></li>
+        <li><a href="#packs">One product, many kinds of business</a></li>
+        <li><a href="#running">Where it runs</a></li>
+        <li><a href="#real">What is real, what is a stand-in</a></li>
+        <li><a href="#next">What comes next</a></li>
+      </ol>
+    </nav>
+
+    <div class="sheet">
+
+      <h2 id="idea"><span class="num">1</span>The idea in one page</h2>
+      <p class="lead">A spaza shop is a small business that runs on trust, cash and a cell phone. TillKnowIT gives it the tools a large shop has, without asking it to change how it works.</p>
+      <p>Most till systems assume a fast connection, a fixed counter and a bookkeeper. A spaza shop has none of those. It has a phone, power that comes and goes, data that costs money, and a shelf of stock the owner keeps in their head. TillKnowIT is a point of sale built around that reality.</p>
+      <p>It starts at the till: scan, tap, take the money, done, even when the network is down. Around the till it adds what an owner actually needs to grow: stock that is counted, a credit book that is honest, daily numbers that arrive on the phone, suppliers who can be ordered from in a few taps, and, for school tuckshops, a wallet that lets a parent load money for a child and see what it was spent on.</p>
+      <div class="note"><p><strong>Know it, done.</strong> The mark is a spaza awning over a tick. The name says the promise: <em>know</em> your shop, your stock and your money, and get it done.</p></div>
+
+      <h3>Three promises the design keeps</h3>
+      <dl class="terms">
+        <dt>Selling never waits for the network</dt>
+        <dd>A sale is written on the till first and sent when there is a connection. A shop that loses its line for a day loses no sales.</dd>
+        <dt>Money is never guessed</dt>
+        <dd>Every rand moves through a ledger that must balance to the cent, and every request that moves money is safe to repeat. Nothing is charged twice, and nothing disappears.</dd>
+        <dt>People keep control of their own information</dt>
+        <dd>Nothing about a customer, a child or a shop is shared without a recorded choice, and shared figures about an area never name anyone.</dd>
+      </dl>
+
+      <hr class="orn" />
+
+      <h2 id="people"><span class="num">2</span>Who uses it</h2>
+      <p>TillKnowIT is one platform with seven apps. Each person sees only the app that fits their job, and signs in with a cell number and a one-time code.</p>
+      <div class="table-wrap"><table>
+        <caption>The seven apps and the people they are for</caption>
+        <thead><tr><th>App</th><th>Who</th><th>What they do there</th></tr></thead>
+        <tbody>
+          <tr><td>Till</td><td>Cashiers and shift managers</td><td>Sell, take payment, refund, cash up, receive stock. Works offline.</td></tr>
+          <tr><td>Back office</td><td>Shop owners and managers</td><td>Products, stock, staff, reports, ordering, billing, setup.</td></tr>
+          <tr><td>Supplier portal</td><td>Wholesalers and their reps</td><td>Catalogue, orders, deals, group buys, statements.</td></tr>
+          <tr><td>Insights portal</td><td>Suppliers</td><td>Area trends built from shops that chose to share.</td></tr>
+          <tr><td>Parent app</td><td>Parents and guardians</td><td>A child's school wallet: top up, set limits, see spending.</td></tr>
+          <tr><td>Field agent</td><td>People who set shops up</td><td>Walk a new shop through the seven setup steps and verify it.</td></tr>
+          <tr><td>Admin</td><td>The platform team</td><td>Business types, plans, schools, disputes, catalogue approval.</td></tr>
+        </tbody>
+      </table></div>
+      <p>The manuals in this library describe each app. They are listed on the <a href="index.html">library page</a>.</p>
+
+      <hr class="orn" />
+
+      <h2 id="does"><span class="num">3</span>What it does</h2>
+      <p>The system was built in five phases, each one adding a layer on the last. The list below is what exists in the code today. <a href="#real">Chapter 11</a> says which parts are connected to real outside services and which are not.</p>
+
+      <h3>Phase 1: the spaza till</h3>
+      <ul>
+        <li>Owner sign-up, shop setup, staff with PINs, and tills registered with a one-time code.</li>
+        <li>A shared product catalogue, with each shop's own products and prices on top.</li>
+        <li>Selling by scan, search or tile, paid by cash, card, QR or on credit; slips only when a customer asks.</li>
+        <li>Stock in by scan, Excel or CSV, or a photo of an invoice; stock counts; expiry tracking (the rule that blocks expired goods is written, but the till's selling screen does not apply it yet, so for now expiry shows as flags on the stock list).</li>
+        <li>A credit book, cash-up at the end of the day, reports as CSV, Excel and PDF, and a compliance document wallet.</li>
+        <li>Airtime and electricity sales, a daily summary and loss alerts for the owner, and a field agent app to set shops up.</li>
+      </ul>
+      <h3>Phase 2: the supplier marketplace</h3>
+      <ul>
+        <li>Suppliers apply, are verified, upload a price list and set where and when they deliver.</li>
+        <li>Shops see ranked reorder options (true cost per unit including VAT, deals and delivery), order by app, WhatsApp or email, and receive against the order.</li>
+        <li>Payment can be held until delivery is confirmed, with refunds for short deliveries and a dispute process. Shops can buy together at a group price.</li>
+      </ul>
+      <h3>Phase 3: the school wallet</h3>
+      <ul>
+        <li>A double-entry ledger, school registration, learner import, cards and wristbands.</li>
+        <li>Parents top up, set a daily limit, block items, and see every purchase. Pre-orders by break time.</li>
+        <li>Paying at the till by card or QR, including offline within a signed allowance; daily payouts to the tuckshop and reconciliation to the cent.</li>
+      </ul>
+      <h3>Phase 4: every business</h3>
+      <ul>
+        <li>Business packs switch features on for a cafe, butchery, salon, clothing or hardware shop without changing the code.</li>
+        <li>Variants, add-ons, promotions and combos, refunds, split payments, open tickets, tables and a kitchen board, tips, weighed goods, quotes, lay-by, serial numbers and gift vouchers.</li>
+        <li>Appointments and commission, customers and loyalty points, printer, drawer and scale support behind a standard interface.</li>
+      </ul>
+      <h3>Phase 5: growth</h3>
+      <ul>
+        <li>Plans and billing, sponsored deals that are always labelled, and branches with combined reports and stock transfers.</li>
+        <li>Daily journals to Xero or Sage, pay-later through a named partner, area trend reports from shops that opt in, and a read-only partner API.</li>
+      </ul>
+
+      <hr class="orn" />
+
+      <h2 id="fits"><span class="num">4</span>How the parts fit together</h2>
+      <p class="lead">One API, one worker, one database, and apps that talk to the API through a single typed client.</p>
+      <p>TillKnowIT is a <strong>modular monolith</strong>: a single deployable .NET 10 application made of modules that each own their own code and their own database schema. Modules never read one another's tables; they talk only through published contracts and events. That discipline is checked by automated architecture tests, so a module can later be moved into a service of its own without a rewrite.</p>
+
+      <figure>
+        <div class="diagram">
+          <svg viewBox="0 0 760 430" role="img" aria-label="Architecture: apps talk to one API; the API holds modules and uses SQL Server; a worker processes the outbox and outside partners">
+            <defs>
+              <marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 9 4.5 0 9z" fill="#8a6414"/></marker>
+            </defs>
+            <style>
+              .t{font:600 13px 'Segoe UI',system-ui,sans-serif;fill:#1e2b25}
+              .s{font:12px 'Segoe UI',system-ui,sans-serif;fill:#5b6a62}
+              .h{font:700 12px 'Segoe UI',system-ui,sans-serif;letter-spacing:.12em;fill:#8a6414}
+              .tg{font:600 12px 'Segoe UI',system-ui,sans-serif;fill:#f3ecd8}
+            </style>
+            <!-- Apps -->
+            <text class="h" x="20" y="22">THE SEVEN APPS (REACT, IN THE BROWSER)</text>
+            <g>
+              <rect x="20" y="34" width="96" height="46" rx="8" fill="#fffdf7" stroke="#0f5c40" stroke-width="1.5"/><text class="t" x="68" y="62" text-anchor="middle">Till</text>
+              <rect x="124" y="34" width="96" height="46" rx="8" fill="#fffdf7" stroke="#0f5c40" stroke-width="1.5"/><text class="t" x="172" y="62" text-anchor="middle">Back office</text>
+              <rect x="228" y="34" width="96" height="46" rx="8" fill="#fffdf7" stroke="#0f5c40" stroke-width="1.5"/><text class="t" x="276" y="62" text-anchor="middle">Supplier</text>
+              <rect x="332" y="34" width="96" height="46" rx="8" fill="#fffdf7" stroke="#0f5c40" stroke-width="1.5"/><text class="t" x="380" y="62" text-anchor="middle">Insights</text>
+              <rect x="436" y="34" width="96" height="46" rx="8" fill="#fffdf7" stroke="#0f5c40" stroke-width="1.5"/><text class="t" x="484" y="62" text-anchor="middle">Parent</text>
+              <rect x="540" y="34" width="96" height="46" rx="8" fill="#fffdf7" stroke="#0f5c40" stroke-width="1.5"/><text class="t" x="588" y="62" text-anchor="middle">Field agent</text>
+              <rect x="644" y="34" width="96" height="46" rx="8" fill="#fffdf7" stroke="#0f5c40" stroke-width="1.5"/><text class="t" x="692" y="62" text-anchor="middle">Admin</text>
+            </g>
+            <!-- Till local store -->
+            <rect x="20" y="96" width="96" height="40" rx="8" fill="#f6e9c8" stroke="#c0912f"/>
+            <text class="s" x="68" y="113" text-anchor="middle">Local store +</text><text class="s" x="68" y="127" text-anchor="middle">outbox (offline)</text>
+            <line x1="68" y1="80" x2="68" y2="96" stroke="#8a6414" stroke-width="1.5"/>
+            <!-- arrow to API -->
+            <line x1="380" y1="82" x2="380" y2="150" stroke="#8a6414" stroke-width="2" marker-end="url(#ar)"/>
+            <text class="s" x="392" y="122">HTTPS · one typed client · signed-in person's token</text>
+            <path d="M68 136 V146 H340" fill="none" stroke="#8a6414" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+            <text class="s" x="120" y="143">sends saved sales when online</text>
+
+            <!-- API -->
+            <rect x="20" y="152" width="720" height="150" rx="12" fill="#0b2a1f"/>
+            <text class="tg" x="36" y="174">API (one .NET 10 application)</text>
+            <g class="tg">
+              <rect x="36" y="186" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="88" y="205" text-anchor="middle">Identity</text>
+              <rect x="146" y="186" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="198" y="205" text-anchor="middle">ShopCore</text>
+              <rect x="256" y="186" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="308" y="205" text-anchor="middle">Catalogue</text>
+              <rect x="366" y="186" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="418" y="205" text-anchor="middle">Marketplace</text>
+              <rect x="476" y="186" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="528" y="205" text-anchor="middle">Payments</text>
+              <rect x="586" y="186" width="136" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="654" y="205" text-anchor="middle">Wallet (own schema)</text>
+              <rect x="36" y="222" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="88" y="241" text-anchor="middle">Messaging</text>
+              <rect x="146" y="222" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="198" y="241" text-anchor="middle">Platform</text>
+              <rect x="256" y="222" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="308" y="241" text-anchor="middle">Billing</text>
+              <rect x="366" y="222" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="418" y="241" text-anchor="middle">Accounting</text>
+              <rect x="476" y="222" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="528" y="241" text-anchor="middle">Finance</text>
+              <rect x="586" y="222" width="136" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="654" y="241" text-anchor="middle">Insights</text>
+              <rect x="36" y="258" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="88" y="277" text-anchor="middle">Bookings</text>
+              <rect x="146" y="258" width="104" height="28" rx="6" fill="#11402f" stroke="#c0912f"/><text x="198" y="277" text-anchor="middle">Customers</text>
+            </g>
+            <text class="tg" x="270" y="277" fill="#b9c7bd" style="fill:#b9c7bd;font-weight:500">Modules meet only through contracts and events; one outbox per module.</text>
+
+            <!-- DB -->
+            <line x1="200" y1="302" x2="200" y2="340" stroke="#8a6414" stroke-width="2" marker-end="url(#ar)"/>
+            <rect x="20" y="342" width="300" height="70" rx="12" fill="#fffdf7" stroke="#0f5c40" stroke-width="2"/>
+            <text class="t" x="170" y="368" text-anchor="middle">SQL Server / Azure SQL</text>
+            <text class="s" x="170" y="386" text-anchor="middle">One database, one schema per module</text>
+            <text class="s" x="170" y="401" text-anchor="middle">(the wallet can take a database of its own)</text>
+
+            <!-- Worker -->
+            <line x1="560" y1="302" x2="560" y2="340" stroke="#8a6414" stroke-width="2" marker-end="url(#ar)" transform="rotate(180 560 321)"/>
+            <rect x="440" y="342" width="300" height="70" rx="12" fill="#fffdf7" stroke="#c0912f" stroke-width="2"/>
+            <text class="t" x="590" y="366" text-anchor="middle">Worker</text>
+            <text class="s" x="590" y="384" text-anchor="middle">Outbox delivery, reminders, daily jobs, payouts,</text>
+            <text class="s" x="590" y="399" text-anchor="middle">summaries, journals, SMS and WhatsApp</text>
+            <line x1="440" y1="377" x2="322" y2="377" stroke="#8a6414" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+          </svg>
+        </div>
+        <figcaption>Figure 1. The seven apps call one API. The API holds the modules and one database. A worker handles everything that should happen later or on a schedule.</figcaption>
+      </figure>
+
+      <h3>The technology, plainly</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Server</td><td>.NET 10, one API plus one worker, EF Core</td><td>The team's standard; small team, one thing to deploy.</td></tr>
+          <tr><td>Database</td><td>SQL Server (Azure SQL in production), one schema per module</td><td>The team's standard (decision record 0001). Replaces PostgreSQL in the first specs.</td></tr>
+          <tr><td>Apps</td><td>React and TypeScript, seven apps over shared packages</td><td>One design system, one API client, one set of rules in TypeScript that the till can run offline.</td></tr>
+          <tr><td>Events</td><td>Transactional outbox in every module</td><td>An event is saved with the change that caused it, so neither is lost.</td></tr>
+          <tr><td>Checks</td><td>Automated tests, architecture tests, browser tests</td><td>The module boundaries and the money rules are enforced by tests, not by good intentions.</td></tr>
+        </tbody>
+      </table></div>
+
+      <hr class="orn" />
+
+      <h2 id="modules"><span class="num">5</span>The modules</h2>
+      <p>Every module has a Domain (the rules), an Application (what people can ask it to do), an Infrastructure (how it stores and talks) and a Contracts project (the only part other modules may use).</p>
+      <div class="table-wrap"><table>
+        <caption>The fourteen modules and what each is responsible for</caption>
+        <thead><tr><th>Module</th><th>Responsible for</th></tr></thead>
+        <tbody>
+          <tr><td>Identity</td><td>People, sign-in by one-time code, shops and their setup checklist, staff and PINs, tills and their credentials, who is allowed to do what.</td></tr>
+          <tr><td>ShopCore</td><td>The heart of the till: selling, payments, refunds, stock, counts, credit book, cash-up, tickets and tables, kitchen, quotes, lay-by, vouchers, reports, compliance documents, daily summary and alerts.</td></tr>
+          <tr><td>Catalogue</td><td>The shared product catalogue, the approval queue, and lookups such as municipalities, with translations.</td></tr>
+          <tr><td>Marketplace</td><td>Suppliers, their catalogues and deals, reorder ranking, orders and delivery, ratings, group buying and buying groups.</td></tr>
+          <tr><td>Payments</td><td>Paying suppliers: holding money until delivery, releasing it, refunds, disputes, signed partner callbacks, daily reconciliation.</td></tr>
+          <tr><td>Wallet</td><td>The school wallet: the ledger, schools, learners, cards, top-ups, limits, offline allowances, pre-orders, payouts, reconciliation and erasure.</td></tr>
+          <tr><td>Messaging</td><td>Slips, reminders and summaries by WhatsApp, SMS and email, the message bundle per plan, and counting what was sent.</td></tr>
+          <tr><td>Platform</td><td>Business packs, the feature switches, and the partner API with its keys, scopes and call log.</td></tr>
+          <tr><td>Billing</td><td>Plans, subscriptions, upgrades, invoices, failed-payment handling and sponsored campaigns.</td></tr>
+          <tr><td>Accounting</td><td>Connecting Xero or Sage and posting one balanced journal for each finished day.</td></tr>
+          <tr><td>Finance</td><td>Pay-later: consent per named partner, what was shared, and repayments from signed callbacks. TillKnowIT never lends.</td></tr>
+          <tr><td>Insights</td><td>Area trend figures from shops that opted in, kept anonymous by a ten-shop minimum.</td></tr>
+          <tr><td>Bookings</td><td>Services, staff, appointments, reminders and commission.</td></tr>
+          <tr><td>Customers</td><td>The customer directory with consent, and loyalty points.</td></tr>
+        </tbody>
+      </table></div>
+
+      <hr class="orn" />
+
+      <h2 id="offline"><span class="num">6</span>Selling without a connection</h2>
+      <p class="lead">The till is the one app that must never stop. It is built so that a sale is safe on the device before anyone is told it succeeded.</p>
+      <ol class="steps">
+        <li>The cashier rings up the sale. The till works out prices, promotions and change using the same rules as the server, written in TypeScript so they run on the device.</li>
+        <li>On payment, the sale is written to a queue on the device (the outbox) <em>before</em> the screen says it is saved.</li>
+        <li>When there is a connection the till sends the queue in batches. If the network fails it tries again with longer pauses.</li>
+        <li>The server checks each sale against the same rules, records it once, and answers. A sale sent twice is recognised by its id and never doubled.</li>
+        <li>Anything the server refuses is counted and shown, so a problem is seen rather than hidden.</li>
+      </ol>
+      <div class="note"><p>Some things need a connection by their nature: redeeming a gift voucher, online refunds, and any payment that must be checked against a live balance. The school wallet is the exception that proves the rule: each till is handed a signed allowance for each learner, so a card can be accepted offline without ever holding the real balance.</p></div>
+      <div class="warn"><p>Offline sync of the shop's whole product list is not finished. The decision on the sync technology waits on a test against SQL Server (decision record 0001). Until then the till downloads its lists when it is online and uploads its sales in batches.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="money"><span class="num">7</span>Looking after money</h2>
+      <p>Anything that moves money follows the same few rules, in every module.</p>
+      <dl class="terms">
+        <dt>Double entry</dt>
+        <dd>The wallet records every movement as legs that must add up to zero. The code refuses anything that does not balance, and a property test tries two thousand random cases of each kind of posting.</dd>
+        <dt>Balances are worked out, not stored</dt>
+        <dd>A balance is the sum of its entries. There is no number to be edited or to drift out of step.</dd>
+        <dt>Safe to repeat</dt>
+        <dd>Every request carries a reference. Sending it twice has the effect of sending it once. This is what makes retries after a dropped connection harmless.</dd>
+        <dt>Hold, then release</dt>
+        <dd>When a shop pays a supplier in the app, the money is held until delivery is confirmed (or released after 72 hours), short deliveries are refunded, and a dispute freezes the money until a platform admin resolves it.</dd>
+        <dt>Reconcile every day</dt>
+        <dd>A daily job compares the ledger with the payment partner's own total, to the cent. Any difference blocks payouts until a person writes down what happened.</dd>
+        <dt>Last, never first</dt>
+        <dd>For airtime and electricity the sale is saved before the partner is called. A reply that never arrives is recorded as unknown and is never retried, so no one is ever sold the same voucher twice.</dd>
+      </dl>
+
+      <hr class="orn" />
+
+      <h2 id="privacy"><span class="num">8</span>Privacy and security</h2>
+      <h3>Who can do what</h3>
+      <p>People sign in with a cell number and a one-time code. They receive a signed session that lasts twelve hours, and every request that names an acting person must carry that person's token. Permissions come from membership of a shop, school or supplier, with a role. Tills prove themselves with a signed device token, issued once from a setup code the owner approves, and that can be reset.</p>
+      <h3>What is protected</h3>
+      <ul>
+        <li><strong>Documents and photos</strong> are stored encrypted (AES-256-GCM) and downloaded only by people allowed to see them.</li>
+        <li><strong>PINs</strong> are stored as salted hashes, never as the PIN, and a till locks after five wrong tries.</li>
+        <li><strong>Cards</strong> are stored as a hash of the NFC identifier. A blocked card stays blocked.</li>
+        <li><strong>Vouchers</strong> are shown once; only a hash is kept.</li>
+        <li><strong>Partner callbacks</strong> are signed and checked for replay, and accepted once only.</li>
+      </ul>
+      <h3>What is shared, and only by choice</h3>
+      <ul>
+        <li>A parent sees a child only after entering the link code and agreeing to the terms; the version of the terms agreed to is recorded.</li>
+        <li>Supplier demand totals and area trend reports show counts and bands, never names, and never from fewer than three shops (demand) or ten shops (trends). The ten-shop rule is enforced by the code and by a database constraint.</li>
+        <li>Sharing to a pay-later partner needs consent for that named partner, can be withdrawn, and every share is logged where the owner can see it.</li>
+        <li>Erasure removes names, grades, photos and guardian links; the ledger stays, because it holds no names.</li>
+      </ul>
+      <div class="warn"><p>The legal and data-ethics review for market insights and pay-later sharing (POPIA and competition law), the penetration test and a load test are still to be done before any real shop is asked to opt in. They are on the hand-over list in the <a href="08-technical-guide.html">technical guide</a>.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="packs"><span class="num">9</span>One product, many kinds of business</h2>
+      <p>A spaza shop needs a till and a credit book. A cafe needs tables and a kitchen. A salon needs appointments and commission. A butcher sells by weight. A hardware shop quotes and keeps serial numbers.</p>
+      <p>TillKnowIT does not build a different product for each. A <strong>business pack</strong> is a named list of features and settings, stored as data. The owner picks a business type; the features it includes appear, and the others stay out of sight. Switching changes only what is visible, so no product, sale or customer is touched and switching back restores everything. A platform admin can create a new pack with no code change, and the architecture tests make sure no pack name ever appears in the selling code.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Pack</th><th>Typical extras it turns on</th></tr></thead>
+        <tbody>
+          <tr><td>Spaza (default)</td><td>Selling, stock, credit book, airtime and electricity, slips on request.</td></tr>
+          <tr><td>Cafe</td><td>Tables, open tickets, kitchen board, add-ons, tips.</td></tr>
+          <tr><td>Butchery</td><td>Weighed goods, scale, price-embedded barcodes.</td></tr>
+          <tr><td>Salon</td><td>Services, appointments, reminders, commission.</td></tr>
+          <tr><td>Clothing and hardware</td><td>Variants, quotes, lay-by, serial numbers.</td></tr>
+        </tbody>
+      </table></div>
+
+      <hr class="orn" />
+
+      <h2 id="running"><span class="num">10</span>Where it runs</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Where</th><th>What</th><th>For</th></tr></thead>
+        <tbody>
+          <tr><td>A developer's PC</td><td>The API on SQL Server LocalDB, seven apps on ports 5173 to 5179, a seeded demo shop.</td><td>Building and trying things.</td></tr>
+          <tr><td>The public demo</td><td>The apps on GitHub Pages, the API as a free web service, a hosted SQL Server database, demo mode switched on.</td><td>Showing it to people, with made-up data only.</td></tr>
+          <tr><td>Production (planned)</td><td>Azure South Africa North: container apps for the API and worker, Azure SQL, Key Vault, storage, monitoring.</td><td>Real shops. Needs the items on the hand-over list first.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="danger"><p>Demo mode shows each sign-in code on the screen because no SMS is sent. That is deliberate for a demo and is a serious hole anywhere real people's data lives. It must never be switched on in production.</p></div>
+
+      <hr class="orn" />
+
+      <h2 id="real"><span class="num">11</span>What is real, what is a stand-in</h2>
+      <p>This is the honest part. Everything below is built and tested, but several features stop at a clearly defined edge where a licensed partner or an account is needed. Behind each edge there is a <strong>port</strong> (an interface) and a <strong>fake</strong> used in tests and in the demo.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Area</th><th>State today</th></tr></thead>
+        <tbody>
+          <tr><td>Selling, stock, credit, cash-up, reports, packs, appointments, loyalty</td><td>Built, with automated tests. The screens have been looked at in a browser against the real API and clicked through by browser tests.</td></tr>
+          <tr><td>Sign-in codes by SMS</td><td>A BulkSMS provider is coded and tested against a stub only. It has never been run against the live service.</td></tr>
+          <tr><td>Payments to suppliers, wallet top-ups and payouts</td><td>All the rules are built. The real payment and stored-value partners are not connected; a development fake stands in.</td></tr>
+          <tr><td>Airtime and electricity</td><td>Sale flow and safety rules built. No licensed partner connected.</td></tr>
+          <tr><td>WhatsApp, SMS and email slips and alerts</td><td>Built behind the Messaging module. Providers other than the development fake are not connected.</td></tr>
+          <tr><td>Xero and Sage</td><td>Adapters written to the vendors' documentation and tested against stubs. Nothing has run against a real organisation.</td></tr>
+          <tr><td>Pay-later</td><td>Consent, logging and repayments built. No real partner or agreement yet.</td></tr>
+          <tr><td>Printer, drawer, scale, NFC reader</td><td>Standard interfaces, an ESC/POS encoder and fakes. No adapter for a real device yet.</td></tr>
+          <tr><td>Invoice reading</td><td>Upload, queue, review and confirm are built. The reader itself (OCR or a language model) is not connected.</td></tr>
+          <tr><td>Languages</td><td>English complete. First drafts of the till and sign-in screens exist in isiZulu, isiXhosa, Sesotho, Setswana and Afrikaans, unreviewed. Five more are registered and show English.</td></tr>
+          <tr><td>Offline product sync</td><td>Waits on a test of the sync technology against SQL Server.</td></tr>
+        </tbody>
+      </table></div>
+      <p>The full story-by-story list is kept in <code>docs/STATUS.md</code> and is updated with every change.</p>
+
+      <hr class="orn" />
+
+      <h2 id="next"><span class="num">12</span>What comes next</h2>
+      <ol class="steps">
+        <li><strong>Run it for real.</strong> Run the API and worker against a real SQL Server and confirm the migrations, the seed and the outbox behave.</li>
+        <li><strong>Connect the partners.</strong> SMS, payments, the stored-value partner, WhatsApp, Xero and Sage, and a finance partner, each in its sandbox first.</li>
+        <li><strong>Review before release.</strong> Legal and data-ethics review, a penetration test, a load test at ten thousand shops, and first-language review of every translation.</li>
+        <li><strong>Choose the hardware.</strong> Write the real printer, drawer, scale and NFC adapters once the devices are chosen and tested.</li>
+        <li><strong>Pilot with twenty to thirty shops</strong> and let what they actually do decide what to build next.</li>
+      </ol>
+
+    </div>
+
+    <div class="pager"><a href="index.html">&larr; All manuals</a><a href="02-shop-owner-manual.html">Shop owner manual &rarr;</a></div>
+  </main>
+
+  <footer class="run-foot">
+    <span>TillKnowIT &middot; The Solution Explained &middot; Version 1.0</span>
+    <img src="assets/logo.svg" alt="TillKnowIT" />
+  </footer>
+</body>
+</html>
